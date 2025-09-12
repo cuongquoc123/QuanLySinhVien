@@ -173,3 +173,4 @@
 /Users/cps/QuanLySinhVien/bin/Debug/net9.0/Swashbuckle.AspNetCore.Swagger.dll
 /Users/cps/QuanLySinhVien/bin/Debug/net9.0/Swashbuckle.AspNetCore.SwaggerGen.dll
 /Users/cps/QuanLySinhVien/bin/Debug/net9.0/Swashbuckle.AspNetCore.SwaggerUI.dll
+/Users/cps/QuanLySinhVien/obj/Debug/net9.0/QuanLySinhVien.sourcelink.json

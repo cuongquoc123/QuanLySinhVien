@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using QuanLySinhVien.Models;
 using QuanLySinhVien.Service.CheckFace;
-namespace QuanLySinhVien.Controllers;
+namespace QuanLySinhVien.Controller;
 [ApiController]
 public class verifyFace : ControllerBase
 {

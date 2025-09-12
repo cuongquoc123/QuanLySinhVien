@@ -138,7 +138,8 @@ app.UseCors();
 //Đặt sau app.UseCors để các tệp tĩnh có chính sách Cors
 //Đật sau cors và trước UseAuthorization
 app.UseStaticFiles();
-
+app.UseMiddleware<GlobalExceptionMiddleware>();
+app.UseMiddleware<GlabalLogger>();
 app.UseAuthentication();
 
 //Cấu hình các đường dẫn API theo quyền
