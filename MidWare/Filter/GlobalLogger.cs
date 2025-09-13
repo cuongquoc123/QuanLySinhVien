@@ -58,7 +58,7 @@ namespace QuanLySinhVien.MidWare.Filter
             await _next(context);
             var elapse = DateTime.Now - start;
 
-            _logger.LogInformation($"API: {path}; User: {ip};Proccess Time: {elapse}ms; Call (1h): {countLastHour}; Total call: {totalCall}");
+            _logger.LogInformation($"API: {path}; User: {ip}; Proccess Time: {elapse.Milliseconds}ms; Call (1h): {countLastHour}; Total call: {totalCall}");
         }
     }
 }
