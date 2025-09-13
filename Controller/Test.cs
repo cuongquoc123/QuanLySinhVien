@@ -9,7 +9,7 @@ namespace QuanLySinhVien.Controller
         [HttpGet("RateLimit")]
         public IActionResult Index()
         {
-            return Ok();
+            return Ok(new { Message = "Hello from APi" });
         }
     }
 }

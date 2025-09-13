@@ -20,7 +20,10 @@ namespace QuanLySinhVien.MidWare.Filter
         public async Task Invoke(HttpContext context)
         {
             var path = context.Request.Path.ToString();
-            
+            if (path.Contains("/test/RateLimit"))
+            {
+                throw new CustomError(429,"Rate Limit","Rate limit exceeded. Try again later.");
+            }
             var ip = context.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
 
             var now = DateTime.Now;

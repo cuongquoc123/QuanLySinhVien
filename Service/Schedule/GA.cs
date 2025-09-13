@@ -21,7 +21,7 @@ namespace QuanLySinhVien.Service.Schedule
             var fitness = new ScheduleFitness();
 
             //Tạo ra quần thể với 20 là số lượng cá thể nhỏ nhất và 50 là lớn nhất, Còn chromosome là tạo lịch ngẫu nhiên
-            var population = new Population(20, 50, chromosome);
+            var population = new Population(50, 250, chromosome);
             var ga = new GeneticAlgorithm(
                 population,
                 fitness,

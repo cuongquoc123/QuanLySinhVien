@@ -21,10 +21,13 @@ namespace QuanLySinhVien.Service.Schedule
             {
                 var schedulesInSlot = new List<schedule>();
 
-                // Ví dụ: random số lớp trong 1 slot (1–3 lớp chẳng hạn)
-                int numberOfClasses = PhongHoc.Count;
-
-                for (int j = 0; j < 3; j++)
+                // Ví dụ: random số lớp trong 1 slot tối thiểu 20, tối đa là bằng số lượng phòng học
+                int numberOfClasses = RandomizationProvider.Current.GetInt(0, PhongHoc.Count + 1);
+                if (numberOfClasses < 20)
+                {
+                    numberOfClasses = 20;
+                } 
+                for (int j = 0; j < numberOfClasses; j++)
                 {
                     var randomClass = _classes[RandomizationProvider.Current.GetInt(0, _classes.Count)];
                     var randomPH = phongHoc[RandomizationProvider.Current.GetInt(0, phongHoc.Count)];

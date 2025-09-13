@@ -43,11 +43,16 @@ namespace QuanLySinhVien.Service.Schedule
                     {
                         score -= 100;
                     }
-                    
+
                     //Kiểm tra các môn có số tiết > 3 sẽ phải lấy phòng của ca sau 
                     if (pair.Classes.SoTiet > 3 && (pair.Slot + 1) == other.Slot)
                     {
                         score -= 100;
+                    }
+
+                    if (pair.Classes.MaGv == other.Classes.MaGv)
+                    {
+                        score -= 150;
                     }
                 }
             }
