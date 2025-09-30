@@ -5,7 +5,7 @@ namespace QuanLySinhVien.Controller;
 [ApiController]
 public class verifyFace : ControllerBase
 {
-    private readonly MyDbContext context;
+    private readonly  MyDbContext context;
     private readonly IWebHostEnvironment webHostEnvironment;
     private readonly CheckFace checkFace = new CheckFace();
 
@@ -27,12 +27,12 @@ public class verifyFace : ControllerBase
             logger.LogWarning("File IMG Is Null ");
             throw new ArgumentException("File is Null");
         }
-        var SV = context.SinhViens.Where(i => i.Mssv == mssv).First();
-        if (SV == null)
+        var SV = context.SinhViens.Find(mssv) ?? null;
+        if (SV is null)
         {
             throw new KeyNotFoundException("Sinh Vien not Exsit");
         }
-        string IMG2 = SV.Avatar ?? null;
+        string IMG2 = SV.Avatar ?? string.Empty;
         var uploadFolder = Path.Combine(webHostEnvironment.WebRootPath, "temp_uploads");
         if (Directory.Exists(uploadFolder))
         {  //Tạo folder chứa ảnh tạm thời nếu chưa xuất hiện
@@ -40,7 +40,7 @@ public class verifyFace : ControllerBase
             logger.LogInformation($"Create new folder named: {uploadFolder} ");
         }
 
-        string IMG1 = null;
+        string IMG1 = string.Empty;
         
 
         try

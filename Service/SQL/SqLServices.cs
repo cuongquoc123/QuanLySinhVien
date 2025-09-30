@@ -8,19 +8,19 @@ namespace QuanLySinhVien.Service.SQL
     public class SqLService : ISqLServices
     {
         private readonly MyDbContext context;
-        private readonly ILogger<SqLService> logger;
+
 
         public SqLService()
         {
+            this.context = new MyDbContext();
         }
 
-        public SqLService(MyDbContext context, ILogger<SqLService> logger)
+        public SqLService(MyDbContext context)
         {
             this.context = context;
-            this.logger = logger;
         }
 
-        public LichHoc AddLichHoc(string DayOfWeek, schedule schedule)
+        public LichHoc AddLichHoc(string DayOfWeek, Schedulee schedule)
         {
             LichHoc moi = new LichHoc();
             moi.DayOfWeek = DayOfWeek;

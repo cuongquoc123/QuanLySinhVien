@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using QuanLySinhVien.DTOS;
+using QuanLySinhVien.MidWare.Filter;
 using QuanLySinhVien.Models;
 using QuanLySinhVien.Service.HashPassword;
 
@@ -30,9 +31,13 @@ namespace QuanLySinhVien.MidWare.JWT
         private bool ValidateUser(string username, string password, out string UserId, out string[] Roles)
         {
 
-            var user = context.Users.Where(x => x.Username == username).First();
-            if (user != null)
+            var user = context.Users.FirstOrDefault(x => x.Username == username);
+            if (user is not null)
             {
+                if (string.IsNullOrEmpty(user.Passwords))
+                {
+                    throw new CustomError(422, "Unprocessable Entity", "Your KeyWord not true");
+                }
                 if (passWordService.VerifyPassword(password, user.Passwords))
                 {
                     if (user.Role != null)
@@ -53,7 +58,7 @@ namespace QuanLySinhVien.MidWare.JWT
             }
             else
             {
-                throw new KeyNotFoundException("User Not Exsit");
+                throw new KeyNotFoundException("User Not Exsits");
             }
         }
 
@@ -83,6 +88,10 @@ namespace QuanLySinhVien.MidWare.JWT
             if (user.Role == null)
             {
                 throw new UnauthorizedAccessException("Cant Author");
+            }
+            if ( user.Role.RoleName is null)
+            {
+                throw new CustomError(403,"UnAuthentiacion","You don't have permision");
             }
             var pair = _tokenService.CreateTokenPair(userId, new string[] { user.Role.RoleName });
             refreshStore[pair.RefreshToken] = userId; //Lưu token mới vào CSDL

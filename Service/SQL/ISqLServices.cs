@@ -5,6 +5,6 @@ namespace QuanLySinhVien.Service.SQL
 {
     public interface ISqLServices
     {
-        public LichHoc AddLichHoc(string DayOfWeek, schedule schedule);
+        public LichHoc AddLichHoc(string DayOfWeek, Schedulee schedule);
     }
 }

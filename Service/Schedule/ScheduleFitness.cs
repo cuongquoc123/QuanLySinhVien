@@ -7,16 +7,16 @@ namespace QuanLySinhVien.Service.Schedule
         public double Evaluate(IChromosome chromosome)
         {
             var genes = chromosome.GetGenes();
-            var schedules = new List<schedule>();
+            var schedules = new List<Schedulee>();
 
             // gom tất cả lớp trong các gene về 1 list duy nhất
             foreach (var g in genes)
             {
-                if (g.Value is List<schedule> list)
+                if (g.Value is List<Schedulee> list)
                 {
                     schedules.AddRange(list);
                 }
-                else if (g.Value is schedule single)
+                else if (g.Value is Schedulee single)
                 {
                     schedules.Add(single);
                 }

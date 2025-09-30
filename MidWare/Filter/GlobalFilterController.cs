@@ -45,11 +45,17 @@ namespace QuanLySinhVien.MidWare.Filter
             }
             else if (context.Exception is CustomError e)
             {
-                logger.LogWarning(respone.message);
+                logger.LogError(respone.message);
                 status = e.status;
                 Error = e.Error;
 
-            } 
+            }
+            else if (context.Exception is InvalidOperationException exception)
+            {
+                logger.LogError(exception.Message);
+                status = (int)HttpStatusCode.Conflict;
+                Error = "Invalid Operation Exception";
+            }
             //các lỗi khác 
             else
             {
