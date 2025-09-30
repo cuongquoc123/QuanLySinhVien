@@ -15,7 +15,7 @@ namespace QuanLySinhVien.Service.Schedule
 
         public Schedulee()
         { 
-            Sotiet = Classes.SoTiet;
+            Sotiet = Classes.MaMonNavigation.SoTiet;
         }
         public int Slot { get; set; } // Tượng trưng cho ca học 
 

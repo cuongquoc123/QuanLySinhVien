@@ -1,6 +1,7 @@
 using GeneticSharp;
 using Microsoft.AspNetCore.Mvc;
 using QuanLySinhVien.Models;
+
 using QuanLySinhVien.Service.Schedule;
 using QuanLySinhVien.Service.SQL;
 

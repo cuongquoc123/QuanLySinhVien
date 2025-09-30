@@ -12,6 +12,7 @@ public partial class LopHocPhan
     [Key]
     [Column("MaLopHP")]
     [StringLength(10)]
+    [Unicode(false)]
     public string MaLopHp { get; set; } = null!;
 
     [Column("TenLopHP")]
@@ -19,10 +20,12 @@ public partial class LopHocPhan
     public string TenLopHp { get; set; } = null!;
 
     [StringLength(10)]
+    [Unicode(false)]
     public string MaMon { get; set; } = null!;
 
     [Column("MaGV")]
     [StringLength(10)]
+    [Unicode(false)]
     public string MaGv { get; set; } = null!;
 
     [StringLength(10)]
@@ -30,8 +33,6 @@ public partial class LopHocPhan
 
     [StringLength(20)]
     public string? NamHoc { get; set; }
-
-    public int SoTiet { get; set; }
 
     [InverseProperty("MaLopHpNavigation")]
     public virtual ICollection<DiemDanh> DiemDanhs { get; set; } = new List<DiemDanh>();

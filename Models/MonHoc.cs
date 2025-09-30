@@ -11,6 +11,7 @@ public partial class MonHoc
 {
     [Key]
     [StringLength(10)]
+    [Unicode(false)]
     public string MaMon { get; set; } = null!;
 
     [StringLength(100)]
@@ -18,7 +19,10 @@ public partial class MonHoc
 
     public int? SoTinChi { get; set; }
 
+    public int SoTiet { get; set; }
+
     [StringLength(10)]
+    [Unicode(false)]
     public string MaNganh { get; set; } = null!;
 
     [InverseProperty("MaMonNavigation")]

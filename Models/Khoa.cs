@@ -11,6 +11,7 @@ public partial class Khoa
 {
     [Key]
     [StringLength(10)]
+    [Unicode(false)]
     public string MaKhoa { get; set; } = null!;
 
     [StringLength(100)]

@@ -28,7 +28,7 @@ namespace QuanLySinhVien.Service.Schedule
             foreach (var pair in schedules)
             {
                 
-                if ((pair.Slot == 2 || pair.Slot == 4 || pair.Slot == 6) && pair.Classes.SoTiet > 3  )
+                if ((pair.Slot == 2 || pair.Slot == 4 || pair.Slot == 6) && pair.Classes.MaMonNavigation.SoTiet > 3  )
                 {
                     score -= 100;
                 }
@@ -45,7 +45,7 @@ namespace QuanLySinhVien.Service.Schedule
                     }
 
                     //Kiểm tra các môn có số tiết > 3 sẽ phải lấy phòng của ca sau 
-                    if (pair.Classes.SoTiet > 3 && (pair.Slot + 1) == other.Slot)
+                    if (pair.Classes.MaMonNavigation.SoTiet > 3 && (pair.Slot + 1) == other.Slot)
                     {
                         score -= 100;
                     }

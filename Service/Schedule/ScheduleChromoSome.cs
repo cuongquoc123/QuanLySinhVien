@@ -37,7 +37,7 @@ namespace QuanLySinhVien.Service.Schedule
                         Slot = i + 1,
                         Classes = randomClass,
                         PhongHoc = randomPH,
-                        Sotiet = randomClass.SoTiet
+                        Sotiet = randomClass.MaMonNavigation.SoTiet
                     });
                 }
                 ReplaceGene(i, new Gene(schedulesInSlot));
@@ -69,7 +69,7 @@ namespace QuanLySinhVien.Service.Schedule
                     Slot = geneIndex + 1,
                     Classes = randomClass,
                     PhongHoc = randomPH,
-                    Sotiet = randomClass.SoTiet
+                    Sotiet = randomClass.MaMonNavigation.SoTiet
                 });
             }
 
