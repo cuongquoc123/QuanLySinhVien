@@ -19,22 +19,25 @@ namespace QuanLySinhVien.Service.Schedule
             //Vòng lập tạo 
             for (int i = 0; i < _slots; i++)
             {
-                var schedulesInSlot = new List<schedule>();
+                var schedulesInSlot = new List<Schedulee>();
 
-                // Ví dụ: random số lớp trong 1 slot (1–3 lớp chẳng hạn)
-                int numberOfClasses = PhongHoc.Count;
-
-                for (int j = 0; j < 3; j++)
+                // Ví dụ: random số lớp trong 1 slot tối thiểu 20, tối đa là bằng số lượng phòng học
+                int numberOfClasses = RandomizationProvider.Current.GetInt(0, PhongHoc.Count + 1);
+                if (numberOfClasses < 20)
+                {
+                    numberOfClasses = 20;
+                } 
+                for (int j = 0; j < numberOfClasses; j++)
                 {
                     var randomClass = _classes[RandomizationProvider.Current.GetInt(0, _classes.Count)];
                     var randomPH = phongHoc[RandomizationProvider.Current.GetInt(0, phongHoc.Count)];
 
-                    schedulesInSlot.Add(new schedule
+                    schedulesInSlot.Add(new Schedulee
                     {
                         Slot = i + 1,
                         Classes = randomClass,
                         PhongHoc = randomPH,
-                        Sotiet = randomClass.SoTiet
+                        Sotiet = randomClass.MaMonNavigation.SoTiet
                     });
                 }
                 ReplaceGene(i, new Gene(schedulesInSlot));
@@ -52,7 +55,7 @@ namespace QuanLySinhVien.Service.Schedule
         public override Gene GenerateGene(int geneIndex)
         {
 
-            var schedulesInSlot = new List<schedule>();
+            var schedulesInSlot = new List<Schedulee>();
 
             int numberOfClasses = phongHoc.Count;
 
@@ -61,12 +64,12 @@ namespace QuanLySinhVien.Service.Schedule
                 var randomClass = _classes[RandomizationProvider.Current.GetInt(0, _classes.Count)];
                 var randomPH = phongHoc[RandomizationProvider.Current.GetInt(0, phongHoc.Count)];
 
-                schedulesInSlot.Add(new schedule
+                schedulesInSlot.Add(new Schedulee
                 {
                     Slot = geneIndex + 1,
                     Classes = randomClass,
                     PhongHoc = randomPH,
-                    Sotiet = randomClass.SoTiet
+                    Sotiet = randomClass.MaMonNavigation.SoTiet
                 });
             }
 

@@ -12,6 +12,7 @@ public partial class SinhVien
     [Key]
     [Column("MSSV")]
     [StringLength(15)]
+    [Unicode(false)]
     public string Mssv { get; set; } = null!;
 
     [StringLength(100)]
@@ -34,6 +35,7 @@ public partial class SinhVien
 
     [Column("MaLopHC")]
     [StringLength(10)]
+    [Unicode(false)]
     public string MaLopHc { get; set; } = null!;
 
     [StringLength(255)]

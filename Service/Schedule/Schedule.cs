@@ -4,24 +4,24 @@ namespace QuanLySinhVien.Service.Schedule
 {
 
 
-    public class schedule
+    public class Schedulee
     {
-        public schedule(int slot, string PhongHoc, int Sotiet)
+        public Schedulee(int slot, string PhongHoc, int Sotiet)
         {
             Slot = slot;
             this.PhongHoc = PhongHoc;
             this.Sotiet = Sotiet;
         }
 
-        public schedule()
+        public Schedulee()
         { 
-            Sotiet = Classes.SoTiet;
+            Sotiet = Classes.MaMonNavigation.SoTiet;
         }
         public int Slot { get; set; } // Tượng trưng cho ca học 
 
         public int Sotiet { get; set; }
         public LopHocPhan Classes { get; set; } = new LopHocPhan();
 
-        public string PhongHoc { get; set; }
+        public string? PhongHoc { get; set; }
     }
 }

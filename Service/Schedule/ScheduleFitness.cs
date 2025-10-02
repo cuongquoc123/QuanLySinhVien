@@ -7,16 +7,16 @@ namespace QuanLySinhVien.Service.Schedule
         public double Evaluate(IChromosome chromosome)
         {
             var genes = chromosome.GetGenes();
-            var schedules = new List<schedule>();
+            var schedules = new List<Schedulee>();
 
             // gom tất cả lớp trong các gene về 1 list duy nhất
             foreach (var g in genes)
             {
-                if (g.Value is List<schedule> list)
+                if (g.Value is List<Schedulee> list)
                 {
                     schedules.AddRange(list);
                 }
-                else if (g.Value is schedule single)
+                else if (g.Value is Schedulee single)
                 {
                     schedules.Add(single);
                 }
@@ -28,7 +28,7 @@ namespace QuanLySinhVien.Service.Schedule
             foreach (var pair in schedules)
             {
                 
-                if ((pair.Slot == 2 || pair.Slot == 4 || pair.Slot == 6) && pair.Classes.SoTiet > 3  )
+                if ((pair.Slot == 2 || pair.Slot == 4 || pair.Slot == 6) && pair.Classes.MaMonNavigation.SoTiet > 3  )
                 {
                     score -= 100;
                 }
@@ -43,11 +43,16 @@ namespace QuanLySinhVien.Service.Schedule
                     {
                         score -= 100;
                     }
-                    
+
                     //Kiểm tra các môn có số tiết > 3 sẽ phải lấy phòng của ca sau 
-                    if (pair.Classes.SoTiet > 3 && (pair.Slot + 1) == other.Slot)
+                    if (pair.Classes.MaMonNavigation.SoTiet > 3 && (pair.Slot + 1) == other.Slot)
                     {
                         score -= 100;
+                    }
+
+                    if (pair.Classes.MaGv == other.Classes.MaGv)
+                    {
+                        score -= 150;
                     }
                 }
             }

@@ -1,4 +1,4 @@
-namespace QuanLySinhVien.DTOS
+namespace QuanLySinhVien.DTOS.Request
 {
     public class RefeshRequest
     {

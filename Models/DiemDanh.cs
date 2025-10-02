@@ -14,10 +14,12 @@ public partial class DiemDanh
 
     [Column("MSSV")]
     [StringLength(15)]
+    [Unicode(false)]
     public string Mssv { get; set; } = null!;
 
     [Column("MaLopHP")]
     [StringLength(10)]
+    [Unicode(false)]
     public string MaLopHp { get; set; } = null!;
 
     public DateOnly NgayHoc { get; set; }

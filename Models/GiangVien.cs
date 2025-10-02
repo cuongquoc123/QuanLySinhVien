@@ -12,6 +12,7 @@ public partial class GiangVien
     [Key]
     [Column("MaGV")]
     [StringLength(10)]
+    [Unicode(false)]
     public string MaGv { get; set; } = null!;
 
     [StringLength(100)]
@@ -25,6 +26,7 @@ public partial class GiangVien
     public string? Sdt { get; set; }
 
     [StringLength(10)]
+    [Unicode(false)]
     public string MaKhoa { get; set; } = null!;
 
     [InverseProperty("MaGvNavigation")]
