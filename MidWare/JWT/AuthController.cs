@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using QuanLySinhVien.DTOS;
+using QuanLySinhVien.DTOS.Request;
+using QuanLySinhVien.DTOS.Respone;
 using QuanLySinhVien.MidWare.Filter;
 using QuanLySinhVien.Models;
 using QuanLySinhVien.Service.HashPassword;

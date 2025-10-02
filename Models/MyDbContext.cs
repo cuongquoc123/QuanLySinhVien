@@ -37,7 +37,8 @@ public partial class MyDbContext : DbContext
     public virtual DbSet<SinhVien> SinhViens { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
-static string db_host2 = Env.GetString("db_host2");
+
+    static string db_host2 = Env.GetString("db_host2");
     static string db2 = Env.GetString("db2");
     static string db_user2 = Env.GetString("db_user2");
     static string db_password2 = Env.GetString("db_password2");

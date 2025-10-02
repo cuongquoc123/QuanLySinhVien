@@ -2,7 +2,7 @@ using System.Data.SqlTypes;
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using QuanLySinhVien.DTOS;
+using QuanLySinhVien.DTOS.Respone;
 
 namespace QuanLySinhVien.MidWare.Filter
 {

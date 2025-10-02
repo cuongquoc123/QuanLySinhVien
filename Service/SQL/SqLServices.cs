@@ -33,6 +33,35 @@ namespace QuanLySinhVien.Service.SQL
             return moi;
         }
 
+        public int CreateLHP(string TenLopHp, string MaMon, string MaGv, string HocKy, string NamHoc)
+        {
+            
+            LopHocPhan NewLop = new LopHocPhan();
+            NewLop.MaLopHp = GenerateMa(so_luong_chu: 10, ky_tu_bat_dau: "LHP");
+            NewLop.TenLopHp = TenLopHp;
+            NewLop.MaMon = MaMon;
+            NewLop.HocKy = HocKy;
+            NewLop.NamHoc = NamHoc;
+            context.LopHocPhans.Add(NewLop);
+            context.SaveChanges();
+            return 1;
+        }
+
+        public void DiemDanhThanhCong(string mssv, string maLHP)
+        {
+            if (string.IsNullOrEmpty(mssv) || string.IsNullOrEmpty(maLHP))
+            {
+                throw new Exception("Null poiter when Attendance");
+            }
+            DiemDanh moi = new DiemDanh();
+            moi.Mssv = mssv;
+            moi.MaLopHp = maLHP;
+            moi.TrangThai = "Có mặt";
+            context.DiemDanhs.Add(moi);
+            context.SaveChanges();
+            return;
+        }
+
         private string GenerateMa(int so_luong_chu, string ky_tu_bat_dau)
         {
             string KQ = ky_tu_bat_dau;
