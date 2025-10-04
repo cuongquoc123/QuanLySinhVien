@@ -56,3 +56,6 @@ nunit-*.xml
 
 # Bỏ qua file môi trường 
 .env
+
+#Bỏ qua log hệ thống
+Logs/

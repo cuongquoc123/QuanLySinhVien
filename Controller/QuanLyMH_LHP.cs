@@ -17,7 +17,7 @@ namespace QuanLySinhVien.Controller
         }
 
         [HttpPost("TaoLHP")]
-        public IActionResult CreateLHP(List<CreateLHPRequest> dsLHP)
+        public async Task<IActionResult> CreateLHP(List<CreateLHPRequest> dsLHP)
         {
             List<String> dstaoTC = new List<String>();
             foreach (var LHP in dsLHP)
@@ -30,17 +30,21 @@ namespace QuanLySinhVien.Controller
                 {
                     continue;
                 }
-                if (sqLServices.CreateLHP(LHP.TenLopHp,LHP.MaMon,LHP.MaGv,LHP.HocKy,LHP.NamHoc) == 1)
+                int kt = await sqLServices.CreateLHP(LHP.TenLopHp, LHP.MaMon, LHP.MaGv, LHP.HocKy, LHP.NamHoc);
+                if (kt == 1)
                 {
                     dstaoTC.Add(LHP.TenLopHp);
                 }
             }
-            return Ok(new CreateLHPRepone
+
+            var Respone = new CreateLHPRepone()
             {
                 Danh_Sach_Lop_Tao_Thanh_Cong = dstaoTC,
                 So_luong_lop = $"{dstaoTC.Count}/{dsLHP.Count}"
-            });
+            };
+            logger.LogInformation($"Create Successfully {Respone.So_luong_lop}");
+            return Ok(Respone);
         }
-
+        
     }
 }

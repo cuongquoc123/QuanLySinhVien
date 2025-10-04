@@ -25,7 +25,7 @@ namespace QuanLySinhVien.Controller
         }
 
         [HttpPost("LapLich/{HocKy}/{NamHoc}")]
-        public IActionResult Schedule(string HocKy,string NamHoc)
+        public async Task<IActionResult> Schedule(string HocKy,string NamHoc)
         {
             List<LopHocPhan> classes = myDbContext.LopHocPhans.Where(l => l.HocKy == HocKy && l.NamHoc == NamHoc).ToList();
             if (classes.Count == 0 || !classes.Any())
@@ -50,7 +50,7 @@ namespace QuanLySinhVien.Controller
             {
                 foreach (var schedule in item.schedules)
                 {
-                   dsLH.Add( sqLServices.AddLichHoc(item.DayOfWeek, schedule));
+                   dsLH.Add(await sqLServices.AddLichHoc(item.DayOfWeek, schedule));
                 }
             }
 
@@ -74,9 +74,6 @@ namespace QuanLySinhVien.Controller
                     }
                 }
             }
-
-            
-
             return PhongHocs;
         }
     }

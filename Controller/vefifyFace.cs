@@ -31,8 +31,11 @@ public class verifyFace : ControllerBase
             logger.LogWarning("File IMG Is Null ");
             throw new ArgumentException("File is Null");
         }
-        var SV = context.SinhViens.Find(mssv) ?? null;
-        var LHP = context.LopHocPhans.Find(maLHP) ?? null;
+        var SV = await context.SinhViens.FindAsync(mssv);
+        var LHP = await  context.LopHocPhans.FindAsync(maLHP);
+      
+
+
         if (LHP is null)
         {
             throw new KeyNotFoundException("Classroom not Exsit");
@@ -70,7 +73,7 @@ public class verifyFace : ControllerBase
 
             await checkFace.CheckFaceAsync(IMG1, IMG2);
             logger.LogInformation("Verify successfull for: ");
-            sqLServices.DiemDanhThanhCong(mssv, maLHP);
+            await sqLServices.DiemDanhThanhCong(mssv, maLHP);
             return Ok(new { message = "Verify successfull" });
 
         }

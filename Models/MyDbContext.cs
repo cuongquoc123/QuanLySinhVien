@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using DotNetEnv;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace QuanLySinhVien.Models;
@@ -39,6 +40,7 @@ public partial class MyDbContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     static string db_host2 = Env.GetString("db_host2");
+
     static string db2 = Env.GetString("db2");
     static string db_user2 = Env.GetString("db_user2");
     static string db_password2 = Env.GetString("db_password2");
@@ -47,7 +49,7 @@ public partial class MyDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer(connectionString2);
-
+    SqlConnection conn = new SqlConnection(connectionString2);
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<DiemDanh>(entity =>
@@ -206,4 +208,20 @@ public partial class MyDbContext : DbContext
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+
+    public void Test_connect()
+    {
+        try
+        {
+            conn.Open();
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+        finally
+        {
+            conn.Close();
+        }
+    }
 }

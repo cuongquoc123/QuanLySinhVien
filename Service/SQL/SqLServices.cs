@@ -20,7 +20,7 @@ namespace QuanLySinhVien.Service.SQL
             this.context = context;
         }
 
-        public LichHoc AddLichHoc(string DayOfWeek, Schedulee schedule)
+        public async Task<LichHoc> AddLichHoc(string DayOfWeek, Schedulee schedule)
         {
             LichHoc moi = new LichHoc();
             moi.DayOfWeek = DayOfWeek;
@@ -29,11 +29,11 @@ namespace QuanLySinhVien.Service.SQL
             moi.TietBatDau = schedule.Slot;
             moi.MaLopHp = schedule.Classes.MaLopHp;
             context.LichHocs.Add(moi);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
             return moi;
         }
 
-        public int CreateLHP(string TenLopHp, string MaMon, string MaGv, string HocKy, string NamHoc)
+        public async Task<int> CreateLHP(string TenLopHp, string MaMon, string MaGv, string HocKy, string NamHoc)
         {
             
             LopHocPhan NewLop = new LopHocPhan();
@@ -43,11 +43,11 @@ namespace QuanLySinhVien.Service.SQL
             NewLop.HocKy = HocKy;
             NewLop.NamHoc = NamHoc;
             context.LopHocPhans.Add(NewLop);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
             return 1;
         }
 
-        public void DiemDanhThanhCong(string mssv, string maLHP)
+        public async Task DiemDanhThanhCong(string mssv, string maLHP)
         {
             if (string.IsNullOrEmpty(mssv) || string.IsNullOrEmpty(maLHP))
             {
@@ -58,7 +58,7 @@ namespace QuanLySinhVien.Service.SQL
             moi.MaLopHp = maLHP;
             moi.TrangThai = "Có mặt";
             context.DiemDanhs.Add(moi);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
             return;
         }
 

@@ -11,6 +11,7 @@ using QuanLySinhVien.Service.CheckFace;
 using QuanLySinhVien.Service.HashPassword;
 using QuanLySinhVien.Service.Schedule;
 using QuanLySinhVien.Service.SQL;
+using Serilog;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +20,14 @@ Env.Load();
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 
+Log.Logger = new LoggerConfiguration()
+            .WriteTo.Console()
+            .WriteTo.File("Logs/system_log.txt", //Tạo ra file log 
+                             rollingInterval: RollingInterval.Day ,//file log được tạo ra hằng ngày 
+                             retainedFileCountLimit: 7) // Tự động xóa sau 7 ngày 
+            .CreateLogger();
+
+builder.Host.UseSerilog();
 
 builder.Services.AddControllers(options =>
 {
@@ -89,16 +98,7 @@ builder.Services.AddCors(option =>
 );
 
 //Cấu hình kết nối MS SQL server 
-var db_host2 = Env.GetString("db_host2");
-var db2 = Env.GetString("db2");
-var db_user2 = Env.GetString("db_user2");
-var db_password2 = Env.GetString("db_password2");
-var TrustServerCertificate = Env.GetString("TrustServerCertificate");
-var connectionString2 = $"Server={db_host2};Database={db2};User Id={db_user2};Password={db_password2};TrustServerCertificate={TrustServerCertificate};";
-
-builder.Services.AddDbContext<MyDbContext>(
-    options => options.UseSqlServer(connectionString2)
-);
+builder.Services.AddDbContext<MyDbContext>();
 
 
 //Add các service tự viết của project
@@ -147,4 +147,5 @@ app.MapGroup("/admin").RequireAuthorization(policy => policy.RequireRole("GiangV
 app.UseAuthorization();
 
 app.MapControllers();
+logger.LogInformation("Server start at {Time}",DateTime.Now);
 app.Run();
