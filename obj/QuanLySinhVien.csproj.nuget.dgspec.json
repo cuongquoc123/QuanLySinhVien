@@ -1,26 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "/Users/cps/QuanLySinhVien/QuanLySinhVien.csproj": {}
+    "/Users/mac/Desktop/QuanLySinhVien/QuanLySinhVien.csproj": {}
   },
   "projects": {
-    "/Users/cps/QuanLySinhVien/QuanLySinhVien.csproj": {
+    "/Users/mac/Desktop/QuanLySinhVien/QuanLySinhVien.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/cps/QuanLySinhVien/QuanLySinhVien.csproj",
+        "projectUniqueName": "/Users/mac/Desktop/QuanLySinhVien/QuanLySinhVien.csproj",
         "projectName": "QuanLySinhVien",
-        "projectPath": "/Users/cps/QuanLySinhVien/QuanLySinhVien.csproj",
-        "packagesPath": "/Users/cps/.nuget/packages/",
-        "outputPath": "/Users/cps/QuanLySinhVien/obj/",
+        "projectPath": "/Users/mac/Desktop/QuanLySinhVien/QuanLySinhVien.csproj",
+        "packagesPath": "/Users/mac/.nuget/packages/",
+        "outputPath": "/Users/mac/Desktop/QuanLySinhVien/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/cps/.nuget/NuGet/NuGet.Config"
+          "/Users/mac/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net9.0"
         ],
         "sources": {
-          "/usr/local/share/dotnet/library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -109,7 +108,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.304/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.300/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
