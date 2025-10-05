@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using System.Net;
+using QuanLySinhVien.MidWare.Filter;
 
 namespace QuanLySinhVien.Service.CheckFace
 {
@@ -21,8 +23,12 @@ namespace QuanLySinhVien.Service.CheckFace
 
             try
             {
-                using (Process process = Process.Start(start))
+                using (Process process = Process.Start(start)!)
                 {
+                    if (process == null)
+                    {
+                        throw new InvalidOperationException("Không thể khởi tạo tiến trình Python");
+                    }
                     var outputTask = process.StandardOutput.ReadToEndAsync();
                     var errorTask = process.StandardError.ReadToEndAsync();
 
@@ -38,23 +44,22 @@ namespace QuanLySinhVien.Service.CheckFace
                         throw new Exception($"Python exited with code {process.ExitCode}.\nError: {error}\nOutput: {output}");
                     }
 
-                    //File python đã chạy thành công 
                     if (!string.IsNullOrEmpty(error))
                     {
-                        //Log lỗi python nhưng không phải là lỗi API 
-                        System.Console.WriteLine($"Python produced warnings:\n{error}");
+                        Console.WriteLine($"Python produced warnings:\n{error}");
                     }
-                    //Kiểm tra kết quả có khớp không 
+
                     if (output.Contains("Ket_qua_khop"))
                     {
                         return 200;
                     }
-                    else throw new UnauthorizedAccessException("Kết quả không khớp, xác thực thất bại");
+
+                    throw new UnauthorizedAccessException("Kết quả không khớp, xác thực thất bại");
                 }
             }
             catch (Exception e)
             {
-                throw new Exception($"Không thể khởi chạy Pyhon");
+                throw new CustomError(500, "Internal Server Error", message: e.Message);
             }
         }
     }

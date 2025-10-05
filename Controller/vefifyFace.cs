@@ -1,38 +1,56 @@
 using Microsoft.AspNetCore.Mvc;
 using QuanLySinhVien.Models;
 using QuanLySinhVien.Service.CheckFace;
+using QuanLySinhVien.Service.SQL;
 namespace QuanLySinhVien.Controller;
 [ApiController]
 public class verifyFace : ControllerBase
 {
+    private readonly ISqLServices sqLServices;
     private readonly MyDbContext context;
     private readonly IWebHostEnvironment webHostEnvironment;
     private readonly CheckFace checkFace = new CheckFace();
 
     private readonly ILogger<verifyFace> logger;
 
-    public verifyFace(ILogger<verifyFace> logger, IWebHostEnvironment webHostEnvironment, MyDbContext context)
+    public verifyFace(ILogger<verifyFace> logger, IWebHostEnvironment webHostEnvironment, MyDbContext context, ISqLServices sqLServices)
     {
         this.context = context;
         this.logger = logger;
         this.webHostEnvironment = webHostEnvironment;
+        this.sqLServices = sqLServices;
     }
 
-    [HttpPost("Verify")]
-    public async Task<IActionResult> VerifyFace([FromForm] IFormFile img, string mssv)
+    [HttpPost("DiemDanh")]
+    public async Task<IActionResult> DiemDanh([FromForm] IFormFile img, string mssv, string maLHP)
     {
         logger.LogInformation("Verify API is being called");
+        //Kiểm tra ảnh gửi vào có hợp lệ không
         if (img == null || img.Length == 0)
         {
             logger.LogWarning("File IMG Is Null ");
             throw new ArgumentException("File is Null");
         }
-        var SV = context.SinhViens.Where(i => i.Mssv == mssv).First();
-        if (SV == null)
+        var SV = await context.SinhViens.FindAsync(mssv);
+        var LHP = await  context.LopHocPhans.FindAsync(maLHP);
+      
+
+
+        if (LHP is null)
         {
-            throw new KeyNotFoundException("Sinh Vien not Exsit");
+            throw new KeyNotFoundException("Classroom not Exsit");
         }
-        string IMG2 = SV.Avatar ?? null;
+        
+        if (SV is null)
+        {
+            throw new KeyNotFoundException("Student not Exsit");
+        }
+        //Kiểm tra sinh viên có thuộc lớp học phần không 
+        if (!SV.MaLopHps.Contains(LHP))
+        {
+            throw new ArgumentException("Do not register for class");
+        }
+        string IMG2 = SV.Avatar ?? string.Empty;
         var uploadFolder = Path.Combine(webHostEnvironment.WebRootPath, "temp_uploads");
         if (Directory.Exists(uploadFolder))
         {  //Tạo folder chứa ảnh tạm thời nếu chưa xuất hiện
@@ -40,7 +58,7 @@ public class verifyFace : ControllerBase
             logger.LogInformation($"Create new folder named: {uploadFolder} ");
         }
 
-        string IMG1 = null;
+        string IMG1 = string.Empty;
         
 
         try
@@ -55,6 +73,7 @@ public class verifyFace : ControllerBase
 
             await checkFace.CheckFaceAsync(IMG1, IMG2);
             logger.LogInformation("Verify successfull for: ");
+            await sqLServices.DiemDanhThanhCong(mssv, maLHP);
             return Ok(new { message = "Verify successfull" });
 
         }
@@ -72,6 +91,5 @@ public class verifyFace : ControllerBase
             }
         }
     }
-
 
 }

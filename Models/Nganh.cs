@@ -11,6 +11,7 @@ public partial class Nganh
 {
     [Key]
     [StringLength(10)]
+    [Unicode(false)]
     public string MaNganh { get; set; } = null!;
 
     [StringLength(100)]

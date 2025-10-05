@@ -14,6 +14,7 @@ public partial class LichHoc
 
     [Column("MaLopHP")]
     [StringLength(10)]
+    [Unicode(false)]
     public string MaLopHp { get; set; } = null!;
 
     public DateOnly NgayHoc { get; set; }
@@ -28,7 +29,7 @@ public partial class LichHoc
     [StringLength(200)]
     public string? GhiChu { get; set; }
 
-    [StringLength(10)]
+    [StringLength(30)]
     public string DayOfWeek { get; set; } = null!;
 
     [InverseProperty("MaLichHocNavigation")]

@@ -8,19 +8,19 @@ namespace QuanLySinhVien.Service.SQL
     public class SqLService : ISqLServices
     {
         private readonly MyDbContext context;
-        private readonly ILogger<SqLService> logger;
+
 
         public SqLService()
         {
+            this.context = new MyDbContext();
         }
 
-        public SqLService(MyDbContext context, ILogger<SqLService> logger)
+        public SqLService(MyDbContext context)
         {
             this.context = context;
-            this.logger = logger;
         }
 
-        public LichHoc AddLichHoc(string DayOfWeek, schedule schedule)
+        public async Task<LichHoc> AddLichHoc(string DayOfWeek, Schedulee schedule)
         {
             LichHoc moi = new LichHoc();
             moi.DayOfWeek = DayOfWeek;
@@ -29,8 +29,37 @@ namespace QuanLySinhVien.Service.SQL
             moi.TietBatDau = schedule.Slot;
             moi.MaLopHp = schedule.Classes.MaLopHp;
             context.LichHocs.Add(moi);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
             return moi;
+        }
+
+        public async Task<int> CreateLHP(string TenLopHp, string MaMon, string MaGv, string HocKy, string NamHoc)
+        {
+            
+            LopHocPhan NewLop = new LopHocPhan();
+            NewLop.MaLopHp = GenerateMa(so_luong_chu: 10, ky_tu_bat_dau: "LHP");
+            NewLop.TenLopHp = TenLopHp;
+            NewLop.MaMon = MaMon;
+            NewLop.HocKy = HocKy;
+            NewLop.NamHoc = NamHoc;
+            context.LopHocPhans.Add(NewLop);
+            await context.SaveChangesAsync();
+            return 1;
+        }
+
+        public async Task DiemDanhThanhCong(string mssv, string maLHP)
+        {
+            if (string.IsNullOrEmpty(mssv) || string.IsNullOrEmpty(maLHP))
+            {
+                throw new Exception("Null poiter when Attendance");
+            }
+            DiemDanh moi = new DiemDanh();
+            moi.Mssv = mssv;
+            moi.MaLopHp = maLHP;
+            moi.TrangThai = "Có mặt";
+            context.DiemDanhs.Add(moi);
+            await context.SaveChangesAsync();
+            return;
         }
 
         private string GenerateMa(int so_luong_chu, string ky_tu_bat_dau)

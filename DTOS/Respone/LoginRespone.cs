@@ -1,4 +1,4 @@
-namespace QuanLySinhVien.DTOS
+namespace QuanLySinhVien.DTOS.Respone
 {
     public class LoginResponse
     {

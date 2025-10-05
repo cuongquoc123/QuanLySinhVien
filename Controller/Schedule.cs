@@ -1,6 +1,7 @@
 using GeneticSharp;
 using Microsoft.AspNetCore.Mvc;
 using QuanLySinhVien.Models;
+
 using QuanLySinhVien.Service.Schedule;
 using QuanLySinhVien.Service.SQL;
 
@@ -24,9 +25,8 @@ namespace QuanLySinhVien.Controller
         }
 
         [HttpPost("LapLich/{HocKy}/{NamHoc}")]
-        public IActionResult Schedule(string HocKy,string NamHoc)
+        public async Task<IActionResult> Schedule(string HocKy,string NamHoc)
         {
-            logger.LogInformation("Schedule api calling");
             List<LopHocPhan> classes = myDbContext.LopHocPhans.Where(l => l.HocKy == HocKy && l.NamHoc == NamHoc).ToList();
             if (classes.Count == 0 || !classes.Any())
             {
@@ -38,7 +38,7 @@ namespace QuanLySinhVien.Controller
                 gen[i] = gAServices.
                         Ga(6,
                         classes,
-                        this.PhongHocs(new string[] { "A", "B" }, so_luong_phong_moi_tang: 10, so_tang: 5));
+                        PhongHocs(new string[] { "A", "B" }, so_luong_phong_moi_tang: 10, so_tang: 5));
             }
 
             List<FormatSchedule> ds = new List<FormatSchedule>();
@@ -50,33 +50,30 @@ namespace QuanLySinhVien.Controller
             {
                 foreach (var schedule in item.schedules)
                 {
-                   dsLH.Add( sqLServices.AddLichHoc(item.DayOfWeek, schedule));
+                   dsLH.Add(await sqLServices.AddLichHoc(item.DayOfWeek, schedule));
                 }
             }
 
             return Ok();
         }
 
-        private List<string> PhongHocs(string[] ten_day, int so_luong_phong_moi_tang, int so_tang)
+        static public List<string> PhongHocs(string[] ten_day, int so_luong_phong_moi_tang, int so_tang)
         {
             List<string> PhongHocs = new List<string>();
             if (ten_day == null || so_luong_phong_moi_tang <= 0 || so_tang <= 0)
             {
                 throw new Exception("Can't be found Classroom");
             }
-            foreach (string ten in ten_day)
-            {
+            foreach (string ten in ten_day) //ten_day = B, C, D, E 
+            { // B
                 for (int i = 1; i <= so_tang; i++)
-                {
+                { //1
                     for (int j = 1; j <= so_luong_phong_moi_tang; j++)
-                    {
-                        PhongHocs.Add($"{ten}{i}0{j}");
+                    { //1
+                        PhongHocs.Add($"{ten}{i}0{j}"); //B101
                     }
                 }
             }
-
-
-
             return PhongHocs;
         }
     }

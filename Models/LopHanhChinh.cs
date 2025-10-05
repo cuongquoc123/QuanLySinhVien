@@ -12,6 +12,7 @@ public partial class LopHanhChinh
     [Key]
     [Column("MaLopHC")]
     [StringLength(10)]
+    [Unicode(false)]
     public string MaLopHc { get; set; } = null!;
 
     [Column("TenLopHC")]
@@ -21,6 +22,7 @@ public partial class LopHanhChinh
     public int? SiSo { get; set; }
 
     [StringLength(10)]
+    [Unicode(false)]
     public string MaNganh { get; set; } = null!;
 
     [ForeignKey("MaNganh")]
