@@ -6,7 +6,7 @@ namespace QuanLySinhVien.DTOS.Respone
         public int status { get; set; }
         public string message { get; set; }
         public string Error { get; set; }
-        public DateTime Time { get; set; }
+        public string Time { get; set; }
         public string path { get; set; }
 
         public ErrorRespone()
@@ -14,7 +14,7 @@ namespace QuanLySinhVien.DTOS.Respone
             status = 500;
             message = "";
             Error = "";
-            Time = DateTime.Now;
+            Time = DateTime.Now.ToString();
             path = "";
         }
     }

@@ -217,7 +217,8 @@ public partial class MyDbContext : DbContext
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            Console.WriteLine("Error: "+ex.Message);
+            throw new Exception("Can't connect to Sql Server");
         }
         finally
         {

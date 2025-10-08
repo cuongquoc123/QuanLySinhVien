@@ -1,5 +1,6 @@
 using GeneticSharp;
 using Microsoft.AspNetCore.Mvc;
+using QuanLySinhVien.MidWare.Filter;
 using QuanLySinhVien.Models;
 
 using QuanLySinhVien.Service.Schedule;
@@ -28,9 +29,9 @@ namespace QuanLySinhVien.Controller
         public async Task<IActionResult> Schedule(string HocKy,string NamHoc)
         {
             List<LopHocPhan> classes = myDbContext.LopHocPhans.Where(l => l.HocKy == HocKy && l.NamHoc == NamHoc).ToList();
-            if (classes.Count == 0 || !classes.Any())
+            if (classes.Count == 0 || !classes.Any() || classes == null)
             {
-                return NoContent();
+                throw new CustomError(404,"Not Found","Please create Class First");
             }
             Gene[][] gen = new Gene[7][];
             for (int i = 0; i < 7; i++)

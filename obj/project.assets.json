@@ -9509,51 +9509,24 @@
     ]
   },
   "packageFolders": {
-<<<<<<< HEAD
     "/Users/mac/.nuget/packages/": {}
-=======
-    "C:\\Users\\Admin\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
->>>>>>> 9d9c9a272bace02be17208bea6df14e4aea8fc48
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-<<<<<<< HEAD
       "projectUniqueName": "/Users/mac/Desktop/QuanLySinhVien/QuanLySinhVien.csproj",
       "projectName": "QuanLySinhVien",
       "projectPath": "/Users/mac/Desktop/QuanLySinhVien/QuanLySinhVien.csproj",
       "packagesPath": "/Users/mac/.nuget/packages/",
       "outputPath": "/Users/mac/Desktop/QuanLySinhVien/obj/",
-=======
-      "projectUniqueName": "C:\\Users\\Admin\\QuanLySinhVien\\QuanLySinhVien.csproj",
-      "projectName": "QuanLySinhVien",
-      "projectPath": "C:\\Users\\Admin\\QuanLySinhVien\\QuanLySinhVien.csproj",
-      "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Admin\\QuanLySinhVien\\obj\\",
->>>>>>> 9d9c9a272bace02be17208bea6df14e4aea8fc48
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-      ],
       "configFilePaths": [
-<<<<<<< HEAD
         "/Users/mac/.nuget/NuGet/NuGet.Config"
-=======
-        "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
->>>>>>> 9d9c9a272bace02be17208bea6df14e4aea8fc48
       ],
       "originalTargetFrameworks": [
         "net8.0"
       ],
       "sources": {
-<<<<<<< HEAD
-=======
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Program Files\\dotnet\\library-packs": {},
->>>>>>> 9d9c9a272bace02be17208bea6df14e4aea8fc48
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -9646,6 +9619,20 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
+        "downloadDependencies": [
+          {
+            "name": "Microsoft.AspNetCore.App.Ref",
+            "version": "[8.0.16, 8.0.16]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Host.osx-x64",
+            "version": "[8.0.16, 8.0.16]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Ref",
+            "version": "[8.0.16, 8.0.16]"
+          }
+        ],
         "frameworkReferences": {
           "Microsoft.AspNetCore.App": {
             "privateAssets": "none"
@@ -9654,12 +9641,16 @@
             "privateAssets": "all"
           }
         },
-<<<<<<< HEAD
         "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.300/PortableRuntimeIdentifierGraph.json"
-=======
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.305/PortableRuntimeIdentifierGraph.json"
->>>>>>> 9d9c9a272bace02be17208bea6df14e4aea8fc48
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "Undefined",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Problem reading the cache file /Users/mac/Desktop/QuanLySinhVien/obj/project.nuget.cache : '<' is an invalid start of a property name. Expected a '\"'. Path: $ | LineNumber: 2 | BytePositionInLine: 0."
+    }
+  ]
 }
