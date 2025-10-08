@@ -32,7 +32,7 @@ namespace QuanLySinhVien.MidWare.JWT
         private bool ValidateUser(string username, string password, out string UserId, out string[] Roles)
         {
 
-            var user = context.Users.FirstOrDefault(x => x.Username == username);
+            var user = context.Sysusers.FirstOrDefault(x => x.UserName == username);
             if (user is not null)
             {
                 if (string.IsNullOrEmpty(user.Passwords))
@@ -85,7 +85,7 @@ namespace QuanLySinhVien.MidWare.JWT
 
             //Có cơ sở dữ liệu thật thì phải xác thực validate lại cho Token Refesh xem có hợp lệ không
             
-            var user = context.Users.Where(u => u.Username == userId).First();
+            var user = context.Sysusers.Where(u => u.UserName == userId).First();
             if (user.Role == null)
             {
                 throw new UnauthorizedAccessException("Cant Author");

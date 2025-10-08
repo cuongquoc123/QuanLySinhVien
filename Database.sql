@@ -1,130 +1,135 @@
-use master
-DROP DATABASE QL_DiemDanhSV;
-GO
+﻿--Tạo CSDL 
+Drop Database if exists ql_cua_hang;
+create Database ql_cua_hang;
+go
 
--- Tạo database
-CREATE DATABASE QL_DiemDanhSV;
-GO
+use ql_cua_hang;
 
-USE QL_DiemDanhSV;
-GO
-
--- Bảng Khoa
-CREATE TABLE Khoa (
-    MaKhoa CHAR(10) PRIMARY KEY,
-    TenKhoa NVARCHAR(100) NOT NULL
+drop table if exists cuahang;
+create table cuahang(
+	CuaHangId char(10) primary key,
+	TenCH nvarchar(50) not null,
+	DiaChi nvarchar(50) not null,
+	SDT char(11),
+	Email varchar(100)
 );
--- Bảng Khoa
-CREATE TABLE Nganh (
-    MaNganh CHAR(10) PRIMARY KEY,
-    TenNganh NVARCHAR(100) NOT NULL
-);
+go
 
--- Bảng Lớp Hành Chính
-CREATE TABLE LopHanhChinh (
-    MaLopHC CHAR(10) PRIMARY KEY,
-    TenLopHC NVARCHAR(100) NOT NULL,
-    SiSo INT,
-    MaNganh CHAR(10) NOT NULL,
-    FOREIGN KEY (MaNganh) REFERENCES Nganh(MaNganh)
-);
--- Bảng Sinh Viên
-CREATE TABLE SinhVien (
-    MSSV CHAR(15) PRIMARY KEY,
-    HoTen NVARCHAR(100) NOT NULL,
-    NgaySinh DATE,
-    GioiTinh NVARCHAR(10),
-    SDT NVARCHAR(20),
-    Email NVARCHAR(100),
-    DiaChi NVARCHAR(200),
-    MaLopHC CHAR(10) NOT NULL,
-    FOREIGN KEY (MaLopHC) REFERENCES LopHanhChinh(MaLopHC)
-);
--- Bảng Giảng Viên
-CREATE TABLE GiangVien (
-    MaGV CHAR(10) PRIMARY KEY,
-    HoTen NVARCHAR(100) NOT NULL,
-    Email NVARCHAR(100),
-    SDT NVARCHAR(20),
-    MaKhoa CHAR(10) NOT NULL,
-    FOREIGN KEY (MaKhoa) REFERENCES Khoa(MaKhoa)
-);
--- Bảng Môn Học
-CREATE TABLE MonHoc (
-    MaMon CHAR(10) PRIMARY KEY,
-    TenMon NVARCHAR(100) NOT NULL,
-    SoTinChi INT,
-    SoTiet INT NOT NULL,
-    MaNganh CHAR(10) NOT NULL,
-    FOREIGN KEY (MaNganh) REFERENCES Nganh(MaNganh)
-);
+drop table if exists staff;
+create table staff(
+	CCCD char(11) primary key,
+	Ten nvarchar(50) not null,
+	DiaChi nvarchar(50) not null,
+	NgaySinh date,
+	Vtri nvarchar(50),
+	Luong Decimal(4,2),
+	Avatar nvarchar(500) not null,
+	CuaHangId char(10),
+	Constraint FK_CH_STAFF foreign key (CuaHangId) references cuahang (CuaHangId) 
+)
+go
 
--- Bảng Lớp Học Phần
-CREATE TABLE LopHocPhan (
-    MaLopHP CHAR(10) PRIMARY KEY,
-    TenLopHP NVARCHAR(100) NOT NULL,
-    MaMon CHAR(10) NOT NULL,
-    MaGV CHAR(10) NOT NULL,
-    HocKy NVARCHAR(10),
-    NamHoc NVARCHAR(20),
-    constraint FK_MH_LHP FOREIGN KEY (MaMon) REFERENCES MonHoc(MaMon),
-    constraint FK_GV_LHP FOREIGN KEY (MaGV) REFERENCES GiangVien(MaGV)
+drop table if exists phieu_NL; 
+create table phieu_NL(
+	MaPhieu char(10) primary key,
+	ngay_yeu_cau date not null,
+	CuaHangId char(10),
+	Constraint FK_CH_PNL foreign key (CuaHangId) references cuahang (CuaHangId) 
 );
--- Bảng Đăng Ký Lớp Học Phần
-CREATE TABLE DangKyLopHP (
-    MSSV CHAR(15),
-    MaLopHP CHAR(10),
-    PRIMARY KEY (MSSV, MaLopHP),
-    FOREIGN KEY (MSSV) REFERENCES SinhVien(MSSV),
-    FOREIGN KEY (MaLopHP) REFERENCES LopHocPhan(MaLopHP)
+go
+
+drop table if exists nguyenlieu;
+create table nguyenlieu (
+	MaNguyenLieu char(10) primary key,
+	TenNguyenLieu nvarchar(50) not null,
+	DVT nvarchar(20) not null
 );
+go
 
--- Bảng Điểm Danh
-CREATE TABLE DiemDanh (
-    MaDiemDanh INT IDENTITY(1,1) PRIMARY KEY,
-    MSSV CHAR(15) NOT NULL,
-    MaLopHP CHAR(10) NOT NULL,
-    NgayHoc DATE NOT NULL,
-    TrangThai NVARCHAR(20) CHECK (TrangThai IN ('Có mặt', 'Không phép', 'Có phép')),
-    FOREIGN KEY (MSSV) REFERENCES SinhVien(MSSV),
-    FOREIGN KEY (MaLopHP) REFERENCES LopHocPhan(MaLopHP)
+drop table if exists chi_tiet_yeu_cau;
+create table chi_tiet_yeu_cau (
+	MaNguyenLieu char(10) not null, 
+	SoLuong int Check(SoLuong > 0),
+	MaPhieu char(10) not null,
+	Primary key (MaNguyenLieu,MaPhieu),
+	Constraint FK_CTYC_PHIEU foreign key (MaPhieu) references phieu_NL(MaPhieu),
+	Constraint FK_CTYC_NL foreign key (MaNguyenLieu) references nguyenlieu(MaNguyenLieu)
 );
-CREATE TABLE LichHoc (
-    MaLichHoc INT IDENTITY(1,1) PRIMARY KEY,
-    MaLopHP CHAR(10) NOT NULL,     
-    NgayHoc DATE NOT NULL,
-    TietBatDau INT NOT NULL,
-    SoTiet INT NOT NULL,
-    PhongHoc NVARCHAR(50),
-    GhiChu NVARCHAR(200),
-    FOREIGN KEY (MaLopHP) REFERENCES LopHocPhan(MaLopHP)
+go
+
+drop table if exists kho;
+create table kho (
+	MaKho char(10) primary key,
+	SoLuongTon int check (SoLuongTon >= 0),
+	MaNguyenLieu char(10),
+	Constraint FK_Kho_NguyenLieu foreign key (MaNguyenLieu) references nguyenlieu(MaNguyenLieu),
+	CuaHangId char(10),
+	Constraint FK_Kho_CH foreign key (CuaHangId) references cuahang(CuaHangId)
 );
+go
 
-ALTER TABLE LichHoc 
-add DayOfWeek NVARCHAR(30) NOt NULL
+drop table if exists sysrole;
+create table sysrole(
+	RoleId char(10) primary key,
+	RoleName nvarchar(20) not null
+); 
+go
 
-SELECT * FROM LichHoc
-DELETE from LichHoc
-
-
-ALTER TABLE DIEMDANH
-ADD MaLichHoc INT NULL,
-    FOREIGN KEY (MaLichHoc) REFERENCES LichHoc(MaLichHoc);
-
-use QL_DiemDanhSV
-CREATE TABLE roles (
-    roleId char(3) PRIMARY KEY,
-    roleName NVARCHAR(30)
+drop table if exists sysuser;
+create table sysuser (
+	UserId char(10) primary key,
+	NgaySinh date,
+	DiaChi nvarchar(50),
+	UserName nvarchar(100) unique not null,
+	Avatar nvarchar(500),
+	Passwords nvarchar(100) not null,
+	CuaHangId char(10) not null,
+	Constraint FK_CH_User foreign key (CuaHangId) references cuahang(CuaHangId),
+	RoleId char(10)
+	Constraint FK_USER_ROLE foreign key (RoleId) references sysrole(RoleId)
 );
+go
 
-CREATE TABLE users (
-    username char(10) PRIMARY KEY,
-    roleId char (3),
-    passwords Nvarchar(50),
+drop table if exists danhmuc;
+create table danhmuc (
+	maDM char(10) primary key,
+	tenDM nvarchar(50) not null
 );
+go
 
-ALTER TABLE users 
-ADD CONSTRAINT FK_USER_ROLE FOREIGN KEY (roleId) REFERENCES roles(roleId)
-USE QL_DiemDanhSV
-ALTER TABLE SinhVien 
-add  Avatar VARCHAR(255)
+drop table if exists sanpham;
+create table sanpham (
+	MaSP char(10) primary key,
+	DonGia decimal(4,2) not null,
+	TenSP nvarchar(50) not null,
+	Anh nvarchar(500),
+	Mota text,
+	maDM char(10) not null,
+	Constraint FK_SP_DM foreign key (maDM) references danhmuc(maDM)
+);
+go
+
+drop table if exists donhang;
+create table donhang(
+	MaDon char(10) primary key,
+	ThanhTien decimal(4,2) not null,
+	TrangThai nvarchar(50) check (TrangThai in (N'Hoang Thanh', N'Da Huy', N'Tiep Nhan', N'Dang Xu Ly')),
+	NgayNhan Date not null,
+	NgayHoangThanh date,
+	CuaHangId char(10) not null,
+	Constraint FK_CH_DH foreign key (CuaHangId) references cuahang(CuaHangId),
+	UserId char(10) not null, 
+	Constraint FK_NV_DH foreign key (UserId) references sysuser(UserId)
+); 
+go
+
+drop table if exists chi_tiet_don_hang;
+create table chi_tiet_don_hang (
+	SoLuong int not null check (SoLuong > 0),
+	MaDon char(10) not null,
+	MaSP char(10) not null, 
+	primary key (MaDon,MaSP),
+	Constraint FK_CTDH_SP foreign key (MaSP) references sanpham(MaSP),
+	Constraint FK_CTDH_DH foreign key (MaDon) references donhang(MaDon)
+);
+go

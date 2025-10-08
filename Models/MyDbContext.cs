@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using DotNetEnv;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace QuanLySinhVien.Models;
@@ -17,211 +16,181 @@ public partial class MyDbContext : DbContext
     {
     }
 
-    public virtual DbSet<DiemDanh> DiemDanhs { get; set; }
+    public virtual DbSet<ChiTietDonHang> ChiTietDonHangs { get; set; }
 
-    public virtual DbSet<GiangVien> GiangViens { get; set; }
+    public virtual DbSet<ChiTietYeuCau> ChiTietYeuCaus { get; set; }
 
-    public virtual DbSet<Khoa> Khoas { get; set; }
+    public virtual DbSet<Cuahang> Cuahangs { get; set; }
 
-    public virtual DbSet<LichHoc> LichHocs { get; set; }
+    public virtual DbSet<Danhmuc> Danhmucs { get; set; }
 
-    public virtual DbSet<LopHanhChinh> LopHanhChinhs { get; set; }
+    public virtual DbSet<Donhang> Donhangs { get; set; }
 
-    public virtual DbSet<LopHocPhan> LopHocPhans { get; set; }
+    public virtual DbSet<Kho> Khos { get; set; }
 
-    public virtual DbSet<MonHoc> MonHocs { get; set; }
+    public virtual DbSet<Nguyenlieu> Nguyenlieus { get; set; }
 
-    public virtual DbSet<Nganh> Nganhs { get; set; }
+    public virtual DbSet<PhieuNl> PhieuNls { get; set; }
 
-    public virtual DbSet<Role> Roles { get; set; }
+    public virtual DbSet<Sanpham> Sanphams { get; set; }
 
-    public virtual DbSet<SinhVien> SinhViens { get; set; }
+    public virtual DbSet<Staff> Staff { get; set; }
 
-    public virtual DbSet<User> Users { get; set; }
+    public virtual DbSet<Sysrole> Sysroles { get; set; }
 
-    static string db_host2 = Env.GetString("db_host2");
+    public virtual DbSet<Sysuser> Sysusers { get; set; }
 
-    static string db2 = Env.GetString("db2");
-    static string db_user2 = Env.GetString("db_user2");
-    static string db_password2 = Env.GetString("db_password2");
+    static string? Server = Env.GetString("db_host2") ; 
+    static string? database = Env.GetString("db2");
+    static string User = Env.GetString("db_user2");
+    static string Password = Env.GetString("db_password2");
     static string TrustServerCertificate = Env.GetString("TrustServerCertificate");
-    static string connectionString2 = $"Server={db_host2};Database={db2};User Id={db_user2};Password={db_password2};TrustServerCertificate={TrustServerCertificate};";
-
+    static string ConnStr = $"Server={Server};Database={database};User Id={User};Password={Password};TrustServerCertificate={TrustServerCertificate};";
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer(connectionString2);
-    SqlConnection conn = new SqlConnection(connectionString2);
+        => optionsBuilder.UseSqlServer(ConnStr);
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DiemDanh>(entity =>
+        modelBuilder.Entity<ChiTietDonHang>(entity =>
         {
-            entity.HasKey(e => e.MaDiemDanh).HasName("PK__DiemDanh__1512439D452631EC");
+            entity.HasKey(e => new { e.MaDon, e.MaSp }).HasName("PK__chi_tiet__EFFBA5E9AEBA59AB");
 
-            entity.Property(e => e.MaLopHp).IsFixedLength();
-            entity.Property(e => e.Mssv).IsFixedLength();
+            entity.Property(e => e.MaDon).IsFixedLength();
+            entity.Property(e => e.MaSp).IsFixedLength();
 
-            entity.HasOne(d => d.MaLichHocNavigation).WithMany(p => p.DiemDanhs).HasConstraintName("FK__DiemDanh__MaLich__5AEE82B9");
-
-            entity.HasOne(d => d.MaLopHpNavigation).WithMany(p => p.DiemDanhs)
+            entity.HasOne(d => d.MaDonNavigation).WithMany(p => p.ChiTietDonHangs)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__DiemDanh__MaLopH__571DF1D5");
+                .HasConstraintName("FK_CTDH_DH");
 
-            entity.HasOne(d => d.MssvNavigation).WithMany(p => p.DiemDanhs)
+            entity.HasOne(d => d.MaSpNavigation).WithMany(p => p.ChiTietDonHangs)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__DiemDanh__MSSV__5629CD9C");
+                .HasConstraintName("FK_CTDH_SP");
         });
 
-        modelBuilder.Entity<GiangVien>(entity =>
+        modelBuilder.Entity<ChiTietYeuCau>(entity =>
         {
-            entity.HasKey(e => e.MaGv).HasName("PK__GiangVie__2725AEF3B50D7B8A");
+            entity.HasKey(e => new { e.MaNguyenLieu, e.MaPhieu }).HasName("PK__chi_tiet__D53798ABAED2B5B4");
 
-            entity.Property(e => e.MaGv).IsFixedLength();
-            entity.Property(e => e.MaKhoa).IsFixedLength();
+            entity.Property(e => e.MaNguyenLieu).IsFixedLength();
+            entity.Property(e => e.MaPhieu).IsFixedLength();
 
-            entity.HasOne(d => d.MaKhoaNavigation).WithMany(p => p.GiangViens)
+            entity.HasOne(d => d.MaNguyenLieuNavigation).WithMany(p => p.ChiTietYeuCaus)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__GiangVien__MaKho__440B1D61");
-        });
+                .HasConstraintName("FK_CTYC_NL");
 
-        modelBuilder.Entity<Khoa>(entity =>
-        {
-            entity.HasKey(e => e.MaKhoa).HasName("PK__Khoa__6539040544DD51CC");
-
-            entity.Property(e => e.MaKhoa).IsFixedLength();
-        });
-
-        modelBuilder.Entity<LichHoc>(entity =>
-        {
-            entity.HasKey(e => e.MaLichHoc).HasName("PK__LichHoc__150EBC213CAC7493");
-
-            entity.Property(e => e.MaLopHp).IsFixedLength();
-
-            entity.HasOne(d => d.MaLopHpNavigation).WithMany(p => p.LichHocs)
+            entity.HasOne(d => d.MaPhieuNavigation).WithMany(p => p.ChiTietYeuCaus)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__LichHoc__MaLopHP__59FA5E80");
+                .HasConstraintName("FK_CTYC_PHIEU");
         });
 
-        modelBuilder.Entity<LopHanhChinh>(entity =>
+        modelBuilder.Entity<Cuahang>(entity =>
         {
-            entity.HasKey(e => e.MaLopHc).HasName("PK__LopHanhC__976ACA0F42EE3B50");
+            entity.HasKey(e => e.CuaHangId).HasName("PK__cuahang__1BECA8F8C0C32786");
 
-            entity.Property(e => e.MaLopHc).IsFixedLength();
-            entity.Property(e => e.MaNganh).IsFixedLength();
+            entity.Property(e => e.CuaHangId).IsFixedLength();
+            entity.Property(e => e.Sdt).IsFixedLength();
+        });
 
-            entity.HasOne(d => d.MaNganhNavigation).WithMany(p => p.LopHanhChinhs)
+        modelBuilder.Entity<Danhmuc>(entity =>
+        {
+            entity.HasKey(e => e.MaDm).HasName("PK__danhmuc__7A3EF408A47B3096");
+
+            entity.Property(e => e.MaDm).IsFixedLength();
+        });
+
+        modelBuilder.Entity<Donhang>(entity =>
+        {
+            entity.HasKey(e => e.MaDon).HasName("PK__donhang__3D89F568DADE1B50");
+
+            entity.Property(e => e.MaDon).IsFixedLength();
+            entity.Property(e => e.CuaHangId).IsFixedLength();
+            entity.Property(e => e.UserId).IsFixedLength();
+
+            entity.HasOne(d => d.CuaHang).WithMany(p => p.Donhangs)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__LopHanhCh__MaNga__3B75D760");
-        });
+                .HasConstraintName("FK_CH_DH");
 
-        modelBuilder.Entity<LopHocPhan>(entity =>
-        {
-            entity.HasKey(e => e.MaLopHp).HasName("PK__LopHocPh__976ACA3229293036");
-
-            entity.Property(e => e.MaLopHp).IsFixedLength();
-            entity.Property(e => e.MaGv).IsFixedLength();
-            entity.Property(e => e.MaMon).IsFixedLength();
-
-            entity.HasOne(d => d.MaGvNavigation).WithMany(p => p.LopHocPhans)
+            entity.HasOne(d => d.User).WithMany(p => p.Donhangs)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_GV_LHP");
+                .HasConstraintName("FK_NV_DH");
+        });
 
-            entity.HasOne(d => d.MaMonNavigation).WithMany(p => p.LopHocPhans)
+        modelBuilder.Entity<Kho>(entity =>
+        {
+            entity.HasKey(e => e.MaKho).HasName("PK__kho__3BDA9350B6F69AB0");
+
+            entity.Property(e => e.MaKho).IsFixedLength();
+            entity.Property(e => e.CuaHangId).IsFixedLength();
+            entity.Property(e => e.MaNguyenLieu).IsFixedLength();
+
+            entity.HasOne(d => d.CuaHang).WithMany(p => p.Khos).HasConstraintName("FK_Kho_CH");
+
+            entity.HasOne(d => d.MaNguyenLieuNavigation).WithMany(p => p.Khos).HasConstraintName("FK_Kho_NguyenLieu");
+        });
+
+        modelBuilder.Entity<Nguyenlieu>(entity =>
+        {
+            entity.HasKey(e => e.MaNguyenLieu).HasName("PK__nguyenli__C7519355A690F357");
+
+            entity.Property(e => e.MaNguyenLieu).IsFixedLength();
+        });
+
+        modelBuilder.Entity<PhieuNl>(entity =>
+        {
+            entity.HasKey(e => e.MaPhieu).HasName("PK__phieu_NL__2660BFE0512F08CE");
+
+            entity.Property(e => e.MaPhieu).IsFixedLength();
+            entity.Property(e => e.CuaHangId).IsFixedLength();
+
+            entity.HasOne(d => d.CuaHang).WithMany(p => p.PhieuNls).HasConstraintName("FK_CH_PNL");
+        });
+
+        modelBuilder.Entity<Sanpham>(entity =>
+        {
+            entity.HasKey(e => e.MaSp).HasName("PK__sanpham__2725081C4A783281");
+
+            entity.Property(e => e.MaSp).IsFixedLength();
+            entity.Property(e => e.MaDm).IsFixedLength();
+
+            entity.HasOne(d => d.MaDmNavigation).WithMany(p => p.Sanphams)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_MH_LHP");
+                .HasConstraintName("FK_SP_DM");
         });
 
-        modelBuilder.Entity<MonHoc>(entity =>
+        modelBuilder.Entity<Staff>(entity =>
         {
-            entity.HasKey(e => e.MaMon).HasName("PK__MonHoc__3A5B29A871EE7D5D");
+            entity.HasKey(e => e.Cccd).HasName("PK__staff__A955A0AB1ECBB64F");
 
-            entity.Property(e => e.MaMon).IsFixedLength();
-            entity.Property(e => e.MaNganh).IsFixedLength();
+            entity.Property(e => e.Cccd).IsFixedLength();
+            entity.Property(e => e.CuaHangId).IsFixedLength();
 
-            entity.HasOne(d => d.MaNganhNavigation).WithMany(p => p.MonHocs)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__MonHoc__MaNganh__46E78A0C");
+            entity.HasOne(d => d.CuaHang).WithMany(p => p.Staff).HasConstraintName("FK_CH_STAFF");
         });
 
-        modelBuilder.Entity<Nganh>(entity =>
+        modelBuilder.Entity<Sysrole>(entity =>
         {
-            entity.HasKey(e => e.MaNganh).HasName("PK__Nganh__A2CEF50DD986D40C");
-
-            entity.Property(e => e.MaNganh).IsFixedLength();
-        });
-
-        modelBuilder.Entity<Role>(entity =>
-        {
-            entity.HasKey(e => e.RoleId).HasName("PK__roles__CD98462A5111BB9C");
+            entity.HasKey(e => e.RoleId).HasName("PK__sysrole__8AFACE1A7623A76D");
 
             entity.Property(e => e.RoleId).IsFixedLength();
         });
 
-        modelBuilder.Entity<SinhVien>(entity =>
+        modelBuilder.Entity<Sysuser>(entity =>
         {
-            entity.HasKey(e => e.Mssv).HasName("PK__SinhVien__6CB3B7F9E545C0D1");
+            entity.HasKey(e => e.UserId).HasName("PK__sysuser__1788CC4C7B96833B");
 
-            entity.Property(e => e.Mssv).IsFixedLength();
-            entity.Property(e => e.MaLopHc).IsFixedLength();
-
-            entity.HasOne(d => d.MaLopHcNavigation).WithMany(p => p.SinhViens)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__SinhVien__MaLopH__412EB0B6");
-
-            entity.HasMany(d => d.MaLopHps).WithMany(p => p.Mssvs)
-                .UsingEntity<Dictionary<string, object>>(
-                    "DangKyLopHp",
-                    r => r.HasOne<LopHocPhan>().WithMany()
-                        .HasForeignKey("MaLopHp")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK__DangKyLop__MaLop__4E88ABD4"),
-                    l => l.HasOne<SinhVien>().WithMany()
-                        .HasForeignKey("Mssv")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK__DangKyLopH__MSSV__4D94879B"),
-                    j =>
-                    {
-                        j.HasKey("Mssv", "MaLopHp").HasName("PK__DangKyLo__55C51B5A9E3BD083");
-                        j.ToTable("DangKyLopHP");
-                        j.IndexerProperty<string>("Mssv")
-                            .HasMaxLength(15)
-                            .IsUnicode(false)
-                            .IsFixedLength()
-                            .HasColumnName("MSSV");
-                        j.IndexerProperty<string>("MaLopHp")
-                            .HasMaxLength(10)
-                            .IsUnicode(false)
-                            .IsFixedLength()
-                            .HasColumnName("MaLopHP");
-                    });
-        });
-
-        modelBuilder.Entity<User>(entity =>
-        {
-            entity.HasKey(e => e.Username).HasName("PK__users__F3DBC5737CECC4F8");
-
-            entity.Property(e => e.Username).IsFixedLength();
+            entity.Property(e => e.UserId).IsFixedLength();
+            entity.Property(e => e.CuaHangId).IsFixedLength();
             entity.Property(e => e.RoleId).IsFixedLength();
 
-            entity.HasOne(d => d.Role).WithMany(p => p.Users).HasConstraintName("FK_USER_ROLE");
+            entity.HasOne(d => d.CuaHang).WithMany(p => p.Sysusers)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_CH_User");
+
+            entity.HasOne(d => d.Role).WithMany(p => p.Sysusers).HasConstraintName("FK_USER_ROLE");
         });
 
         OnModelCreatingPartial(modelBuilder);
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
-
-    public void Test_connect()
-    {
-        try
-        {
-            conn.Open();
-        }
-        catch (Exception ex)
-        {
-            throw new Exception(ex.Message);
-        }
-        finally
-        {
-            conn.Close();
-        }
-    }
 }

@@ -9,7 +9,6 @@ using QuanLySinhVien.MidWare.JWT;
 using QuanLySinhVien.Models;
 using QuanLySinhVien.Service.CheckFace;
 using QuanLySinhVien.Service.HashPassword;
-using QuanLySinhVien.Service.Schedule;
 using QuanLySinhVien.Service.SQL;
 using Serilog;
 
@@ -102,10 +101,6 @@ builder.Services.AddDbContext<MyDbContext>();
 
 
 //Add các service tự viết của project
-builder.Services.AddScoped<IGAServices>(
-    sp => new GA()
-);
-
 int workFactor = int.Parse(Environment.GetEnvironmentVariable("WorkFactor") ?? "9");
 builder.Services.AddScoped<IPassWordService>(
     sp => new BCryptPasswordService(workFactor)
@@ -147,5 +142,5 @@ app.MapGroup("/admin").RequireAuthorization(policy => policy.RequireRole("GiangV
 app.UseAuthorization();
 
 app.MapControllers();
-logger.LogInformation("Server start at {Time}",DateTime.Now);
+logger.LogInformation("Server start at {Time}",DateTime.Now.ToString());
 app.Run();

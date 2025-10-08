@@ -73,7 +73,7 @@ public class verifyFace : ControllerBase
 
             await checkFace.CheckFaceAsync(IMG1, IMG2);
             logger.LogInformation("Verify successfull for: ");
-            await sqLServices.DiemDanhThanhCong(mssv, maLHP);
+           
             return Ok(new { message = "Verify successfull" });
 
         }
