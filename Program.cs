@@ -137,7 +137,9 @@ app.UseMiddleware<GlabalLogger>();
 app.UseAuthentication();
 
 //Cấu hình các đường dẫn API theo quyền
-app.MapGroup("/admin").RequireAuthorization(policy => policy.RequireRole("GiangVien"));
+app.MapGroup("/admin").RequireAuthorization(policy => policy.RequireRole("admin"));
+app.MapGroup("/manager").RequireAuthorization(policy => policy.RequireRole("manager"));
+app.MapGroup("/cashier").RequireAuthorization(policy => policy.RequireRole("cashier"));
 
 app.UseAuthorization();
 
