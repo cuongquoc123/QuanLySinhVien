@@ -15,7 +15,7 @@ public partial class Sanpham
     [Unicode(false)]
     public string MaSp { get; set; } = null!;
 
-    [Column(TypeName = "decimal(4, 2)")]
+    [Column(TypeName = "decimal(18, 2)")]
     public decimal DonGia { get; set; }
 
     [Column("TenSP")]

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using DotNetEnv;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace QuanLySinhVien.Models;
@@ -41,21 +39,11 @@ public partial class MyDbContext : DbContext
 
     public virtual DbSet<Sysuser> Sysusers { get; set; }
 
-    static string? Server = Env.GetString("db_host2") ; 
-    static string? database = Env.GetString("db2");
-    static string User = Env.GetString("db_user2");
-    static string Password = Env.GetString("db_password2");
-    static string TrustServerCertificate = Env.GetString("TrustServerCertificate");
-    static string ConnStr = $"Server={Server};Database={database};User Id={User};Password={Password};TrustServerCertificate={TrustServerCertificate};";
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer(ConnStr);
-
-    SqlConnection con = new SqlConnection(ConnStr);
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<ChiTietDonHang>(entity =>
         {
-            entity.HasKey(e => new { e.MaDon, e.MaSp }).HasName("PK__chi_tiet__EFFBA5E98DD6A5EE");
+            entity.HasKey(e => new { e.MaDon, e.MaSp }).HasName("PK__chi_tiet__EFFBA5E98B69BE2A");
 
             entity.Property(e => e.MaDon).IsFixedLength();
             entity.Property(e => e.MaSp).IsFixedLength();
@@ -71,7 +59,7 @@ public partial class MyDbContext : DbContext
 
         modelBuilder.Entity<ChiTietYeuCau>(entity =>
         {
-            entity.HasKey(e => new { e.MaNguyenLieu, e.MaPhieu }).HasName("PK__chi_tiet__D53798ABCD8BE8FA");
+            entity.HasKey(e => new { e.MaNguyenLieu, e.MaPhieu }).HasName("PK__chi_tiet__D53798AB72B5F04A");
 
             entity.Property(e => e.MaNguyenLieu).IsFixedLength();
             entity.Property(e => e.MaPhieu).IsFixedLength();
@@ -87,7 +75,7 @@ public partial class MyDbContext : DbContext
 
         modelBuilder.Entity<Cuahang>(entity =>
         {
-            entity.HasKey(e => e.CuaHangId).HasName("PK__cuahang__1BECA8F841EE22E1");
+            entity.HasKey(e => e.CuaHangId).HasName("PK__cuahang__1BECA8F88DCAB47F");
 
             entity.Property(e => e.CuaHangId).IsFixedLength();
             entity.Property(e => e.Sdt).IsFixedLength();
@@ -95,31 +83,27 @@ public partial class MyDbContext : DbContext
 
         modelBuilder.Entity<Danhmuc>(entity =>
         {
-            entity.HasKey(e => e.MaDm).HasName("PK__danhmuc__7A3EF4089156C24F");
+            entity.HasKey(e => e.MaDm).HasName("PK__danhmuc__7A3EF408AE94A1F4");
 
             entity.Property(e => e.MaDm).IsFixedLength();
         });
 
         modelBuilder.Entity<Donhang>(entity =>
         {
-            entity.HasKey(e => e.MaDon).HasName("PK__donhang__3D89F5688D68FF7C");
+            entity.HasKey(e => e.MaDon).HasName("PK__donhang__3D89F568CDBEA615");
 
             entity.Property(e => e.MaDon).IsFixedLength();
             entity.Property(e => e.CuaHangId).IsFixedLength();
             entity.Property(e => e.UserId).IsFixedLength();
 
-            entity.HasOne(d => d.CuaHang).WithMany(p => p.Donhangs)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_CH_DH");
+            entity.HasOne(d => d.CuaHang).WithMany(p => p.Donhangs).HasConstraintName("FK_CH_DH");
 
-            entity.HasOne(d => d.User).WithMany(p => p.Donhangs)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_NV_DH");
+            entity.HasOne(d => d.User).WithMany(p => p.Donhangs).HasConstraintName("FK_NV_DH");
         });
 
         modelBuilder.Entity<Kho>(entity =>
         {
-            entity.HasKey(e => e.MaKho).HasName("PK__kho__3BDA9350703CE234");
+            entity.HasKey(e => e.MaKho).HasName("PK__kho__3BDA935016F83E4D");
 
             entity.Property(e => e.MaKho).IsFixedLength();
             entity.Property(e => e.CuaHangId).IsFixedLength();
@@ -132,14 +116,14 @@ public partial class MyDbContext : DbContext
 
         modelBuilder.Entity<Nguyenlieu>(entity =>
         {
-            entity.HasKey(e => e.MaNguyenLieu).HasName("PK__nguyenli__C7519355423B2AA6");
+            entity.HasKey(e => e.MaNguyenLieu).HasName("PK__nguyenli__C7519355B95EBEBA");
 
             entity.Property(e => e.MaNguyenLieu).IsFixedLength();
         });
 
         modelBuilder.Entity<PhieuNl>(entity =>
         {
-            entity.HasKey(e => e.MaPhieu).HasName("PK__phieu_NL__2660BFE061848AC1");
+            entity.HasKey(e => e.MaPhieu).HasName("PK__phieu_NL__2660BFE02DFAD015");
 
             entity.Property(e => e.MaPhieu).IsFixedLength();
             entity.Property(e => e.CuaHangId).IsFixedLength();
@@ -149,7 +133,7 @@ public partial class MyDbContext : DbContext
 
         modelBuilder.Entity<Sanpham>(entity =>
         {
-            entity.HasKey(e => e.MaSp).HasName("PK__sanpham__2725081C2EFE76A1");
+            entity.HasKey(e => e.MaSp).HasName("PK__sanpham__2725081C5F2A27BA");
 
             entity.Property(e => e.MaSp).IsFixedLength();
             entity.Property(e => e.MaDm).IsFixedLength();
@@ -161,7 +145,7 @@ public partial class MyDbContext : DbContext
 
         modelBuilder.Entity<Staff>(entity =>
         {
-            entity.HasKey(e => e.Cccd).HasName("PK__staff__A955A0AB5293C432");
+            entity.HasKey(e => e.Cccd).HasName("PK__staff__A955A0AB1379916E");
 
             entity.Property(e => e.Cccd).IsFixedLength();
             entity.Property(e => e.CuaHangId).IsFixedLength();
@@ -171,14 +155,14 @@ public partial class MyDbContext : DbContext
 
         modelBuilder.Entity<Sysrole>(entity =>
         {
-            entity.HasKey(e => e.RoleId).HasName("PK__sysrole__8AFACE1AECFDB9DC");
+            entity.HasKey(e => e.RoleId).HasName("PK__sysrole__8AFACE1AD0408EE8");
 
             entity.Property(e => e.RoleId).IsFixedLength();
         });
 
         modelBuilder.Entity<Sysuser>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__sysuser__1788CC4CCC11413C");
+            entity.HasKey(e => e.UserId).HasName("PK__sysuser__1788CC4C3380878C");
 
             entity.Property(e => e.UserId).IsFixedLength();
             entity.Property(e => e.CuaHangId).IsFixedLength();
@@ -195,20 +179,4 @@ public partial class MyDbContext : DbContext
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
-
-    public void TestConnect()
-    {
-        try
-        {
-            con.Open();
-        }
-        catch (Exception ex)
-        {
-            throw new Exception(ex.Message);
-        }
-        finally
-        {
-            con.Close();
-        }
-    }
 }

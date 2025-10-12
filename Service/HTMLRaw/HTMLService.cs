@@ -1,101 +1,211 @@
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 using QuanLySinhVien.Models;
 
 namespace QuanLySinhVien.Service.HTMLRaw
 {
     public class HTMLService : IHtmService
     {
+        private readonly MyDbContext context;
 
-        public string HoaDonHTMl(Donhang donhang)
+        public HTMLService(MyDbContext context)
         {
+            this.context = context;
+        }
+        public string HoaDonHTMl(String Madon)
+        {
+            // ... (phần code truy vấn dữ liệu của bạn giữ nguyên) ...
+            var donHang = context.Donhangs
+                                 .Include(dh => dh.CuaHang) 
+                                 .Include(dh => dh.User)     
+                                 .FirstOrDefault(dh => dh.MaDon == Madon);
+
+            if (donHang == null)
+            {
+                throw new KeyNotFoundException("Bill not exists");
+            }
+
+            var ChiTietDonHangs = context.ChiTietDonHangs
+                                         .Include(ctdh => ctdh.MaSpNavigation)
+                                         .Where(x => x.MaDon == donHang.MaDon)
+                                         .ToList();
+
+            if (ChiTietDonHangs == null || !ChiTietDonHangs.Any())
+            {
+                throw new KeyNotFoundException("Fake bills");
+            }
+            var viVNCulture = new System.Globalization.CultureInfo("vi-VN");
             var Table = new StringBuilder();
             Table.AppendLine(@"
-            <thead>
-                <tr>
-                    <th>Tên Sản Phẩm</th>
-                    <th class='text-right'>Đơn giá</th>
-                    <th class='text-right'>SL</th>
-                    <th class='text-right'>Thành tiền</th>
-                </tr>
-            </thead>
-            <tbody>");
+    <thead>
+        <tr class='heading'>
+            <td>Sản phẩm</td>
+            <td class='text-right'>Đơn giá</td>
+            <td class='text-center'>Số lượng</td>
+            <td class='text-right'>Thành tiền</td>
+        </tr>
+    </thead>
+    <tbody>");
 
-            foreach (var item in donhang.ChiTietDonHangs)
+            foreach (var item in ChiTietDonHangs)
             {
+                var donGia = item.MaSpNavigation?.DonGia ?? 0;
+                var tenSp = item.MaSpNavigation?.TenSp ?? "Sản phẩm không xác định";
+                var thanhTienItem = item.SoLuong * donGia;
+
                 Table.AppendLine($@"
-                <tr>
-                    <td>{item.MaSpNavigation.TenSp}</td>
-                    <td class='text-right'>{item.MaSpNavigation.DonGia}</td>
-                    <td class='text-right'>{item.SoLuong}</td>
-                    <td class='text-right'>{item.SoLuong * item.MaSpNavigation.DonGia}</td>
-                </tr>");
+        <tr class='item'>
+            <td>{tenSp}</td>
+            <td class='text-right'>{donGia.ToString("N0",viVNCulture)}đ</td>
+            <td class='text-center'>{item.SoLuong}</td>
+            <td class='text-right'>{thanhTienItem.ToString("N0",viVNCulture)}đ</td>
+        </tr>");
             }
             Table.AppendLine(@"</tbody>");
 
+            var thanhTien = donHang.ThanhTien ;
+            var thue = thanhTien * 0.1m; // Giả sử VAT 10%
+            var tamTinh = thanhTien - thue;
+
+            // PHẦN TEMPLATE HTML MỚI
             string HTMlContent = $@"
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <meta charset='utf-8' />
-                        <title>Hóa Đơn #{donhang.MaDon}</title>
-                        <style>
-                            body {{ font-family: 'Times New Roman', Times, serif; font-size: 14px; margin: 0; padding: 20px; }}
-                            .invoice-box {{ max-width: 800px; margin: auto; border: 1px solid #eee; padding: 30px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.15); }}
-                            h1 {{ text-align: center; color: #333; }}
-                            table {{ width: 100%; line-height: inherit; text-align: left; border-collapse: collapse; }}
-                            .invoice-info {{ margin-bottom: 20px; }}
-                            .invoice-info td {{ padding-bottom: 20px; }}
-                            .item-table th, .item-table td {{ border-bottom: 1px solid #eee; padding: 8px; }}
-                            .item-table th {{ background: #eee; }}
-                            .text-right {{ text-align: right; }}
-                            .total-row {{ font-weight: bold; }}
-                        </style>
-                    </head>
-                    <body>
-                        <div class='invoice-box'>
-                            <h1 style='color: #2c3e50;'>HÓA ĐƠN BÁN HÀNG</h1>
-                            
-                            <table cellpadding='0' cellspacing='0' class='invoice-info'>
-                                <tr>
-                                    <td style='width: 50%;'>
-                                        <strong>Công ty Cổ phần Đối tác lập trình</strong><br>
-                                        Địa chỉ: Số 123, Đường Lập Trình, TP. HCM<br>
-                                        Email: support@partner.com
-                                    </td>
-                                    <td class='text-right'>
-                                        <strong>Hóa đơn #: {donhang.MaDon}</strong><br>
-                                        Ngày phát hành: {donhang.NgayNhan.ToString("dd/MM/yyyy")}<br>
-                                    </td>
-                                </tr>
-                            </table>
-                            
-                            <table cellpadding='0' cellspacing='0' class='item-table'>
-                                {Table.ToString()}
-                            </table>
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset='utf-8' />
+            <title>Hóa Đơn #{donHang.MaDon}</title>
+            <style>
+                body {{
+                    font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
+                    color: #555;
+                    background: #FFF;
+                    font-size: 14px;
+                }}
+                .invoice-box {{
+                    max-width: 800px;
+                    margin: auto;
+                    padding: 30px;
+                    border: 1px solid #eee;
+                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+                }}
+                .invoice-box table {{
+                    width: 100%;
+                    line-height: inherit;
+                    text-align: left;
+                    border-collapse: collapse;
+                }}
+                .invoice-box table td {{
+                    padding: 5px;
+                    vertical-align: top;
+                }}
+                .invoice-box table tr td:nth-child(2) {{
+                    text-align: right;
+                }}
+                .invoice-box .header {{
+                    margin-bottom: 20px;
+                }}
+                .invoice-box .header .logo {{
+                    width: 100%;
+                    max-width: 200px;
+                }}
+                .invoice-box .header .company-details {{
+                    text-align: right;
+                }}
+                .invoice-box .invoice-details td {{
+                    padding-bottom: 20px;
+                }}
+                .invoice-box .item-table table th, .invoice-box .item-table table td {{
+                    border-bottom: 1px solid #eee;
+                    padding: 10px 5px;
+                }}
+                .invoice-box .item-table table .heading td {{
+                    background: #eee;
+                    border-bottom: 1px solid #ddd;
+                    font-weight: bold;
+                }}
+                .invoice-box .item-table table .item td {{
+                    border-bottom: 1px solid #eee;
+                }}
+                .invoice-box .totals table {{
+                    width: 50%;
+                    float: right;
+                }}
+                .invoice-box .totals table .total td:nth-child(2) {{
+                    border-top: 2px solid #eee;
+                    font-weight: bold;
+                }}
+                .text-right {{
+                    text-align: right !important;
+                }}
+                .text-center {{
+                    text-align: center !important;
+                }}
 
-                            <table style='width: 40%; float: right; margin-top: 20px;'>
-                                <tr>
-                                    <td>Tạm tính:</td>
-                                    <td class='text-right'>{(donhang.ThanhTien * 90 / 100).ToString("N2")} VNĐ</td>
-                                </tr>
-                                <tr>
-                                    <td>Thuế 10%: </td>
-                                    <td class='text-right'>{(donhang.ThanhTien * 10 / 100).ToString("N2")} VNĐ</td>
-                                </tr>
-                                <tr class='total-row'>
-                                    <td>TỔNG CỘNG:</td>
-                                    <td class='text-right'>{donhang.ThanhTien.ToString("N2")} VNĐ</td>
-                                </tr>
-                            </table>
-                            <div style='clear: both;'></div>
+                /* Tối ưu cho việc in ấn */
+                @media print {{
+                    .invoice-box {{
+                        box-shadow: none;
+                        border: 0;
+                    }}
+                }}
+            </style>
+        </head>
+        <body>
+            <div class='invoice-box'>
+                <table class='header' cellpadding='0' cellspacing='0'>
+                    <tr>
+                        <td>
+                            <img src='https://i.imgur.com/vU2p3s2.png' alt='Company Logo' class='logo' />
+                        </td>
+                        <td class='company-details'>
+                            <strong>{donHang.CuaHang?.TenCh ?? "Tên Cửa Hàng"}</strong><br />
+                            {donHang.CuaHang?.DiaChi ?? "Địa chỉ cửa hàng"}<br />
+                            {donHang.CuaHang?.Email ?? "Email cửa hàng"}
+                        </td>
+                    </tr>
+                </table>
 
-                            <p style='margin-top: 50px; text-align: center; font-style: italic;'>
-                                Cảm ơn quý khách đã tin tưởng dịch vụ của chúng tôi!
-                            </p>
-                        </div>
-                    </body>
-                    </html>";
-                return HTMlContent;
+                <table class='invoice-details' cellpadding='0' cellspacing='0'>
+                    <tr>
+                        <td>
+                            <strong>Khách hàng</strong><br />
+                            Khách lẻ
+                        </td>
+                        <td class='text-right'>
+                            <strong>Hóa đơn #: {donHang.MaDon}</strong><br />
+                            Ngày tạo: {donHang.NgayNhan.ToString("dd/MM/yyyy")}<br />
+                            Nhân viên: {donHang.User?.UserName ?? "Không xác định"}
+                        </td>
+                    </tr>
+                </table>
+
+                <div class='item-table'>
+                    <table>
+                        {Table.ToString()}
+                    </table>
+                </div>
+
+                <div class='totals'>
+                    <table cellpadding='0' cellspacing='0'>
+                        <tr>
+                            <td>Tạm tính</td>
+                            <td class='text-right'>{tamTinh.ToString("N0",viVNCulture)}đ</td>
+                        </tr>
+                        <tr>
+                            <td>Thuế (10%)</td>
+                            <td class='text-right'>{thue.ToString("N0",viVNCulture)}đ</td>
+                        </tr>
+                        <tr class='total'>
+                            <td><strong>Tổng cộng</strong></td>
+                            <td class='text-right'><strong>{thanhTien.ToString("N0",viVNCulture)}đ</strong></td>
+                        </tr>
+                    </table>
+                </div>
+                 <div style='clear: both;'></div>
+            </div>
+        </body>
+        </html>";
+            return HTMlContent;
         }
     }
 }

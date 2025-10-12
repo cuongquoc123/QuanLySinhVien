@@ -5,7 +5,7 @@ namespace QuanLySinhVien.DTOS.Request
 {
     public class Product
     {
-        public Sanpham? sp { get; set; }
+        public string? Masp { get; set; }
         public int SoLuong { get; set; }
     }
     public class HoaDonRequest

@@ -28,9 +28,14 @@ namespace QuanLySinhVien.Controller.Admin
             var respone = new PageRespone<Donhang>();
 
             var Items = await context.Donhangs.Where(d => d.NgayNhan > datestarts && d.NgayNhan < datends).
-                                Skip((pageNum - 1 ) * pageSize)
+                                Skip((pageNum - 1) * pageSize)
                                 .Take(pageSize).ToListAsync();
 
+            if(Items == null || Items.Count == 0 || !Items.Any())
+            {
+                return NoContent();
+            }
+            
             foreach (var item in Items)
             {
                 Item<Donhang> itemNew = new Item<Donhang>()

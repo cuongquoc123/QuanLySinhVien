@@ -100,18 +100,21 @@ namespace QuanLySinhVien.Service.SQL
                 moi.NgayNhan = DateOnly.FromDateTime(DateTime.Now);
                 moi.TrangThai = "Tiep Nhan";
                 moi.ThanhTien = ThanhTien;
+                context.Donhangs.Add(moi);
                 foreach (var sp in dssp)
                 {
-                    if (sp.sp == null)
+                    if (string.IsNullOrEmpty(sp.Masp))
                     {
                         throw new Exception("A Product in list Product null");
                     }
                     ChiTietDonHang mois = new ChiTietDonHang();
                     mois.MaDon = moi.MaDon;
-                    mois.MaSp = sp.sp.MaSp;
+                    mois.MaSp = sp.Masp;
                     mois.SoLuong = sp.SoLuong;
-                    moi.ChiTietDonHangs.Add(mois);
+                    
+                    context.ChiTietDonHangs.Add(mois);
                 }
+                
                 await context.SaveChangesAsync();
                 await Transaction.CommitAsync();
                 return moi;

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace QuanLySinhVien.Models;
 
 [Table("sysuser")]
-[Index("UserName", Name = "UQ__sysuser__C9F28456651CB389", IsUnique = true)]
+[Index("UserName", Name = "UQ__sysuser__C9F284560D44C27A", IsUnique = true)]
 public partial class Sysuser
 {
     [Key]

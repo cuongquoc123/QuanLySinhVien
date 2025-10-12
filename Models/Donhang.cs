@@ -14,7 +14,7 @@ public partial class Donhang
     [Unicode(false)]
     public string MaDon { get; set; } = null!;
 
-    [Column(TypeName = "decimal(4, 2)")]
+    [Column(TypeName = "decimal(18, 2)")]
     public decimal ThanhTien { get; set; }
 
     [StringLength(50)]
@@ -26,20 +26,20 @@ public partial class Donhang
 
     [StringLength(10)]
     [Unicode(false)]
-    public string CuaHangId { get; set; } = null!;
+    public string? CuaHangId { get; set; }
 
     [StringLength(10)]
     [Unicode(false)]
-    public string UserId { get; set; } = null!;
+    public string? UserId { get; set; }
 
     [InverseProperty("MaDonNavigation")]
     public virtual ICollection<ChiTietDonHang> ChiTietDonHangs { get; set; } = new List<ChiTietDonHang>();
 
     [ForeignKey("CuaHangId")]
     [InverseProperty("Donhangs")]
-    public virtual Cuahang CuaHang { get; set; } = null!;
+    public virtual Cuahang? CuaHang { get; set; }
 
     [ForeignKey("UserId")]
     [InverseProperty("Donhangs")]
-    public virtual Sysuser User { get; set; } = null!;
+    public virtual Sysuser? User { get; set; }
 }
