@@ -20,7 +20,7 @@ namespace QuanLySinhVien.Controller.Admin
         }
 
         [HttpPost()]
-        public async Task<IActionResult> CreateUser(Sysuser req)
+        public async Task<IActionResult> CreateUser([FromBody]Sysuser req)
         {
             if (ModelState.IsValid)
             {
@@ -32,7 +32,7 @@ namespace QuanLySinhVien.Controller.Admin
         }
 
         [HttpPut()]
-        public async Task<IActionResult> UpdateUser(Sysuser req)
+        public async Task<IActionResult> UpdateUser([FromBody]Sysuser req)
         {
             if (ModelState.IsValid)
             {
@@ -44,7 +44,7 @@ namespace QuanLySinhVien.Controller.Admin
         }
 
         [HttpDelete("/SoftDelete")]
-        public async Task<IActionResult> SoftDeleteUser(string req)
+        public async Task<IActionResult> SoftDeleteUser([FromQuery]string req)
         {
             if (await sqLServices.SoftDeleteUser(req) == 200)
             {
@@ -58,7 +58,7 @@ namespace QuanLySinhVien.Controller.Admin
         }
 
         [HttpDelete()]
-        public async Task<IActionResult> DeleteUser(string req)
+        public async Task<IActionResult> DeleteUser([FromQuery]string req)
         {
             if (await sqLServices.deleteUser(req) == 200)
             {

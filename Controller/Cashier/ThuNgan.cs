@@ -6,6 +6,7 @@ using QuanLySinhVien.Service.SQL;
 
 namespace QuanLySinhVien.Controller.Cashier
 {
+    [ApiController]
     [Route("Cashier")]
     public class ThuNgan : ControllerBase
     {
@@ -22,7 +23,7 @@ namespace QuanLySinhVien.Controller.Cashier
         }
 
         [HttpPost("TaoDon")]
-        public async Task<IActionResult> taoDonHang(HoaDonRequest request)
+        public async Task<IActionResult> taoDonHang([FromBody] HoaDonRequest request)
         {
             if (string.IsNullOrEmpty(request.MaCH) || string.IsNullOrEmpty(request.MaNV)) {
                 throw new ArgumentException("Need Param User and CuaHang");
