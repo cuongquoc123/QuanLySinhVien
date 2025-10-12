@@ -9,6 +9,6 @@ namespace QuanLySinhVien.Service.SQL
         public Task<Sysuser> UpdateUser(Sysuser sysuser);
         public Task<int> deleteUser(string Id);
         public Task<int> SoftDeleteUser(string Id);
-        Task<Donhang?> taoDon(string CuaHangId, string MaNV, List<Sanpham> dssp, decimal ThanhTien);
+        Task<Donhang?> taoDon(string CuaHangId, string MaNV, List<Product> dssp, decimal ThanhTien);
     }
 }

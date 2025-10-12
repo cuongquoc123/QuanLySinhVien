@@ -43,8 +43,8 @@ namespace QuanLySinhVien.Controller.Admin
             throw new CustomError(400, "Bad Request", "Can't Update User Info");
         }
 
-        [HttpDelete("/SoftDelete")]
-        public async Task<IActionResult> SoftDeleteUser([FromQuery]string req)
+        [HttpDelete("/soft/{req}")]
+        public async Task<IActionResult> SoftDeleteUser([FromRoute]string req)
         {
             if (await sqLServices.SoftDeleteUser(req) == 200)
             {
@@ -57,8 +57,8 @@ namespace QuanLySinhVien.Controller.Admin
             throw new Exception("Server is broken");
         }
 
-        [HttpDelete()]
-        public async Task<IActionResult> DeleteUser([FromQuery]string req)
+        [HttpDelete("/{req}")]
+        public async Task<IActionResult> DeleteUser([FromRoute] string req)
         {
             if (await sqLServices.deleteUser(req) == 200)
             {
@@ -69,5 +69,7 @@ namespace QuanLySinhVien.Controller.Admin
             }
             throw new Exception("Server is broken");
         }
+        
+        
     }
 }

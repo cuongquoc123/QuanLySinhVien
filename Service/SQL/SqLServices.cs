@@ -88,7 +88,7 @@ namespace QuanLySinhVien.Service.SQL
             }
         }
 
-        public async Task<Donhang?> taoDon(string CuaHangId, string MaNV, List<Sanpham> dssp, decimal ThanhTien)
+        public async Task<Donhang?> taoDon(string CuaHangId, string MaNV, List<Product> dssp, decimal ThanhTien)
         {
             await using var Transaction = await context.Database.BeginTransactionAsync();
             try
@@ -104,7 +104,8 @@ namespace QuanLySinhVien.Service.SQL
                 {
                     ChiTietDonHang mois = new ChiTietDonHang();
                     mois.MaDon = moi.MaDon;
-                    mois.MaSp = sp.MaSp;
+                    mois.MaSp = sp.sp.MaSp;
+                    mois.SoLuong = sp.SoLuong;
                     moi.ChiTietDonHangs.Add(mois);
                 }
                 await context.SaveChangesAsync();
