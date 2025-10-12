@@ -26,6 +26,10 @@ public partial class Cuahang
     [Unicode(false)]
     public string? Sdt { get; set; }
 
+    [Column("statuss")]
+    [StringLength(100)]
+    public string? Statuss { get; set; }
+
     [StringLength(100)]
     [Unicode(false)]
     public string? Email { get; set; }

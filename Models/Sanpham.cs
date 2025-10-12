@@ -25,6 +25,10 @@ public partial class Sanpham
     [StringLength(500)]
     public string? Anh { get; set; }
 
+    [Column("status")]
+    [StringLength(50)]
+    public string? Status { get; set; }
+
     [Column(TypeName = "text")]
     public string? Mota { get; set; }
 

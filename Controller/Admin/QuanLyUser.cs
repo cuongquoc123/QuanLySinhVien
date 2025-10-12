@@ -7,7 +7,7 @@ using QuanLySinhVien.Service.SQL;
 namespace QuanLySinhVien.Controller.Admin
 {
     [ApiController]
-    [Route("/admin")]
+    [Route("/admin/User")]
     public class AdminController : ControllerBase
     {
         private readonly MyDbContext context;
@@ -19,7 +19,7 @@ namespace QuanLySinhVien.Controller.Admin
             this.sqLServices = sqLServices;
         }
 
-        [HttpPost("User")]
+        [HttpPost()]
         public async Task<IActionResult> CreateUser(Sysuser req)
         {
             if (ModelState.IsValid)
@@ -31,7 +31,7 @@ namespace QuanLySinhVien.Controller.Admin
             throw new Exception("Error while Add a User");
         }
 
-        [HttpPut("User")]
+        [HttpPut()]
         public async Task<IActionResult> UpdateUser(Sysuser req)
         {
             if (ModelState.IsValid)
@@ -43,7 +43,7 @@ namespace QuanLySinhVien.Controller.Admin
             throw new CustomError(400, "Bad Request", "Can't Update User Info");
         }
 
-        [HttpPut("DUser")]
+        [HttpDelete()]
         public async Task<IActionResult> DeleteUser(string req)
         {
             if (await sqLServices.deleteUser(req) == 200)

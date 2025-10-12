@@ -32,6 +32,9 @@ public partial class Staff
     [StringLength(500)]
     public string Avatar { get; set; } = null!;
 
+    [StringLength(100)]
+    public string? StatuSs { get; set; }
+
     [StringLength(10)]
     [Unicode(false)]
     public string? CuaHangId { get; set; }

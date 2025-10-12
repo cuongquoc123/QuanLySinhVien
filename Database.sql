@@ -1,4 +1,5 @@
 ﻿--Tạo CSDL 
+use master;
 Drop Database if exists ql_cua_hang;
 create Database ql_cua_hang;
 go
@@ -11,6 +12,7 @@ create table cuahang(
 	TenCH nvarchar(50) not null,
 	DiaChi nvarchar(50) not null,
 	SDT char(11),
+	statuss nvarchar(100),
 	Email varchar(100)
 );
 go
@@ -24,6 +26,7 @@ create table staff(
 	Vtri nvarchar(50),
 	Luong Decimal(4,2),
 	Avatar nvarchar(500) not null,
+	StatuSs nvarchar(100),
 	CuaHangId char(10),
 	Constraint FK_CH_STAFF foreign key (CuaHangId) references cuahang (CuaHangId) 
 )
@@ -103,6 +106,7 @@ create table sanpham (
 	DonGia decimal(4,2) not null,
 	TenSP nvarchar(50) not null,
 	Anh nvarchar(500),
+	status nvarchar(50),
 	Mota text,
 	maDM char(10) not null,
 	Constraint FK_SP_DM foreign key (maDM) references danhmuc(maDM)
