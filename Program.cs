@@ -9,6 +9,7 @@ using QuanLySinhVien.MidWare.JWT;
 using QuanLySinhVien.Models;
 using QuanLySinhVien.Service.CheckFace;
 using QuanLySinhVien.Service.HashPassword;
+using QuanLySinhVien.Service.HTMLRaw;
 using QuanLySinhVien.Service.SQL;
 using Serilog;
 
@@ -109,6 +110,8 @@ builder.Services.AddScoped<IPassWordService>(
 builder.Services.AddScoped<ISqLServices,SqLService>();
 
 builder.Services.AddScoped<IcheckFace, CheckFace>();
+
+builder.Services.AddScoped<IHtmService, HTMLService>();
 
 var app = builder.Build();
 
