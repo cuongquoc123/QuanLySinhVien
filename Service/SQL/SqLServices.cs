@@ -102,6 +102,10 @@ namespace QuanLySinhVien.Service.SQL
                 moi.ThanhTien = ThanhTien;
                 foreach (var sp in dssp)
                 {
+                    if (sp.sp == null)
+                    {
+                        throw new Exception("A Product in list Product null");
+                    }
                     ChiTietDonHang mois = new ChiTietDonHang();
                     mois.MaDon = moi.MaDon;
                     mois.MaSp = sp.sp.MaSp;

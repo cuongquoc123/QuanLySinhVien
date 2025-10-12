@@ -33,7 +33,11 @@ namespace QuanLySinhVien.Controller.Public
             var items = await myDbContext.Sanphams.OrderBy(x => x.TenSp)
                                 .Skip((pageNum - 1) * pageSize)
                                 .Take(pageSize).ToListAsync();
-
+            
+            if (items == null || items.Count == 0 || !items.Any())
+            {
+                return NoContent();
+            }
             foreach (var item in items)
             {
                 Item<Sanpham> itemNew = new Item<Sanpham>()
@@ -52,8 +56,8 @@ namespace QuanLySinhVien.Controller.Public
             return Ok(res);
         }
 
-        [HttpGet("ProductByCate")]
-        public async Task<IActionResult> GetProduct([FromQuery] int pageNum, [FromQuery] int pageSize, [FromQuery] string CateId)
+        [HttpGet("ProductByCate/{pageNum}/{pageSize}/{CateId}")]
+        public async Task<IActionResult> GetProduct([FromRoute] int pageNum, [FromRoute] int pageSize, [FromRoute] string CateId)
         {
             var res = new PageRespone<Sanpham>();
             if (pageNum < 1)

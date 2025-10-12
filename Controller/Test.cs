@@ -21,7 +21,7 @@ namespace QuanLySinhVien.Controller
         [HttpGet("testConnectDB")]
         public IActionResult test_connect_db()
         {
-            
+            context.TestConnect();
             return NoContent();
         }
     }

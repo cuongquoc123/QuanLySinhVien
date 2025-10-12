@@ -16,7 +16,7 @@ namespace QuanLySinhVien.Controller.Admin
             this.context = context;
         }
         [HttpGet("TheoNgay/{datestart}/{dateend}")]
-        public async Task<IActionResult> dh_theo_ngay([FromRoute] string datestart, [FromRoute] string dateend)
+        public async Task<IActionResult> dh_theo_ngay([FromRoute] string datestart, [FromRoute] string dateend, [FromRoute] int pageNum, [FromRoute] int pageSize)
         {
             if (string.IsNullOrEmpty(datestart) || string.IsNullOrEmpty(dateend))
             {
@@ -28,8 +28,8 @@ namespace QuanLySinhVien.Controller.Admin
             var respone = new PageRespone<Donhang>();
 
             var Items = await context.Donhangs.Where(d => d.NgayNhan > datestarts && d.NgayNhan < datends).
-                                Skip(0)
-                                .Take(10).ToListAsync();
+                                Skip((pageNum - 1 ) * pageSize)
+                                .Take(pageSize).ToListAsync();
 
             foreach (var item in Items)
             {
@@ -40,12 +40,14 @@ namespace QuanLySinhVien.Controller.Admin
                 };
                 respone.Items.Append(itemNew);
             }
-            respone.PageIndex = 1;
+            respone.PageIndex = pageNum;
             respone.TotalCount = await context.Donhangs.Where(d => d.NgayNhan > datestarts && d.NgayNhan < datends).CountAsync();
             respone.TotalPages = (int)Math.Ceiling(respone.TotalCount / (double)10);
-            respone.PageSize = 10;
+            respone.PageSize = pageSize;
             return Ok(respone);
         }
+        
+        
 
         [HttpGet("Chitiet/{MaDon}")]
         public async Task<IActionResult> GetChitietDH([FromRoute] string MaDon)
