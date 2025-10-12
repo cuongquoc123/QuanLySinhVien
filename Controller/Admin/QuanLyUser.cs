@@ -19,7 +19,7 @@ namespace QuanLySinhVien.Controller.Admin
             this.sqLServices = sqLServices;
         }
 
-        [HttpPost()]
+        [HttpPost("User")]
         public async Task<IActionResult> CreateUser(Sysuser req)
         {
             if (ModelState.IsValid)
@@ -31,7 +31,7 @@ namespace QuanLySinhVien.Controller.Admin
             throw new Exception("Error while Add a User");
         }
 
-        [HttpPut()]
+        [HttpPut("User")]
         public async Task<IActionResult> UpdateUser(Sysuser req)
         {
             if (ModelState.IsValid)
@@ -43,7 +43,7 @@ namespace QuanLySinhVien.Controller.Admin
             throw new CustomError(400, "Bad Request", "Can't Update User Info");
         }
 
-        [HttpDelete()]
+        [HttpPut("DUser")]
         public async Task<IActionResult> DeleteUser(string req)
         {
             if (await sqLServices.deleteUser(req) == 200)
@@ -55,5 +55,7 @@ namespace QuanLySinhVien.Controller.Admin
             }
             throw new Exception("Server is broken");
         }
+        
+        
     }
 }
