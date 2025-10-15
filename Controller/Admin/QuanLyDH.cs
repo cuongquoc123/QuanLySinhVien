@@ -15,7 +15,7 @@ namespace QuanLySinhVien.Controller.Admin
         {
             this.context = context;
         }
-        [HttpGet("TheoNgay/{datestart}/{dateend}")]
+        [HttpGet("TheoNgay/{datestart}/{dateend}/{pageNum}/{pageSize}")]
         public async Task<IActionResult> dh_theo_ngay([FromRoute] string datestart, [FromRoute] string dateend, [FromRoute] int pageNum, [FromRoute] int pageSize)
         {
             if (string.IsNullOrEmpty(datestart) || string.IsNullOrEmpty(dateend))
