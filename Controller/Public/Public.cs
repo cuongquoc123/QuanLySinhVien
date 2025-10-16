@@ -77,7 +77,7 @@ namespace QuanLySinhVien.Controller.Public
                 Item<Sanpham> itemNew = new Item<Sanpham>()
                 {
                     Value = item,
-                    PathChiTiet = $"/public/Product/ChiTiet/{item.MaSp}"
+                    PathChiTiet = $"/public/Product/{item.MaSp}"
                 };
 
                 res.Items.Append(itemNew);
@@ -90,14 +90,34 @@ namespace QuanLySinhVien.Controller.Public
 
             return Ok(res);
         }
-        [HttpGet("/Chitiet/{masp}")]
+        [HttpGet("/Product/{masp}")]
         public async Task<IActionResult> GetChiTietProduct([FromRoute] string masp)
         {
             var respone = await myDbContext.Sanphams.FindAsync(masp);
             return Ok(respone);
         }
-        
 
+        [HttpGet("/DanhMuc")]
+        public async Task<IActionResult> getALlCate()
+        {
+            try
+            {
+                var danhmucs = await myDbContext.Danhmucs.ToListAsync();
+                if (danhmucs.Count == 0 || danhmucs == null || !danhmucs.Any())
+                {
+                    return NoContent();
+                }
+
+                 return Ok(danhmucs);
+            }
+            catch (System.Exception)
+            {
+                
+                throw;
+            }
+            
+        }
+        
     }
     
 

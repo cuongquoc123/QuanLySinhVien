@@ -14,7 +14,7 @@ public partial class Donhang
     [Unicode(false)]
     public string MaDon { get; set; } = null!;
 
-    [Column(TypeName = "decimal(18, 2)")]
+    [Column(TypeName = "decimal(18, 3)")]
     public decimal ThanhTien { get; set; }
 
     [StringLength(50)]

@@ -1,4 +1,6 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using QuanLySinhVien.DTOS.Request;
 using QuanLySinhVien.Models;
 using QuanLySinhVien.Service.HTMLRaw;
@@ -29,32 +31,37 @@ namespace QuanLySinhVien.Controller.Cashier
             {
                 return BadRequest("Request body is empty."); // Trả về lỗi 400 Bad Request
             }
-            if (string.IsNullOrEmpty(request.MaCH) || string.IsNullOrEmpty(request.MaNV))
-            {
-                throw new ArgumentException("Need Param User and CuaHang");
-            }
+            
             try
             {
-                System.Console.WriteLine("Start Create bill");
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    throw new UnauthorizedAccessException("Token is not valid");
+                }
+                var user = await context.Sysusers.FindAsync(userId);
+
+                if (user == null)
+                {
+                    throw new UnauthorizedAccessException("User Not Exists in server");
+                }
                 // 3. Toàn bộ logic xử lý chính đặt trong try-catch
                 var donhang = await sqLServices.taoDon(
-
                     ThanhTien: request.ThanhTien,
-                    CuaHangId: request.MaCH, // Tên thuộc tính nên nhất quán
-                    MaNV: request.MaNV,
+                    CuaHangId: user.CuaHangId, // Tên thuộc tính nên nhất quán
+                    MaNV: userId,
                     dssp: request.dssp
                 );
-                System.Console.WriteLine("Done");
+                
                 if (donhang == null)
                 {
-                    System.Console.WriteLine("donhang = null");
+                    
                     // Trả về lỗi 500 Internal Server Error, vì đây là lỗi logic phía server
                     throw new Exception("Failed to create order in database.");
                     
                 }
-                System.Console.WriteLine("Madon: " + donhang.MaDon);
+
                 var res = htmService.HoaDonHTMl(donhang.MaDon);
-                System.Console.WriteLine("var res = htmService.HoaDonHTMl(donhang);");
                 if (string.IsNullOrEmpty(res))
                 {
                     return StatusCode(500, "Failed to generate HTML bill.");

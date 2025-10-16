@@ -26,7 +26,7 @@ public partial class Staff
     [StringLength(50)]
     public string? Vtri { get; set; }
 
-    [Column(TypeName = "decimal(18, 2)")]
+    [Column(TypeName = "decimal(18, 3)")]
     public decimal? Luong { get; set; }
 
     [StringLength(500)]

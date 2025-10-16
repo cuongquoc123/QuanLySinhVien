@@ -6,9 +6,11 @@ namespace QuanLySinhVien.Service.SQL
 {
     public interface ISqLServices
     {
-        public Task<Sysuser> UpdateUser(Sysuser sysuser);
-        public Task<int> deleteUser(string Id);
-        public Task<int> SoftDeleteUser(string Id);
+        Task<Sysuser> UpdateUser(Sysuser sysuser);
+        Task<int> deleteUser(string Id);
+        Task<int> SoftDeleteUser(string Id);
         Task<Donhang?> taoDon(string CuaHangId, string MaNV, List<Product> dssp, decimal ThanhTien);
+        Task<Sanpham?> CreateProDucts(Sanpham spMoi, string imgPath);
+        Task<int> SoftDeleteProduct(string productId);
     }
 }

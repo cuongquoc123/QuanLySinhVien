@@ -19,7 +19,7 @@ public partial class ChiTietDonHang
 
     [Key]
     [Column("MaSP")]
-    [StringLength(10)]
+    [StringLength(20)]
     [Unicode(false)]
     public string MaSp { get; set; } = null!;
 

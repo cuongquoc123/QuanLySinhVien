@@ -11,11 +11,11 @@ public partial class Sanpham
 {
     [Key]
     [Column("MaSP")]
-    [StringLength(10)]
+    [StringLength(20)]
     [Unicode(false)]
     public string MaSp { get; set; } = null!;
 
-    [Column(TypeName = "decimal(18, 2)")]
+    [Column(TypeName = "decimal(18, 3)")]
     public decimal DonGia { get; set; }
 
     [Column("TenSP")]

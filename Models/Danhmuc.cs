@@ -19,6 +19,10 @@ public partial class Danhmuc
     [StringLength(50)]
     public string TenDm { get; set; } = null!;
 
+    [Column("LoaiDM")]
+    [StringLength(50)]
+    public string LoaiDm { get; set; } = null!;
+
     [InverseProperty("MaDmNavigation")]
     public virtual ICollection<Sanpham> Sanphams { get; set; } = new List<Sanpham>();
 }
