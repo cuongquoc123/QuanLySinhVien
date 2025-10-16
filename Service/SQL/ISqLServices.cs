@@ -6,6 +6,7 @@ namespace QuanLySinhVien.Service.SQL
 {
     public interface ISqLServices
     {
+        Task<Sysuser> CreateUser(Sysuser newUser);
         Task<Sysuser> UpdateUser(Sysuser sysuser);
         Task<int> deleteUser(string Id);
         Task<int> SoftDeleteUser(string Id);

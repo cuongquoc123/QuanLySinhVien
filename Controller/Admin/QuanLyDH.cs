@@ -43,7 +43,7 @@ namespace QuanLySinhVien.Controller.Admin
                     throw new UnauthorizedAccessException("User not exists in Server");
                 }
 
-                var Items = await context.Donhangs.Where(d => d.NgayNhan > datestarts && d.NgayNhan < datends && d.CuaHangId == user.CuaHangId).
+                var Items = await context.Donhangs.Where(d => d.NgayNhan >= datestarts && d.NgayNhan <= datends && d.CuaHangId == user.CuaHangId).
                                 Skip((pageNum - 1) * pageSize)
                                 .Take(pageSize).ToListAsync();
                 if (Items == null || Items.Count == 0 || !Items.Any())
@@ -61,7 +61,7 @@ namespace QuanLySinhVien.Controller.Admin
                     respone.Items.Append(itemNew);
                 }
                 respone.PageIndex = pageNum;
-                respone.TotalCount = await context.Donhangs.Where(d => d.NgayNhan > datestarts && d.NgayNhan < datends).CountAsync();
+                respone.TotalCount = await context.Donhangs.Where(d => d.NgayNhan >= datestarts && d.NgayNhan <= datends && d.CuaHangId == user.CuaHangId).CountAsync();
                 respone.TotalPages = (int)Math.Ceiling(respone.TotalCount / (double)10);
                 respone.PageSize = pageSize;
                 return Ok(respone);

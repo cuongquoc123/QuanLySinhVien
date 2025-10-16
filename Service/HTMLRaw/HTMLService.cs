@@ -192,7 +192,7 @@ namespace QuanLySinhVien.Service.HTMLRaw
                             <td class='text-right'>{tamTinh.ToString("N0",viVNCulture)}đ</td>
                         </tr>
                         <tr>
-                            <td>Thuế (10%)</td>
+                            <td>Thuế VAT(10%)</td>
                             <td class='text-right'>{thue.ToString("N0",viVNCulture)}đ</td>
                         </tr>
                         <tr class='total'>

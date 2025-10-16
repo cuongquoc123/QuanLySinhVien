@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using QuanLySinhVien.DTOS.Request;
 using QuanLySinhVien.DTOS.Respone;
 using QuanLySinhVien.MidWare.Filter;
@@ -29,27 +30,38 @@ namespace QuanLySinhVien.MidWare.JWT
         //Chưa có cơ sở dữ liệu nên phải làm tạm thế này, có rồi phải luư token vào CSDL và lấy ra để làm Refesh
         Dictionary<string, string> refreshStore = new Dictionary<string, string>();
         //Thay thế hàm này bằng hàm kiểm tra người dùng thật tế có trả về UserId và Roles để Làm JWT
-        private bool ValidateUser(string username, string password, out string UserId, out string[] Roles)
+        private bool ValidateUser(string username, string password, out string? UserId, out string Roles)
         {
 
             var user = context.Sysusers.FirstOrDefault(x => x.UserName == username);
             if (user is not null)
             {
+                if (string.IsNullOrEmpty(user.Status))
+                {
+                    throw new KeyNotFoundException("Server can't find user Status");
+                }
+                if (user.Status.Equals("Ngưng Hoạt Động") )
+                {
+                    UserId = null;
+                    Roles =  string.Empty ;
+                    return false;
+                }
                 if (string.IsNullOrEmpty(user.Passwords))
                 {
                     throw new CustomError(422, "Unprocessable Entity", "Your KeyWord not true");
                 }
                 if (passWordService.VerifyPassword(password, user.Passwords))
                 {
-                    if (user.Role != null)
+                    var Role = context.Sysroles.Find(user.RoleId);
+                    if (Role != null)
                     {
-                        Roles = new string[] { $"{user.Role.RoleName}" };
+                        Roles = Role.RoleName ;
                     }
                     else
                     {
                         throw new KeyNotFoundException("Can't be Authentication");
                     }
-                    UserId = username;
+                    UserId = user.UserId;
                     return true;
                 }
                 else
@@ -67,7 +79,15 @@ namespace QuanLySinhVien.MidWare.JWT
         public IActionResult Login(LoginRequest request)
         {
             logger.LogInformation($"API Login is being called:");
-            ValidateUser(request.UserName, request.Password, out string userId, out string[] roles);
+            if (!ValidateUser(request.UserName, request.Password, out string? userId, out string roles))
+            {
+                throw new UnauthorizedAccessException("User Infor not true");
+            }
+            if (string.IsNullOrEmpty(userId))
+            {
+                throw new UnauthorizedAccessException("User infor not true");
+            }
+
             var pair = _tokenService.CreateTokenPair(userId, roles);
             refreshStore[pair.RefreshToken] = userId; //Lưu refresh token vào CSDL
             return Ok(new LoginResponse(pair.AccessToken, pair.RefreshToken));
@@ -80,7 +100,7 @@ namespace QuanLySinhVien.MidWare.JWT
             logger.LogInformation($"API Refesh is being called:");
             if (!refreshStore.TryGetValue(request.RefreshToken, out var userId))
             {
-                return Unauthorized();
+                throw new UnauthorizedAccessException("Refresh Token Not Valid");
             }
 
             //Có cơ sở dữ liệu thật thì phải xác thực validate lại cho Token Refesh xem có hợp lệ không
@@ -88,13 +108,13 @@ namespace QuanLySinhVien.MidWare.JWT
             var user = context.Sysusers.Where(u => u.UserName == userId).First();
             if (user.Role == null)
             {
-                throw new UnauthorizedAccessException("Cant Author");
+                throw new UnauthorizedAccessException("You don't have permision");
             }
             if ( user.Role.RoleName is null)
             {
                 throw new CustomError(403,"UnAuthentiacion","You don't have permision");
             }
-            var pair = _tokenService.CreateTokenPair(userId, new string[] { user.Role.RoleName });
+            var pair = _tokenService.CreateTokenPair(userId,  user.Role.RoleName );
             refreshStore[pair.RefreshToken] = userId; //Lưu token mới vào CSDL
             //Nếu có thì mới tạo token mới
             //Nếu không thì trả về 401

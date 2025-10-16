@@ -85,6 +85,7 @@ create table sysuser (
 	DiaChi nvarchar(50),
 	UserName nvarchar(100) unique not null,
 	Avatar nvarchar(500),
+	status nvarchar(30),
 	Passwords nvarchar(100) not null,
 	CuaHangId char(10) not null,
 	Constraint FK_CH_User foreign key (CuaHangId) references cuahang(CuaHangId),
@@ -203,3 +204,15 @@ INSERT INTO sanpham (MaSP, TenSP, DonGia, Anh, status, Mota, maDM) VALUES
 ('SP_SPK03_02', N'Bình French Press', 350000, 'french_press.jpg', N'Còn hàng', N'Dụng cụ pha cà phê kiểu Pháp, dung tích 600ml.', 'DM_SPK03'),
 ('SP_SPK03_03', N'Ấm Cổ Ngỗng', 550000, 'gooseneck_kettle.jpg', N'Tạm hết hàng', N'Ấm chuyên dụng để pha cà phê thủ công, kiểm soát dòng nước.', 'DM_SPK03');
 select * from sanpham;
+
+insert into sysrole (RoleId, RoleName) values 
+('R01', N'admin'),
+('R02', N'manager'),
+('R03', N'cashier');
+
+INSERT INTO cuahang (CuaHangId, TenCH, DiaChi, SDT, statuss, Email) VALUES
+('CH001', N'Cửa hàng Trung tâm', N'123 Nguyễn Huệ, Quận 1, TPHCM', '0908111222', N'Đang hoạt động', 'trungtam.q1@email.com'),
+('CH002', N'Cửa hàng Sân bay', N'456 Trường Sơn, Quận Tân Bình, TPHCM', '0912333444', N'Đang hoạt động', 'sanbay.tphcm@email.com'),
+('CH003', N'Cửa hàng Thảo Điền', N'789 Võ Nguyên Giáp, Quận 2, TPHCM', '0987555666', N'Đang hoạt động', 'thaodien.q2@email.com'),
+('CH004', N'Cửa hàng Quận 7', N'101 Tôn Dật Tiên, Quận 7, TPHCM', '0933777888', N'Tạm ngưng sửa chữa', 'quan7.tdt@email.com'),
+('CH005', N'Cửa hàng Gò Vấp', N'222 Quang Trung, Quận Gò Vấp, TPHCM', '0945999000', N'Sắp khai trương', 'govap.qt@email.com');

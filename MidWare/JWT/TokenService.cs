@@ -35,7 +35,7 @@ namespace QuanLySinhVien.MidWare.JWT
             return Convert.ToBase64String(randomNumber);
         }
 
-        public TokenPair CreateTokenPair(string userID, string[] roles)
+        public TokenPair CreateTokenPair(string userID, string roles)
         {
             // Claims
             var claims = new List<Claim>
@@ -45,13 +45,14 @@ namespace QuanLySinhVien.MidWare.JWT
             };
 
             // Thêm roles (mỗi role là 1 claim)
-            foreach (var role in roles)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, role));
-            }
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_key));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            claims.Add(new Claim(ClaimTypes.Role, roles));
+
+
+            using var sha = SHA256.Create();
+            var keyBytes = sha.ComputeHash(Encoding.UTF8.GetBytes(_key));
+            var securityKey = new SymmetricSecurityKey(keyBytes);
+            var creds = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             // Access Token
             var accessToken = new JwtSecurityToken(

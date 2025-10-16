@@ -24,7 +24,7 @@ namespace QuanLySinhVien.Controller.Cashier
             this.htmService = htmService;
         }
 
-        [HttpPost("TaoDon")]
+        [HttpPost("/admin/TaoDon")]
         public async Task<IActionResult> taoDonHang([FromBody] HoaDonRequest request)
         {
             if (request == null)

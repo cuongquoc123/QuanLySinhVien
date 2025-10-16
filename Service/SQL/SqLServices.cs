@@ -76,7 +76,10 @@ namespace QuanLySinhVien.Service.SQL
                 var user = await context.Sysusers.FindAsync(Id);
                 if (user != null)
                 {
-                    
+                    user.Status = "Ngưng Hoạt Động";
+                    context.Entry(user).State = EntityState.Modified;
+                    await context.SaveChangesAsync();
+                    await Transaction.CommitAsync();
                     return 200;
                 }
                 throw new KeyNotFoundException("User Not Exists");
@@ -203,6 +206,30 @@ namespace QuanLySinhVien.Service.SQL
             {
                 await Transaction.RollbackAsync();
                 return 500;
+            }
+        }
+
+        public async Task<Sysuser> CreateUser(Sysuser newUser)
+        {
+            var Transaction = await context.Database.BeginTransactionAsync();
+            try
+            {
+                Sysuser USer = new Sysuser();
+                USer.UserId = GenerateId(10, "US");
+                USer.UserName = newUser.UserName;
+                USer.Passwords = passWordService.HashPassWord(newUser.Passwords);
+                USer.RoleId = newUser.RoleId;
+                USer.CuaHangId = newUser.CuaHangId;
+                USer.Status = "New User";
+                context.Sysusers.Add(USer);
+                await context.SaveChangesAsync();
+                await Transaction.CommitAsync();
+                return USer;
+            }
+            catch (System.Exception)
+            {
+                await Transaction.RollbackAsync();
+                throw;
             }
         }
     }

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using QuanLySinhVien.DTOS.Request;
 using QuanLySinhVien.MidWare.Filter;
 using QuanLySinhVien.Models;
 using QuanLySinhVien.Service.SQL;
@@ -7,7 +8,7 @@ using QuanLySinhVien.Service.SQL;
 namespace QuanLySinhVien.Controller.Admin
 {
     [ApiController]
-    [Route("/admin/User")]
+    [Route("admin/User")]
     public class AdminController : ControllerBase
     {
         private readonly MyDbContext context;
@@ -19,20 +20,39 @@ namespace QuanLySinhVien.Controller.Admin
             this.sqLServices = sqLServices;
         }
 
-        [HttpPost("User")]
-        public async Task<IActionResult> CreateUser(Sysuser req)
+        [HttpPost("")]
+        public async Task<IActionResult> CreateUser([FromBody]CreateUserRequest req)
         {
-            if (ModelState.IsValid)
+            if (string.IsNullOrEmpty(req.UserName) || string.IsNullOrEmpty(req.Password)
+             ||string.IsNullOrEmpty(req.RoleId)  || string.IsNullOrEmpty(req.StoreId) )
             {
-                context.Sysusers.Add(req);
-                await context.SaveChangesAsync();
-                return Ok(req);
+                throw new ArgumentException("Missing Param UserName, Password or RoleId");
             }
-            throw new Exception("Error while Add a User");
+            Sysuser user = new Sysuser()
+            {
+                UserName = req.UserName,
+                Passwords = req.Password,
+                RoleId = req.RoleId,
+                CuaHangId = req.StoreId,
+            };
+            try
+            {
+                var respone = await sqLServices.CreateUser(user);
+                if (respone == null)
+                {
+                    throw new Exception("User can't be create");
+                }
+
+                return Ok(respone);
+            }
+            catch (System.Exception)
+            {
+                throw;
+            }
         }
 
-        [HttpPut("User")]
-        public async Task<IActionResult> UpdateUser(Sysuser req)
+        [HttpPut("")]
+        public async Task<IActionResult> UpdateUser([FromBody]Sysuser req)
         {
             if (ModelState.IsValid)
             {
@@ -43,10 +63,10 @@ namespace QuanLySinhVien.Controller.Admin
             throw new CustomError(400, "Bad Request", "Can't Update User Info");
         }
 
-        [HttpPut("DUser")]
-        public async Task<IActionResult> DeleteUser(string req)
+        [HttpPut("DUser/{req}")]
+        public async Task<IActionResult> DeleteUser([FromRoute]string req)
         {
-            if (await sqLServices.deleteUser(req) == 200)
+            if (await sqLServices.SoftDeleteUser(req) == 200)
             {
                 return Ok(new
                 {

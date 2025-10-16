@@ -43,7 +43,7 @@ public partial class MyDbContext : DbContext
     {
         modelBuilder.Entity<ChiTietDonHang>(entity =>
         {
-            entity.HasKey(e => new { e.MaDon, e.MaSp }).HasName("PK__chi_tiet__EFFBA5E92D01BE84");
+            entity.HasKey(e => new { e.MaDon, e.MaSp }).HasName("PK__chi_tiet__EFFBA5E9A35275FC");
 
             entity.Property(e => e.MaDon).IsFixedLength();
             entity.Property(e => e.MaSp).IsFixedLength();
@@ -59,7 +59,7 @@ public partial class MyDbContext : DbContext
 
         modelBuilder.Entity<ChiTietYeuCau>(entity =>
         {
-            entity.HasKey(e => new { e.MaNguyenLieu, e.MaPhieu }).HasName("PK__chi_tiet__D53798AB182E1386");
+            entity.HasKey(e => new { e.MaNguyenLieu, e.MaPhieu }).HasName("PK__chi_tiet__D53798AB2C127B16");
 
             entity.Property(e => e.MaNguyenLieu).IsFixedLength();
             entity.Property(e => e.MaPhieu).IsFixedLength();
@@ -75,7 +75,7 @@ public partial class MyDbContext : DbContext
 
         modelBuilder.Entity<Cuahang>(entity =>
         {
-            entity.HasKey(e => e.CuaHangId).HasName("PK__cuahang__1BECA8F84B8C2C66");
+            entity.HasKey(e => e.CuaHangId).HasName("PK__cuahang__1BECA8F88CC14753");
 
             entity.Property(e => e.CuaHangId).IsFixedLength();
             entity.Property(e => e.Sdt).IsFixedLength();
@@ -83,14 +83,14 @@ public partial class MyDbContext : DbContext
 
         modelBuilder.Entity<Danhmuc>(entity =>
         {
-            entity.HasKey(e => e.MaDm).HasName("PK__danhmuc__7A3EF408E1A64DAA");
+            entity.HasKey(e => e.MaDm).HasName("PK__danhmuc__7A3EF408EAA28DD9");
 
             entity.Property(e => e.MaDm).IsFixedLength();
         });
 
         modelBuilder.Entity<Donhang>(entity =>
         {
-            entity.HasKey(e => e.MaDon).HasName("PK__donhang__3D89F568F158E79D");
+            entity.HasKey(e => e.MaDon).HasName("PK__donhang__3D89F5682A56BDDF");
 
             entity.Property(e => e.MaDon).IsFixedLength();
             entity.Property(e => e.CuaHangId).IsFixedLength();
@@ -103,7 +103,7 @@ public partial class MyDbContext : DbContext
 
         modelBuilder.Entity<Kho>(entity =>
         {
-            entity.HasKey(e => e.MaKho).HasName("PK__kho__3BDA93502FF378B9");
+            entity.HasKey(e => e.MaKho).HasName("PK__kho__3BDA9350E4371250");
 
             entity.Property(e => e.MaKho).IsFixedLength();
             entity.Property(e => e.CuaHangId).IsFixedLength();
@@ -116,14 +116,14 @@ public partial class MyDbContext : DbContext
 
         modelBuilder.Entity<Nguyenlieu>(entity =>
         {
-            entity.HasKey(e => e.MaNguyenLieu).HasName("PK__nguyenli__C75193559CA0E375");
+            entity.HasKey(e => e.MaNguyenLieu).HasName("PK__nguyenli__C751935557C71863");
 
             entity.Property(e => e.MaNguyenLieu).IsFixedLength();
         });
 
         modelBuilder.Entity<PhieuNl>(entity =>
         {
-            entity.HasKey(e => e.MaPhieu).HasName("PK__phieu_NL__2660BFE08CAC1143");
+            entity.HasKey(e => e.MaPhieu).HasName("PK__phieu_NL__2660BFE0E07F4071");
 
             entity.Property(e => e.MaPhieu).IsFixedLength();
             entity.Property(e => e.CuaHangId).IsFixedLength();
@@ -133,7 +133,7 @@ public partial class MyDbContext : DbContext
 
         modelBuilder.Entity<Sanpham>(entity =>
         {
-            entity.HasKey(e => e.MaSp).HasName("PK__sanpham__2725081CCD90D3FF");
+            entity.HasKey(e => e.MaSp).HasName("PK__sanpham__2725081C6BDC5CA3");
 
             entity.Property(e => e.MaSp).IsFixedLength();
             entity.Property(e => e.MaDm).IsFixedLength();
@@ -145,7 +145,7 @@ public partial class MyDbContext : DbContext
 
         modelBuilder.Entity<Staff>(entity =>
         {
-            entity.HasKey(e => e.Cccd).HasName("PK__staff__A955A0ABD31B02DA");
+            entity.HasKey(e => e.Cccd).HasName("PK__staff__A955A0AB85D5E9B6");
 
             entity.Property(e => e.Cccd).IsFixedLength();
             entity.Property(e => e.CuaHangId).IsFixedLength();
@@ -155,14 +155,14 @@ public partial class MyDbContext : DbContext
 
         modelBuilder.Entity<Sysrole>(entity =>
         {
-            entity.HasKey(e => e.RoleId).HasName("PK__sysrole__8AFACE1A8778DA13");
+            entity.HasKey(e => e.RoleId).HasName("PK__sysrole__8AFACE1A7A23DC14");
 
             entity.Property(e => e.RoleId).IsFixedLength();
         });
 
         modelBuilder.Entity<Sysuser>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__sysuser__1788CC4CBB74F0AA");
+            entity.HasKey(e => e.UserId).HasName("PK__sysuser__1788CC4CD81D33A1");
 
             entity.Property(e => e.UserId).IsFixedLength();
             entity.Property(e => e.CuaHangId).IsFixedLength();
