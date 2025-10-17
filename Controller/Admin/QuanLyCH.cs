@@ -41,7 +41,7 @@ namespace QuanLySinhVien.Controller.Admin
             }
             return Ok(respone);
         }
-        [HttpGet("/{StoreId}")]
+        [HttpGet("{StoreId}")]
         public async Task<IActionResult> GetCHDetail([FromRoute] string StoreId)
         {
             if (string.IsNullOrEmpty(StoreId))
@@ -90,7 +90,7 @@ namespace QuanLySinhVien.Controller.Admin
             }
         }
 
-        [HttpPut("/{storeId}")]
+        [HttpPut("{storeId}")]
         public async Task<IActionResult> DeteleStore([FromRoute] string storeId)
         {
             if (String.IsNullOrEmpty(storeId))

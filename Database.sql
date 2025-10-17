@@ -1,6 +1,6 @@
 ﻿--Tạo CSDL 
-use master;
-Drop Database if exists ql_cua_hang;
+	use master;
+	Drop Database if exists ql_cua_hang;
 create Database ql_cua_hang;
 go
 
@@ -19,7 +19,8 @@ go
 
 drop table if exists staff;
 create table staff(
-	CCCD char(11) primary key,
+	StaffId char(11) primary key,
+	CCCD char(11) not null unique,
 	Ten nvarchar(50) not null,
 	DiaChi nvarchar(50) not null,
 	NgaySinh date,
@@ -203,7 +204,7 @@ INSERT INTO sanpham (MaSP, TenSP, DonGia, Anh, status, Mota, maDM) VALUES
 ('SP_SPK03_01', N'Bộ Dụng Cụ V60', 450000, 'v60_kit.jpg', N'Còn hàng', N'Bộ pha cà phê pour-over V60 cho người mới bắt đầu.', 'DM_SPK03'),
 ('SP_SPK03_02', N'Bình French Press', 350000, 'french_press.jpg', N'Còn hàng', N'Dụng cụ pha cà phê kiểu Pháp, dung tích 600ml.', 'DM_SPK03'),
 ('SP_SPK03_03', N'Ấm Cổ Ngỗng', 550000, 'gooseneck_kettle.jpg', N'Tạm hết hàng', N'Ấm chuyên dụng để pha cà phê thủ công, kiểm soát dòng nước.', 'DM_SPK03');
-select * from sanpham;
+
 
 insert into sysrole (RoleId, RoleName) values 
 ('R01', N'admin'),
@@ -216,3 +217,6 @@ INSERT INTO cuahang (CuaHangId, TenCH, DiaChi, SDT, statuss, Email) VALUES
 ('CH003', N'Cửa hàng Thảo Điền', N'789 Võ Nguyên Giáp, Quận 2, TPHCM', '0987555666', N'Đang hoạt động', 'thaodien.q2@email.com'),
 ('CH004', N'Cửa hàng Quận 7', N'101 Tôn Dật Tiên, Quận 7, TPHCM', '0933777888', N'Tạm ngưng sửa chữa', 'quan7.tdt@email.com'),
 ('CH005', N'Cửa hàng Gò Vấp', N'222 Quang Trung, Quận Gò Vấp, TPHCM', '0945999000', N'Sắp khai trương', 'govap.qt@email.com');
+delete from sysuser
+select * from sysrole
+select * from cuahang

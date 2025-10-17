@@ -278,5 +278,31 @@ namespace QuanLySinhVien.Service.SQL
                 return 500;
             }
         }
+
+        public async Task<Staff?> createStaff(Staff newStaff, string imgPath)
+        {
+            var Transaction = await context.Database.BeginTransactionAsync();
+            try
+            {
+                Staff moi = new Staff();
+                moi.Avatar = imgPath;
+                moi.Ten = newStaff.Ten;
+                moi.Vtri = newStaff.Vtri;
+                moi.CuaHangId = newStaff.CuaHangId;
+                moi.StatuSs = "Đang làm";
+                moi.StaffId = GenerateId(10, "ST");
+                moi.DiaChi = newStaff.DiaChi;
+                moi.Luong = newStaff.Luong;
+                moi.Cccd = newStaff.Cccd;
+                moi.NgaySinh = newStaff.NgaySinh;
+                await context.Staff.AddAsync(moi);
+                await Transaction.CommitAsync();
+                return moi;
+            } catch (System.Exception)
+            {
+                Transaction.Rollback();
+                return null;
+            }
+        }
     }
 }

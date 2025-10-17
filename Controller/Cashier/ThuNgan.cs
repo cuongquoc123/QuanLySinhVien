@@ -9,7 +9,7 @@ using QuanLySinhVien.Service.SQL;
 namespace QuanLySinhVien.Controller.Cashier
 {
     [ApiController]
-    // [Route("Cashier")]
+    [Route("Cashier")]
     public class ThuNgan : ControllerBase
     {
         private readonly IHtmService htmService;
@@ -24,7 +24,7 @@ namespace QuanLySinhVien.Controller.Cashier
             this.htmService = htmService;
         }
 
-        [HttpPost("/admin/TaoDon")]
+        [HttpPost("TaoDon")]
         public async Task<IActionResult> taoDonHang([FromBody] HoaDonRequest request)
         {
             if (request == null)

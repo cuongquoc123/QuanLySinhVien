@@ -1,10 +1,11 @@
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using QuanLySinhVien.DTOS.Respone;
 using QuanLySinhVien.Models;
+using Microsoft.EntityFrameworkCore;
 using QuanLySinhVien.Service.SQL;
+using QuanLySinhVien.DTOS.Request;
 
 namespace QuanLySinhVien.Controller.Manager
 {
@@ -14,16 +15,18 @@ namespace QuanLySinhVien.Controller.Manager
     {
         private readonly MyDbContext context;
         private readonly ISqLServices sqLServices;
-        public QuanLyStaff(MyDbContext context, ISqLServices sqLServices)
+        private readonly IWebHostEnvironment webHostEnvironment;
+        public QuanLyStaff(MyDbContext context, ISqLServices sqLServices, IWebHostEnvironment webHostEnvironment)
         {
             this.context = context;
             this.sqLServices = sqLServices;
+            this.webHostEnvironment = webHostEnvironment;
         }
 
 
 
-        [HttpGet("/{pageNum}/{pageSize}")]
-        public async Task<IActionResult> GetStaff([FromRoute] int pageNum, [FromRoute] int pageSize)
+        [HttpGet("{pageNum}/{pageSize}")]
+        public async Task<IActionResult> GetStaffm([FromRoute] int pageNum, [FromRoute] int pageSize)
         {
 
             if (pageNum < 1)
@@ -71,8 +74,8 @@ namespace QuanLySinhVien.Controller.Manager
 
             return Ok(respone);
         }
-        [HttpGet("/{StaffId}")]
-        public async Task<IActionResult> StaffDetail([FromRoute] string StaffId)
+        [HttpGet("{StaffId}")]
+        public async Task<IActionResult> StaffDetailm([FromRoute] string StaffId)
         {
             if (string.IsNullOrEmpty(StaffId))
             {
@@ -100,10 +103,65 @@ namespace QuanLySinhVien.Controller.Manager
             return Ok(respone);
         }
 
-        // [HttpPost]
-        // public async Task<IActionResult> CreateStaff ([FromBody])
-        // {
+        [HttpPost]
+        public async Task<IActionResult> CreateStaffm ([FromBody] CreateStaffRequest staff, IFormFile file)
+        {
+            if (string.IsNullOrEmpty(staff.Cccd) || string.IsNullOrEmpty(staff.CuaHangId) ||
+                string.IsNullOrEmpty(staff.Ten) || string.IsNullOrEmpty(staff.DiaChi) ||
+                string.IsNullOrEmpty(staff.Vtri))
+            {
+                throw new ArgumentNullException("Missing Staff request body");
+            }
             
-        // }
+            if(string.IsNullOrEmpty(staff.NgaySinh) || !DateOnly.TryParse(staff.NgaySinh,out  var ngaySinh))
+            {
+                throw new ArgumentException("Param NgaySInh Incorrect format or Null");
+            }
+            if (staff.Luong <= 0)
+            {
+                throw new ArgumentException("Param Luong must higher 0");
+            }
+            try
+            {
+                string WWWroot = webHostEnvironment.WebRootPath;
+                if (string.IsNullOrEmpty(WWWroot))
+                {
+                    throw new Exception("Can't take web root path");
+                }
+                string imgPath = Path.Combine(WWWroot, "img");
+                if (!Directory.Exists(imgPath))
+                {
+                    Directory.CreateDirectory(imgPath);
+                }
+                string uniqueName = Guid.NewGuid().ToString() + "_" + file.FileName;
+                string FilePath = Path.Combine(imgPath, uniqueName);
+                using (var fileStream = new FileStream(FilePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(fileStream);
+                }
+                Staff newstaff = new Staff()
+                {
+                    Ten = staff.Ten,
+                    Cccd = staff.Cccd,
+                    Vtri = staff.Vtri,
+                    Luong = staff.Luong,
+                    NgaySinh = ngaySinh,
+                    DiaChi = staff.DiaChi,
+                    CuaHangId = staff.CuaHangId
+                };
+                var respone = await sqLServices.createStaff(newstaff, FilePath);
+                if (respone == null)
+                {
+                    throw new Exception("Can't create Staff in Database");
+                }
+                return Ok(respone); 
+            }
+            catch (System.Exception)
+            {
+                throw;
+            }
+           
+            
+        }
     }
 }

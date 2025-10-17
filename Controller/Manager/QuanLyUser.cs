@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Http.HttpResults;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLySinhVien.DTOS.Request;
@@ -7,35 +7,45 @@ using QuanLySinhVien.MidWare.Filter;
 using QuanLySinhVien.Models;
 using QuanLySinhVien.Service.SQL;
 
-namespace QuanLySinhVien.Controller.Admin
+namespace QuanLySinhVien.Controller.Manager
 {
     [ApiController]
-    [Route("/admin/User")]
-    public class AdminController : ControllerBase
+    [Route("/manager/user")]
+    public class QuanlyUser: ControllerBase
     {
         private readonly MyDbContext context;
         private readonly ISqLServices sqLServices;
 
-        public AdminController(MyDbContext context, ISqLServices sqLServices)
+        public QuanlyUser(MyDbContext context, ISqLServices sqLServices)
         {
             this.context = context;
             this.sqLServices = sqLServices;
         }
 
         [HttpPost("")]
-        public async Task<IActionResult> CreateUser([FromBody]CreateUserRequest req)
+        public async Task<IActionResult> CreateUserm([FromBody]CreateUserRequest req)
         {
             if (string.IsNullOrEmpty(req.UserName) || string.IsNullOrEmpty(req.Password)
-             ||string.IsNullOrEmpty(req.RoleId)  || string.IsNullOrEmpty(req.StoreId) )
+             || string.IsNullOrEmpty(req.RoleId))
             {
                 throw new ArgumentException("Missing Param UserName, Password or RoleId");
+            }
+            var USID = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (USID == null)
+            {
+                throw new KeyNotFoundException("Not Found User In Token");
+            }
+            var Manager = await context.Sysusers.FindAsync(USID);
+            if (Manager == null)
+            {
+                throw new UnauthorizedAccessException("Token Not Valid");
             }
             Sysuser user = new Sysuser()
             {
                 UserName = req.UserName,
                 Passwords = req.Password,
                 RoleId = req.RoleId,
-                CuaHangId = req.StoreId,
+                CuaHangId = Manager.CuaHangId,
             };
             try
             {
@@ -54,11 +64,24 @@ namespace QuanLySinhVien.Controller.Admin
         }
 
         [HttpPut("")]
-        public async Task<IActionResult> UpdateUser([FromBody]Sysuser req)
+        public async Task<IActionResult> UpdateUserm([FromBody]Sysuser req)
         {
+            var USID = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (USID == null)
+            {
+                throw new KeyNotFoundException("Not Found User In Token");
+            }
+            var Manager = await context.Sysusers.FindAsync(USID);
+            if (Manager == null)
+            {
+                throw new UnauthorizedAccessException("Token Not Valid");
+            }
+            if (req.CuaHangId != Manager.CuaHangId)
+            {
+                throw new CustomError(403, "Not Permission", "Can't modify User");
+            }
             if (ModelState.IsValid)
             {
-
                 var user = await sqLServices.UpdateUser(req);
                 return Ok(user);
             }
@@ -66,8 +89,27 @@ namespace QuanLySinhVien.Controller.Admin
         }
 
         [HttpPut("DUser/{req}")]
-        public async Task<IActionResult> DeleteUser([FromRoute] string req)
+        public async Task<IActionResult> DeleteUserm([FromRoute] string req)
         {
+            var USID = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (USID == null)
+            {
+                throw new KeyNotFoundException("Not Found User In Token");
+            }
+            var Manager = await context.Sysusers.FindAsync(USID);
+            if (Manager == null)
+            {
+                throw new UnauthorizedAccessException("Token Not Valid");
+            }
+            var user = await context.Sysusers.FindAsync(req);
+            if (user == null)
+            {
+                throw new KeyNotFoundException("User not exists in Database => can't delete");
+            }
+            if (user.CuaHangId != Manager.CuaHangId)
+            {
+                throw new CustomError(403, "Not Permission", "Can't modify User");
+            }
             if (await sqLServices.SoftDeleteUser(req) == 200)
             {
                 return Ok(new
@@ -78,7 +120,7 @@ namespace QuanLySinhVien.Controller.Admin
             throw new Exception("Server is broken");
         }
         [HttpGet("{PageNum}/{pageSize}")]
-        public async Task<IActionResult> GetUser([FromRoute] int PageNum, [FromRoute] int pageSize)
+        public async Task<IActionResult> GetUserm([FromRoute] int PageNum, [FromRoute] int pageSize)
         {
             if (PageNum < 1)
             {
@@ -88,7 +130,17 @@ namespace QuanLySinhVien.Controller.Admin
             {
                 throw new ArgumentOutOfRangeException("Page size is between 1 and 100");
             }
-            var lsUser = await context.Sysusers
+            var USID = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (USID == null)
+            {
+                throw new KeyNotFoundException("Not Found User In Token");
+            }
+            var Manager = await context.Sysusers.FindAsync(USID);
+            if (Manager == null)
+            {
+                throw new UnauthorizedAccessException("Token Not Valid");
+            }
+            var lsUser = await context.Sysusers.Where(u => u.CuaHangId == Manager.CuaHangId)
                                     .Skip((PageNum - 1) * pageSize)
                                     .Take(pageSize).ToListAsync();
             PageRespone<Sysuser> respone = new PageRespone<Sysuser>();
@@ -102,7 +154,8 @@ namespace QuanLySinhVien.Controller.Admin
                 respone.Items.Append(item);
             }
 
-            int total = await context.Sysusers.CountAsync();
+            int total = await context.Sysusers
+                            .Where(u => u.CuaHangId == Manager.CuaHangId).CountAsync();
             respone.TotalCount = total;
             respone.TotalPages = (int)Math.Ceiling(total / (double)pageSize);
             respone.PageIndex = PageNum;

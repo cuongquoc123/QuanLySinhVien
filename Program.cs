@@ -8,6 +8,7 @@ using QuanLySinhVien.MidWare.Filter;
 using QuanLySinhVien.MidWare.JWT;
 using QuanLySinhVien.Models;
 using QuanLySinhVien.Service.CheckFace;
+using QuanLySinhVien.Service.GGService;
 using QuanLySinhVien.Service.HashPassword;
 using QuanLySinhVien.Service.HTMLRaw;
 
@@ -120,6 +121,8 @@ builder.Services.AddScoped<ISqLServices,SqLService>();
 builder.Services.AddScoped<IcheckFace, CheckFace>();
 
 builder.Services.AddScoped<IHtmService, HTMLService>();
+
+builder.Services.AddScoped<ISheetService,SheetService>();
 
 var app = builder.Build();
 

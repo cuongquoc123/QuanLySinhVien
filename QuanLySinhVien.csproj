@@ -10,6 +10,7 @@
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="DotNetEnv" Version="3.1.1" />
     <PackageReference Include="GeneticSharp" Version="3.1.4" />
+    <PackageReference Include="Google.Apis.Sheets.v4" Version="1.70.0.3819" />
 
     <!-- Downgrade ASP.NET Core packages từ 9.x -> 8.x -->
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />

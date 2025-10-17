@@ -10,6 +10,10 @@ namespace QuanLySinhVien.Models;
 public partial class Staff
 {
     [Key]
+    [StringLength(11)]
+    [Unicode(false)]
+    public string StaffId { get; set; } = null!;
+
     [Column("CCCD")]
     [StringLength(11)]
     [Unicode(false)]

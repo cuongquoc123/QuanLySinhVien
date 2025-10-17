@@ -10,12 +10,14 @@ namespace QuanLySinhVien.Controller.Public
     [Route("/public")]
     public class PublicController : ControllerBase
     {
+       
         private readonly MyDbContext myDbContext;
         private readonly ISqLServices sqLServices;
         public PublicController(MyDbContext myDbContext, ISqLServices sqLServices)
         {
             this.myDbContext = myDbContext;
             this.sqLServices = sqLServices;
+
         }
 
         [HttpGet("Product")]
@@ -94,7 +96,7 @@ namespace QuanLySinhVien.Controller.Public
 
             return Ok(res);
         }
-        [HttpGet("/Product/{masp}")]
+        [HttpGet("Product/{masp}")]
         public async Task<IActionResult> GetChiTietProduct([FromRoute] string masp)
         {
             var respone = await myDbContext.Sanphams.FindAsync(masp);
@@ -105,7 +107,7 @@ namespace QuanLySinhVien.Controller.Public
             return Ok(respone);
         }
 
-        [HttpGet("/DanhMuc")]
+        [HttpGet("DanhMuc")]
         public async Task<IActionResult> getALlCate()
         {
             try
@@ -125,7 +127,7 @@ namespace QuanLySinhVien.Controller.Public
             }
             
         }
-        
+       
     }
     
 

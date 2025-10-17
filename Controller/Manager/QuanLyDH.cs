@@ -5,10 +5,10 @@ using Microsoft.EntityFrameworkCore;
 using QuanLySinhVien.DTOS.Respone;
 using QuanLySinhVien.Models;
 
-namespace QuanLySinhVien.Controller.Admin
+namespace QuanLySinhVien.Controller.Manager
 {
     [ApiController]
-    [Route("/admin/DH")]
+    [Route("/manager/DH")]
     public class QuanLyDH : ControllerBase
     {
         private readonly MyDbContext context;
@@ -17,7 +17,7 @@ namespace QuanLySinhVien.Controller.Admin
             this.context = context;
         }
         [HttpGet("TheoNgay/{datestart}/{dateend}/{pageNum}/{pageSize}")]
-        public async Task<IActionResult> dh_theo_ngay([FromRoute] string datestart, [FromRoute] string dateend, [FromRoute] int pageNum, [FromRoute] int pageSize)
+        public async Task<IActionResult> dh_theo_ngaym([FromRoute] string datestart, [FromRoute] string dateend, [FromRoute] int pageNum, [FromRoute] int pageSize)
         {
             if (string.IsNullOrEmpty(datestart) || string.IsNullOrEmpty(dateend))
             {
@@ -78,7 +78,7 @@ namespace QuanLySinhVien.Controller.Admin
 
 
         [HttpGet("Chitiet/{MaDon}")]
-        public async Task<IActionResult> GetChitietDH([FromRoute] string MaDon)
+        public async Task<IActionResult> GetChitietDHm([FromRoute] string MaDon)
         {
             
             var DonHang = await context.Donhangs.FindAsync(MaDon);

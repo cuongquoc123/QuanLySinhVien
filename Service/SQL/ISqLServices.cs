@@ -15,6 +15,7 @@ namespace QuanLySinhVien.Service.SQL
         Task<int> SoftDeleteProduct(string productId);
         Task<Cuahang?> CreateStore(Cuahang NewStore);
         Task<int> SoftDeleteStore(string StoreId);
+        Task<Staff?> createStaff(Staff newStaff, string imgPath);
     }
 
 }
