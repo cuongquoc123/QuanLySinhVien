@@ -103,7 +103,7 @@ namespace QuanLySinhVien.Service.SQL
                 moi.NgayNhan = DateOnly.FromDateTime(DateTime.Now);
                 moi.TrangThai = "Tiep Nhan";
                 moi.ThanhTien = ThanhTien;
-                context.Donhangs.Add(moi);
+                await context.Donhangs.AddAsync(moi);
                 foreach (var sp in dssp)
                 {
                     if (string.IsNullOrEmpty(sp.Masp))
@@ -115,7 +115,7 @@ namespace QuanLySinhVien.Service.SQL
                     mois.MaSp = sp.Masp;
                     mois.SoLuong = sp.SoLuong;
                     
-                    context.ChiTietDonHangs.Add(mois);
+                    await context.ChiTietDonHangs.AddAsync(mois);
                 }
                 
                 await context.SaveChangesAsync();
@@ -169,7 +169,7 @@ namespace QuanLySinhVien.Service.SQL
                 moi.DonGia = spMoi.DonGia;
                 moi.MaDm = spMoi.MaDm;
                 moi.Mota = spMoi.Mota;
-                context.Sanphams.Add(moi);
+                await context.Sanphams.AddAsync(moi);
                 await context.SaveChangesAsync();
                 await transaction.CommitAsync();
                 return moi;
@@ -221,7 +221,7 @@ namespace QuanLySinhVien.Service.SQL
                 USer.RoleId = newUser.RoleId;
                 USer.CuaHangId = newUser.CuaHangId;
                 USer.Status = "New User";
-                context.Sysusers.Add(USer);
+                await context.Sysusers.AddAsync(USer);
                 await context.SaveChangesAsync();
                 await Transaction.CommitAsync();
                 return USer;
@@ -230,6 +230,52 @@ namespace QuanLySinhVien.Service.SQL
             {
                 await Transaction.RollbackAsync();
                 throw;
+            }
+        }
+
+        public async Task<Cuahang?> CreateStore(Cuahang NewStore)
+        {
+            var Transaction = await context.Database.BeginTransactionAsync();
+           try
+           {
+                Cuahang moi = new Cuahang();
+                moi.CuaHangId = GenerateId(10, "CH");
+                moi.TenCh = NewStore.TenCh;
+                moi.Statuss = "Đang Hoạt động";
+                moi.DiaChi = NewStore.DiaChi;
+                moi.Sdt = NewStore.Sdt;
+                await context.Cuahangs.AddAsync(moi);
+                await context.SaveChangesAsync();
+                await Transaction.CommitAsync();
+                return moi;
+           }
+           catch (System.Exception)
+           {
+            await Transaction.RollbackAsync();
+            return null;
+           }
+        }
+
+        public async Task<int> SoftDeleteStore(string StoreId)
+        {
+            var Transaction = await context.Database.BeginTransactionAsync();
+            try
+            {
+                Cuahang? DeleteSore = await context.Cuahangs.FindAsync(StoreId);
+                if (DeleteSore == null)
+                {
+                    return 404;
+                }
+                DeleteSore.Statuss = "Ngưng hoạt động";
+                context.Entry(DeleteSore).State = EntityState.Modified;
+                await context.SaveChangesAsync();
+                await Transaction.CommitAsync();
+                return 200;
+            }
+            catch (System.Exception)
+            {
+                await Transaction.RollbackAsync();
+                return 500;
             }
         }
     }

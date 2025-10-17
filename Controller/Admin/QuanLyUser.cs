@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using QuanLySinhVien.DTOS.Request;
+using QuanLySinhVien.DTOS.Respone;
 using QuanLySinhVien.MidWare.Filter;
 using QuanLySinhVien.Models;
 using QuanLySinhVien.Service.SQL;
@@ -64,7 +66,7 @@ namespace QuanLySinhVien.Controller.Admin
         }
 
         [HttpPut("DUser/{req}")]
-        public async Task<IActionResult> DeleteUser([FromRoute]string req)
+        public async Task<IActionResult> DeleteUser([FromRoute] string req)
         {
             if (await sqLServices.SoftDeleteUser(req) == 200)
             {
@@ -75,7 +77,53 @@ namespace QuanLySinhVien.Controller.Admin
             }
             throw new Exception("Server is broken");
         }
-        
-        
+        [HttpGet("/{PageNum}/{pageSize}")]
+        public async Task<IActionResult> GetUser([FromRoute] int PageNum, [FromRoute] int pageSize)
+        {
+            if (PageNum < 1)
+            {
+                throw new ArgumentOutOfRangeException("Pagenum must higher than 1");
+            }
+            if (pageSize < 1 || pageSize > 100)
+            {
+                throw new ArgumentOutOfRangeException("Page size is between 1 and 100");
+            }
+            var lsUser = await context.Sysusers
+                                    .Skip((PageNum - 1) * pageSize)
+                                    .Take(pageSize).ToListAsync();
+            PageRespone<Sysuser> respone = new PageRespone<Sysuser>();
+            foreach (var U in lsUser)
+            {
+                Item<Sysuser> item = new Item<Sysuser>()
+                {
+                    Value = U,
+                    PathChiTiet = $"admin/User/{U.UserId}"
+                };
+                respone.Items.Append(item);
+            }
+
+            int total = await context.Sysusers.CountAsync();
+            respone.TotalCount = total;
+            respone.TotalPages = (int)Math.Ceiling(total / (double)pageSize);
+            respone.PageIndex = PageNum;
+            respone.PageSize = pageSize;
+
+            return Ok(respone);
+        }
+
+        [HttpGet("/{id}")]
+        public async Task<IActionResult> GetUser([FromRoute] string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                throw new ArgumentNullException("Missing Param id");
+            }
+            Sysuser? respone = await context.Sysusers.FindAsync(id);
+            if (respone == null)
+            {
+                throw new KeyNotFoundException("User not Exists");
+            }
+            return Ok(respone);
+        }
     }
 }

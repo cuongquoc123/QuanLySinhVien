@@ -59,7 +59,7 @@ namespace QuanLySinhVien.Controller.Public
         [HttpGet("ProductByCate/{pageNum}/{pageSize}/{CateId}")]
         public async Task<IActionResult> GetProduct([FromRoute] int pageNum, [FromRoute] int pageSize, [FromRoute] string CateId)
         {
-            var res = new PageRespone<Sanpham>();
+            
             if (pageNum < 1)
             {
                 throw new ArgumentOutOfRangeException("PageNum param is Out Of Range");
@@ -71,7 +71,11 @@ namespace QuanLySinhVien.Controller.Public
             var items = await myDbContext.Sanphams.Where(p => p.MaDm == CateId).OrderBy(x => x.TenSp)
                                 .Skip((pageNum - 1) * pageSize)
                                 .Take(pageSize).ToListAsync();
-
+            if (items.Count == 0 || !items.Any() || items == null)
+            {
+                throw new KeyNotFoundException("Can't find any Product");
+            }
+            var res = new PageRespone<Sanpham>();
             foreach (var item in items)
             {
                 Item<Sanpham> itemNew = new Item<Sanpham>()
@@ -94,6 +98,10 @@ namespace QuanLySinhVien.Controller.Public
         public async Task<IActionResult> GetChiTietProduct([FromRoute] string masp)
         {
             var respone = await myDbContext.Sanphams.FindAsync(masp);
+            if (respone == null)
+            {
+                throw new KeyNotFoundException("Product not exists");
+            }
             return Ok(respone);
         }
 
