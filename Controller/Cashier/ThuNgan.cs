@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLySinhVien.DTOS.Request;
@@ -9,7 +10,7 @@ using QuanLySinhVien.Service.SQL;
 namespace QuanLySinhVien.Controller.Cashier
 {
     [ApiController]
-    [Route("Cashier")]
+    [Route("api/order")]
     public class ThuNgan : ControllerBase
     {
         private readonly IHtmService htmService;
@@ -24,7 +25,8 @@ namespace QuanLySinhVien.Controller.Cashier
             this.htmService = htmService;
         }
 
-        [HttpPost("TaoDon")]
+        [HttpPost("")]
+        [Authorize(Roles = "admin,manager,cashier")]
         public async Task<IActionResult> taoDonHang([FromBody] HoaDonRequest request)
         {
             if (request == null)
