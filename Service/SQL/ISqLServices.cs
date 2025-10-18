@@ -11,6 +11,7 @@ namespace QuanLySinhVien.Service.SQL
         Task<int> deleteUser(string Id);
         Task<int> SoftDeleteUser(string Id);
         Task<Donhang?> taoDon(string CuaHangId, string MaNV, List<Product> dssp, decimal ThanhTien);
+        Task<Donhang?> updateDonStatus(string madon, string status);
         Task<Sanpham?> CreateProDucts(Sanpham spMoi, string imgPath);
         Task<int> SoftDeleteProduct(string productId);
         Task<Cuahang?> CreateStore(Cuahang NewStore);

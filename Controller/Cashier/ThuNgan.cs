@@ -11,6 +11,7 @@ namespace QuanLySinhVien.Controller.Cashier
 {
     [ApiController]
     [Route("api/order")]
+    [Authorize(Roles = "manager,cashier")]
     public class ThuNgan : ControllerBase
     {
         private readonly IHtmService htmService;
@@ -26,14 +27,14 @@ namespace QuanLySinhVien.Controller.Cashier
         }
 
         [HttpPost("")]
-        [Authorize(Roles = "admin,manager,cashier")]
+
         public async Task<IActionResult> taoDonHang([FromBody] HoaDonRequest request)
         {
             if (request == null)
             {
                 return BadRequest("Request body is empty."); // Trả về lỗi 400 Bad Request
             }
-            
+
             try
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -54,13 +55,13 @@ namespace QuanLySinhVien.Controller.Cashier
                     MaNV: userId,
                     dssp: request.dssp
                 );
-                
+
                 if (donhang == null)
                 {
-                    
+
                     // Trả về lỗi 500 Internal Server Error, vì đây là lỗi logic phía server
                     throw new Exception("Failed to create order in database.");
-                    
+
                 }
 
                 var res = htmService.HoaDonHTMl(donhang.MaDon);
@@ -72,6 +73,28 @@ namespace QuanLySinhVien.Controller.Cashier
                 return Content(res, "text/html; charset=utf-8");
             }
             catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [HttpPut("{Madon}/{Status}")]
+        public async Task<IActionResult> UpdateDonStatus([FromRoute] string Madon, [FromRoute] string Status)
+        {
+            if (string.IsNullOrEmpty(Madon) || string.IsNullOrEmpty(Status))
+            {
+                throw new ArgumentException("Missing Parram Madon or Status");
+            }
+            try
+            {
+                var respone = await sqLServices.updateDonStatus(Madon, Status);
+                if (respone == null)
+                {
+                    throw new Exception("Can't update status in database");
+                }
+                return Ok(respone);
+            }
+            catch (System.Exception)
             {
                 throw;
             }

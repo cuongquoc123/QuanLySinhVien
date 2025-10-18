@@ -46,6 +46,8 @@ namespace QuanLySinhVien.Service.SQL
             this.passWordService = passWordService;
         }
 
+        
+
         public async Task<int> deleteUser(string Id)
         {
             await using var Transaction = await context.Database.BeginTransactionAsync();
@@ -101,7 +103,7 @@ namespace QuanLySinhVien.Service.SQL
                 moi.CuaHangId = CuaHangId;
                 moi.UserId = MaNV;
                 moi.NgayNhan = DateOnly.FromDateTime(DateTime.Now);
-                moi.TrangThai = "Tiep Nhan";
+                moi.TrangThai = "Chua Xu Ly";
                 moi.ThanhTien = ThanhTien;
                 await context.Donhangs.AddAsync(moi);
                 foreach (var sp in dssp)
@@ -301,6 +303,29 @@ namespace QuanLySinhVien.Service.SQL
             } catch (System.Exception)
             {
                 Transaction.Rollback();
+                return null;
+            }
+        }
+
+        public async Task<Donhang?> updateDonStatus(string madon, string status)
+        {
+            var transaction = await context.Database.BeginTransactionAsync();
+            try
+            {
+                Donhang? UpdateDon = await context.Donhangs.FindAsync(madon);
+                if (UpdateDon == null)
+                {
+                    throw new KeyNotFoundException("Don Hang not exists");
+                }
+                UpdateDon.TrangThai = status;
+                context.Entry(UpdateDon).State = EntityState.Modified;
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return UpdateDon;
+            }
+            catch (System.Exception)
+            {
+                await transaction.RollbackAsync();
                 return null;
             }
         }
