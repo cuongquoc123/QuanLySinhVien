@@ -145,8 +145,9 @@ go
 drop table if exists Customer;
 create table Customer(
 	CustomerId char(10) primary key,
-	UserName nvarchar(100) unique not null,
+	UserName nvarchar(50) unique not null,
 	Passwords nvarchar(100) not null,
+	statusC NVARCHAR(50)
 );
 go
 drop table if exists CustomerDetail;
@@ -154,7 +155,8 @@ create table CustomerDetail(
 	CustomerId char(10) primary key,
 	TenKhach nvarchar(50),
 	CCCD char(11),
-	SDT char(10),
+	SDT char(10) unique,
+	Email NVARCHAR(50) UNIQUE,
 	Avatar nvarchar(500) default (N'https://bla.edu.vn/wp-content/uploads/2025/09/avatar-fb.jpg'),
 	DiaChi nvarchar(100),
 	constraint FK_Detail_Customer foreign key (CustomerId) references Customer(CustomerId)
@@ -185,6 +187,10 @@ create table chi_tiet_don_hang (
 go
 
 set dateformat dmy;
+INSERT into sysrole (RoleId,RoleName) VALUES
+('R01','admin'),
+('R02','manager'),
+('R03','cashier');
 insert into cuahang (CuaHangId,TenCH,DiaChi,statusS,SDT) values 
 ('CH01',N'Cửa hàng mặc định','Cửa hàng online','Đang hoạt động','0123125451');
 
@@ -201,7 +207,7 @@ go
 
 --Tạo Trigger 
 --Trigger khi create bảng chi tiết yêu cầu sẽ cập nhật số lượng tồn kho của cửa hàng tương ứng
-create trigger UpdateSoLuongTonKho on chi_tiet_yeu_cau
+create trigger UpdateSoLuongTonKho on chi_tiet_phieu_nhap
 after Insert 
 as
 begin
@@ -305,24 +311,6 @@ begin
 end;
 go
 --Proc của hệ thống
---Proc báo cáo doanh thu của cửa hàng từ Date From đến Date To
---Chuyển cái này function sau khi làm xong proc 
-create proc DoanhThuCuaHang @From date, @To date, @MaCH char(10), @DoanhThu money output
-as
-begin 
-	set nocount on;
-	set @DoanhThu = (select iSnull(sum(chi_tiet_don_hang.SoLuong * sanpham.DonGia),0) as doanhthu
-					from donhang
-					join chi_tiet_don_hang on chi_tiet_don_hang.MaDon = donhang.MaDon
-					join sanpham on chi_tiet_don_hang.MaSP = sanpham.MaSP
-					join sysuser on donhang.UserId = sysuser.UserId
-					join staff on staff.StaffId = sysuser.UserId
-					join cuahang on cuahang.CuaHangId = staff.CuaHangId
-					where cuahang.CuaHangId = @MaCH and (cast(donhang.NgayHoangThanh as date) between @From and @To)
-					);
-end;
-go
-
 --	Proc tạo đơn hàng truyền vào CustomerId, StaffId và 
 -- 1 mã sản phẩm cùng số lượng nếu CustomerId là rỗng hoặc null thì set CustomerId là ‘CTM01’ nếu StaffId là rỗng hoặc null thì Set là ‘ST01’
 create type dbo.ChiTietType as table 
@@ -426,6 +414,7 @@ go
 create proc TaoMoiNguyenLieu @MaNguyenLieu char(10), @DVT nvarchar(20), @TenNL nvarchar(50)
 as
 begin
+	set NOCOUNT ON;
 	if nullif(@MaNguyenLieu,'') is null or nullif(@DVT,'') is null or nullif(@TenNL,'') is null
 	begin
 		print 'Phải đủ các trường yêu cầu'
@@ -448,4 +437,377 @@ begin
 		end catch
 end;
 go
---proc 
+--proc tạo tài khoản cho staff (điều kiện là staff đã tồn tại ở bảng staff)
+CREATE PROCEDURE TaoTaiKhoanStaff @StaffId CHAR(10), @UserName NVARCHAR(100), @PassWord NVARCHAR(100)
+AS
+BEGIN
+	set nocount ON;
+	IF not exists (select 1 from staff where StaffId = @StaffId)
+	BEGIN
+		PRINT N'Không thể tạo vì staff này không có thông tin trong hệ thống'
+		RETURN -1;
+	END
+	if exists (select 1 from sysuser where UserName = @UserName)
+	BEGIN
+		print N'Tên người dùng đã tồn tại'
+		RETURN -1;
+	END
+
+	INSERT into sysuser (UserId,UserName,Passwords) VALUES
+	(@StaffId,@UserName,@PassWord);
+
+	PRINT N'Tạo thành công'
+	RETURN 0;
+END;
+GO
+--Proc tạo 1 customer mới 
+CREATE PROC TaoCustomer @Email NVARCHAR(50),@Ten NVARCHAR(50), @Id char(10),@DiaChi NVARCHAR(100),@SDT char(11),@PassWord CHAR(100)
+AS
+BEGIN
+	set NOCOUNT ON;
+	IF exists (SELECT 1 from CustomerDetail where Email = @Email or SDT = @SDT)
+	BEGIN
+	 	PRINT N'Email hoặc SDT đã được sử dụng'
+		RETURN -1;
+	END
+
+	INSERT into Customer(CustomerId,UserName,Passwords) VALUES
+	(@Id,@Email,@PassWord);
+	INSERT into CustomerDetail(CustomerId,TenKhach,Email,DiaChi,SDT) VALUES
+	(@Id,@Ten,@Email,@DiaChi,@SDT);
+	PRINT N'Đã thêm thành công'
+	RETURN 0;
+END
+GO
+--proc cập nhật lại trạng thãi của đơn hàng (Các đơn có trạng thái Hoàn thành và đã hủy không được cập nhật)
+CREATE PROC CapNhatTrangThaiDon @MaDon char(10), @TrangThai NVARCHAR(50)
+AS
+BEGIN
+	set NOCOUNT ON;
+	DECLARE @OldStatus nvarchar(50);
+	set @OldStatus = (select TrangThai from donhang WHERE MaDon = @MaDon)
+	IF @OldStatus is null 
+	BEGIN
+		PRINT N'đơn hàng không tồn tại'
+		RETURN -1;
+	END
+
+	IF @OldStatus IN (N'Hoàn thành',N'Đã hủy')
+	BEGIN
+		PRINT N'Đơn hàng đã hoàn thành hoặc đã bị hủy không thể cập nhật'
+		RETURN -1;
+	END
+
+	UPDATE donhang SET TrangThai = @TrangThai WHERE MaDon = @MaDon
+END
+go
+
+--Function của database
+--Func trả về doanh thu của 1 cửa hàng trong khoảng thời gian 
+create FUNCTION DoanhThuCuaHang (@From date, @To date, @MaCH char(10))
+RETURNS money
+as
+begin 
+	set nocount on;
+	Declare @DoanhThu money = (select iSnull(sum(chi_tiet_don_hang.SoLuong * sanpham.DonGia),0) as doanhthu
+					from donhang
+					join chi_tiet_don_hang on chi_tiet_don_hang.MaDon = donhang.MaDon
+					join sanpham on chi_tiet_don_hang.MaSP = sanpham.MaSP
+					join sysuser on donhang.UserId = sysuser.UserId
+					join staff on staff.StaffId = sysuser.UserId
+					join cuahang on cuahang.CuaHangId = staff.CuaHangId
+					where cuahang.CuaHangId = @MaCH and (cast(donhang.NgayHoangThanh as date) between @From and @To)
+					);
+	RETURN @DoanhThu;
+end;
+go
+--Func tính thành tiền cho 1 đơn hàng với công thức thành tiền bằng sum (Số lượng * đơn giá ) * 1.1
+CREATE FUNCTION ThanhTienDonHang (@MaDon char(10))
+RETURNS money
+AS
+BEGIN
+	SET NOCOUNT ON;
+	IF not exists (select 1 from donhang WHERE MaDon = @MaDon)
+	BEGIN
+		RETURN 0; 
+	END
+
+	DECLARE @ThanhTien money = (Select ISNULL(SUM(sanpham.DonGia * chi_tiet_don_hang.SoLuong),0) * 1,1 as ThanhTien
+								from chi_tiet_don_hang
+								join sanpham on chi_tiet_don_hang.MaSP = sanpham.MaSP
+								WHERE chi_tiet_don_hang.MaDon = @MaDon)
+
+	RETURN @ThanhTien;
+END
+GO
+
+--Func lấy tất cả sản phẩm theo danh muc 
+CREATE FUNCTION SanPhamTheoDm (@MaDM char(10))
+RETURNS TABLE
+AS
+	RETURN  
+	(
+		SELECT * 
+		FROM sanpham 
+		WHERE sanpham.maDM = @MaDM 
+		ORDER by sanpham.TenSP desc
+	);
+GO
+
+--Func trả về thời gian xử lý của 1 đơn hàng nếu đơn hàng chưa hoàn thành hoặc bị hủy sẽ trả về 0
+CREATE FUNCTION ThoiGianXuLyDon (@maDon char(10))
+RETURNS INT
+AS
+BEGIN
+	SET NOCOUNT ON;
+	DECLARE @TGXuLy int;
+	select @TGXuLy = case 
+						when dh.TrangThai = N'Hoàn thành' and dh.NgayHoangThanh is not null
+						then DATEDIFF(MINUTE, dh.NgayNhan,dh.NgayHoangThanh)
+						else 0
+					end
+					from donhang dh 
+					WHERE dh.MaDon = @maDon
+	RETURN @TGXuLy;
+END
+go
+
+--Func nhận vào ngày và cửa hàng id trả về tổng số đơn trong ngày hôm đó 
+CREATE FUNCTION TongDonTheoNgayCuaCH (@date date, @MaCH CHAR(10),@TrangThai NVARCHAR(50))
+RETURNS INT
+as
+BEGIN
+	SET NOCOUNT ON;
+	if not exists (SELECT 1 from cuahang WHERE CuaHangId = @MaCH)
+	BEGIN
+		RETURN 0;
+	END
+	DECLARE @TongSoDon int;
+	SELECT @TongSoDon = COUNT(donhang.MaDon)
+						from donhang
+						JOIN sysuser on donhang.UserId = sysuser.UserId
+						JOIN staff on sysuser.UserId = staff.StaffId
+						JOIN cuahang on staff.CuaHangId = cuahang.CuaHangId
+						WHERE cuahang.CuaHangId = @MaCH  and donhang.TrangThai = @TrangThai
+						GROUP BY donhang.MaDon
+	RETURN @TongSoDon;
+END
+go
+
+--Kiểm tra tính hợp lệ của 1 Email 
+CREATE FUNCTION KiemTraHopLeEmail (@Email nvarchar(50))
+RETURNS BIT
+AS
+BEGIN
+	set NOCOUNT ON;
+	IF @Email IS NULL OR @Email = ''
+	BEGIN
+		RETURN 0 
+	END
+	if @Email LIKE N'%@%.%'
+	BEGIN
+		RETURN 1
+	END
+	RETURN 0
+END
+go
+
+--Lấy ra sản phẩm có nhiều lượt mua nhất trong khoảng thời gian
+CREATE FUNCTION SanPhamBanChayNhat (@From date, @To date)
+RETURNS TABLE
+AS
+	RETURN
+	(
+		SELECT sanpham.MaSP, sanpham.TenSP,sanpham.DonGia
+		From sanpham
+		JOIN chi_tiet_don_hang ON chi_tiet_don_hang.MaSP = sanpham.MaSP
+		JOIN donhang ON donhang.MaDon = chi_tiet_don_hang.MaDon
+		WHERE CAST( donhang.NgayHoangThanh as date) BETWEEN @From and @To
+	);
+go
+
+---Cursor + Proc/Trigger của hệ thống
+--Proc gửi Email cho các khách hàng có đơn hoàn thành (Chỉ in ra thông báo đã gửi mail khônng cần gửi thật)
+CREATE PROC GuiMailChoKhach 
+AS
+BEGIN
+	set NOCOUNT ON;
+	DECLARE Cur_KH CURSOR 
+	FOR SELECT MaDon CustomerId, TrangThai FROM donhang
+
+	DECLARE @Customer CHAR(10), @TrangThai NVARCHAR(50), @maDon char(10);
+
+	OPEN Cur_KH
+	FETCH NEXT FROM Cur_KH into @maDon,  @Customer, @TrangThai;
+
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+		IF @TrangThai = N'Hoàn thành'
+		BEGIN
+			PRINT N'đơn hàng: '+@@maDon + N'Đã hoàn thành' + N' ->  mail đến khách hàng: '+ @Customer
+		END 
+		FETCH NEXT FROM Cur_KH into @maDon,  @Customer, @TrangThai;
+	END
+
+	close Cur_KH
+	DEALLOCATE Cur_KH
+END
+GO
+--Cập nhật thưởng cho nhân viên = 2% tổng doanh thu các đơn hàng đã hoàn thành, nếu không có thì cập nhật là 0
+CREATE PROC CapNhatThuongNhanVien 
+AS
+BEGIN
+	SET NOCOUNT ON;
+	DECLARE @ThangHienTai DATE = DATEADD(month, DATEDIFF(month, 0, SYSDATETIME()), 0);
+	
+	DECLARE Cur_nv CURSOR FOR SELECT UserId from sysuser
+
+	Declare @MaNV CHAR(10)
+
+	OPEN Cur_nv
+	FETCH NEXT FROM Cur_nv INTO @MaNV
+
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+		Declare @DoanhThu money;
+		SELECT @DoanhThu = ISNULL(
+            (
+                SELECT 
+                    SUM(sp.DonGia * ctdh.SoLuong * 1.1) -- 1.1 giả định là VAT/phí
+                FROM 
+                    donhang dh
+                JOIN 
+                    chi_tiet_don_hang ctdh ON ctdh.MaDon = dh.MaDon
+                JOIN 
+                    sanpham sp ON sp.MaSP = ctdh.MaSP
+                WHERE 
+                    -- So sánh NgayHoanThanh với tháng hiện tại
+                    dh.NgayHoangThanh >= @ThangHienTai 
+                    AND dh.NgayHoangThanh < DATEADD(month, 1, @ThangHienTai) -- Tới ngày đầu tháng sau
+                    AND dh.TrangThai = N'Hoàn thành' 
+                    AND dh.UserId = @MaNV
+            )
+            , 0 -- Trả về 0 nếu truy vấn không tìm thấy đơn hàng Hoàn thành
+        );
+		UPDATE staff SET Thuong = @DoanhThu * 0.02 WHERE StaffId = @MaNV
+		FETCH NEXT FROM Cur_nv INTO @MaNV
+		
+	END
+	CLOSE Cur_nv
+	DEALLOCATE Cur_nv
+END
+GO
+
+--Cập nhật trạng thái cảnh báo cho sản phẩm không có doanh thu trong 6 tháng qua
+CREATE PROC CapNhatTinhTrangCanhBaoSP
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	DECLARE @NgayMoc DATETIME2 = DATEADD(month, -6, SYSDATETIME());
+
+	DECLARE Cur_sp CURSOR FOR SELECT MaSP from sanpham
+	DECLARE @maSP char(10)
+	OPEN Cur_sp
+
+	FETCH NEXT FROM Cur_sp into @maSP
+
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+		Declare @soLuongDon int;
+
+		
+		SELECT @soLuongDon = COUNT(MaSP) FROM chi_tiet_don_hang
+		JOIN donhang ON donhang.MaDon = chi_tiet_don_hang.MaDon
+		WHERE chi_tiet_don_hang.MaDon = @maSP
+		AND donhang.NgayNhan >= @NgayMoc
+		
+		if @soLuongDon = 0 
+			BEGIN
+				UPDATE sanpham SET [status] = N'Không có doanh thu' where sanpham.MaSP = @maSP
+			END
+		
+		FETCH NEXT FROM Cur_sp into @maSP
+	END
+
+	CLOSE Cur_sp
+	DEALLOCATE Cur_sp
+END
+GO
+
+--Cursor + proc cập nhật trạng thái không hoạt động cho các khách không mua hàng trong 6 tháng 
+CREATE PROC CapNhatNgungHoatDong
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	DECLARE @NgayMoc DATETIME2 = DATEADD(month, -12, SYSDATETIME());
+
+	DECLARE cur_kh CURSOR FOR
+	SELECT CustomerId From Customer
+
+	declare @makh char(10)
+	OPEN cur_kh
+	FETCH NEXT FROM cur_kh INTO @makh
+
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+		DECLARE @SoLuongDon INT;
+
+		SELECT @SoLuongDon =  COUNT(donhang.MaDon)
+		from donhang 
+		WHERE donhang.CustomerId = @makh AND donhang.NgayNhan > @NgayMoc
+
+		IF @SoLuongDon = 0
+		BEGIN
+			UPDATE Customer SET statusC = N'Ngưng hoạt động' where CustomerId = @makh
+		END
+		FETCH NEXT FROM cur_kh INTO @makh
+	END
+
+	Close cur_kh
+	DEALLOCATE cur_kh
+END
+GO
+
+--Proc KiemTraVaCapNhatTrangThaiCuaHang
+CREATE PROC KiemTraVaCapNhatTrangThaiCuaHang 
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	DECLARE @NgayMoc DATETIME2 = DATEADD(month, -12, SYSDATETIME());
+	DECLARE @NgayHienTai datetime2 = SYSDATETIME();
+
+	DECLARE Cur_CH CURSOR FOR  SELECT CuaHangId from cuahang where statusS != N'Ngưng hoạt động';
+	DECLARE @maCH char(10);
+	OPEN Cur_CH;
+	FETCH NEXT FROM Cur_CH INTO @@maCH;
+
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+		DECLARE @DoanhThu money;
+		Declare @NewStatus NVARCHAR(50);
+		Set @DoanhThu = dbo.DoanhThuCuaHang(@NgayMoc,@NgayHienTai,@maCH)
+		if @DoanhThu < 100000000
+		BEGIN
+			SET @NewStatus = N'Doanh số thấp'
+		END
+		ELSE IF @DoanhThu < 400000000
+		BEGIN
+			set @NewStatus = N'Doanh số bình thường'
+		END
+		ELSE 
+		BEGIN
+			set @NewStatus = N'Doanh số cao'
+		END
+
+		update cuahang SET statusS = @NewStatus WHERE CuaHangId = @maCH;
+		FETCH NEXT FROM Cur_CH INTO @@maCH;
+	END
+
+	CLOSE Cur_CH;
+	DEALLOCATE Cur_CH;
+
+END
+go
