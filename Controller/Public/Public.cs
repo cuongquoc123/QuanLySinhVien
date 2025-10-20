@@ -20,8 +20,8 @@ namespace QuanLySinhVien.Controller.Public
 
         }
 
-        [HttpGet("Product")]
-        public async Task<IActionResult> GetProduct([FromQuery] int pageNum, [FromQuery] int pageSize)
+        [HttpGet("Product/{pageNum}/{pageSize}")]
+        public async Task<IActionResult> GetProduct([FromRoute] int pageNum, [FromRoute] int pageSize)
         {
             var res = new PageRespone<Sanpham>();
             if (pageNum < 1)
@@ -96,7 +96,7 @@ namespace QuanLySinhVien.Controller.Public
 
             return Ok(res);
         }
-        [HttpGet("Product/{masp}")]
+        [HttpGet("ProductDetail/{masp}")]
         public async Task<IActionResult> GetChiTietProduct([FromRoute] string masp)
         {
             var respone = await myDbContext.Sanphams.FindAsync(masp);

@@ -6,7 +6,6 @@ namespace QuanLySinhVien.DTOS.Request
         public string? Ten { get; set; }
         public string? DiaChi { get; set; }
         public string? Vtri { get; set; }
-        public string? CuaHangId { get; set; }
         public decimal Luong { get; set; }    
         public string? NgaySinh { get; set; }
     }

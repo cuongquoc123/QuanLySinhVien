@@ -3,6 +3,7 @@ using Azure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLySinhVien.DTOS.Respone;
+using QuanLySinhVien.MidWare.Filter;
 using QuanLySinhVien.Models;
 
 namespace QuanLySinhVien.Controller.Manager
@@ -23,11 +24,11 @@ namespace QuanLySinhVien.Controller.Manager
             {
                 throw new ArgumentException("Missing Param datestart or dateend");
             }
-            if (!DateOnly.TryParse(datestart,out  DateOnly datestarts) ||
-                !DateOnly.TryParse(dateend,out  DateOnly datends))
+            if (!DateOnly.TryParse(datestart, out DateOnly datestarts) ||
+                !DateOnly.TryParse(dateend, out DateOnly datends))
             {
                 throw new ArgumentException("Date Format not true");
-            }  
+            }
             try
             {
 
@@ -36,13 +37,13 @@ namespace QuanLySinhVien.Controller.Manager
                 {
                     throw new UnauthorizedAccessException("Token not valid");
                 }
-                var respone = new PageRespone<Donhang>();
+
                 var user = await context.Sysusers.FindAsync(userID);
                 if (user == null)
                 {
                     throw new UnauthorizedAccessException("User not exists in Server");
                 }
-
+                var respone = new PageRespone<Donhang>();
                 var Items = await context.Donhangs.Where(d => d.NgayNhan >= datestarts && d.NgayNhan <= datends && d.CuaHangId == user.CuaHangId).
                                 Skip((pageNum - 1) * pageSize)
                                 .Take(pageSize).ToListAsync();
@@ -80,11 +81,29 @@ namespace QuanLySinhVien.Controller.Manager
         [HttpGet("Chitiet/{MaDon}")]
         public async Task<IActionResult> GetChitietDHm([FromRoute] string MaDon)
         {
-            
+            var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userID))
+            {
+                throw new UnauthorizedAccessException("Token not valid");
+            }
+
+            var user = await context.Sysusers.FindAsync(userID);
+            if (user == null)
+            {
+                throw new UnauthorizedAccessException("User not exists in Server");
+            }
             var DonHang = await context.Donhangs.FindAsync(MaDon);
             if (DonHang == null)
             {
                 throw new KeyNotFoundException("The bill doesn't exists");
+            }
+            if (string.IsNullOrEmpty(DonHang.CuaHangId))
+            {
+                throw new CustomError(403, "Not Permission", "This Bill is on your store");
+            }
+            if (!DonHang.CuaHangId.Equals(user.CuaHangId))
+            {
+                throw new CustomError(403, "Not Permission", "This Bill is on your store");
             }
             var chiTiets = await context.ChiTietDonHangs.Where(d => d.MaDon == MaDon).ToListAsync();
             return Ok(new

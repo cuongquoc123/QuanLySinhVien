@@ -103,7 +103,7 @@ namespace QuanLySinhVien.Service.SQL
                 moi.CuaHangId = CuaHangId;
                 moi.UserId = MaNV;
                 moi.NgayNhan = DateOnly.FromDateTime(DateTime.Now);
-                moi.TrangThai = "Chua Xu Ly";
+                moi.TrangThai = "Tiep Nhan";
                 moi.ThanhTien = ThanhTien;
                 await context.Donhangs.AddAsync(moi);
                 foreach (var sp in dssp)
@@ -163,10 +163,11 @@ namespace QuanLySinhVien.Service.SQL
             await using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
+                
                 Sanpham moi = new Sanpham();
                 moi.MaSp = GenerateId(10, "SP");
                 moi.TenSp = spMoi.TenSp;
-                moi.Status = spMoi.Status;
+                moi.Status = "Sản phẩm mới";
                 moi.Anh = imgPath;
                 moi.DonGia = spMoi.DonGia;
                 moi.MaDm = spMoi.MaDm;
@@ -286,6 +287,10 @@ namespace QuanLySinhVien.Service.SQL
             var Transaction = await context.Database.BeginTransactionAsync();
             try
             {
+                if (string.IsNullOrEmpty(imgPath))
+                {
+                    imgPath = "https://bla.edu.vn/wp-content/uploads/2025/09/avatar-fb.jpg";
+                }
                 Staff moi = new Staff();
                 moi.Avatar = imgPath;
                 moi.Ten = newStaff.Ten;

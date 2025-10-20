@@ -115,11 +115,11 @@ namespace QuanLySinhVien.MidWare.JWT
                 throw new CustomError(403,"UnAuthentiacion","You don't have permision");
             }
             var pair = _tokenService.CreateTokenPair(userId,  user.Role.RoleName );
-            refreshStore[pair.RefreshToken] = userId; //Lưu token mới vào CSDL
+             //Lưu token mới vào CSDL
             //Nếu có thì mới tạo token mới
             //Nếu không thì trả về 401
             refreshStore.Remove(request.RefreshToken); //Xoá token cũ đi để tránh tấn công phát lại (replay attack)
-            return Ok(new LoginResponse(pair.AccessToken, pair.RefreshToken));
+            return Ok(new LoginResponse(pair.AccessToken, string.Empty));
         }
     }
 }

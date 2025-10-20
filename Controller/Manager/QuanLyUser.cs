@@ -54,7 +54,7 @@ namespace QuanLySinhVien.Controller.Manager
                 {
                     throw new Exception("User can't be create");
                 }
-
+                respone.Passwords = string.Empty;
                 return Ok(respone);
             }
             catch (System.Exception)
@@ -146,10 +146,11 @@ namespace QuanLySinhVien.Controller.Manager
             PageRespone<Sysuser> respone = new PageRespone<Sysuser>();
             foreach (var U in lsUser)
             {
+                U.Passwords = "?????????????????";
                 Item<Sysuser> item = new Item<Sysuser>()
                 {
                     Value = U,
-                    PathChiTiet = $"admin/User/{U.UserId}"
+                    PathChiTiet = $"manager/user/{U.UserId}"
                 };
                 respone.Items.Append(item);
             }
@@ -176,6 +177,7 @@ namespace QuanLySinhVien.Controller.Manager
             {
                 throw new KeyNotFoundException("User not Exists");
             }
+            respone.Passwords = "?????????????????????";
             return Ok(respone);
         }
     }

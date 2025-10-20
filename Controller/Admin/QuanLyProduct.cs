@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using QuanLySinhVien.DTOS.Request;
 using QuanLySinhVien.Models;
 using QuanLySinhVien.Service.SQL;
 
@@ -19,9 +20,9 @@ namespace QuanLySinhVien.Controller.Admin
         }
 
         [HttpPost("")]
-        public async Task<IActionResult> CreateProduct([FromBody] Sanpham sanphams, [FromForm] IFormFile file)
+        public async Task<IActionResult> CreateProduct([FromBody] CreateProductRequest sanphams, [FromForm] IFormFile file)
         {
-            if (sanphams == null)
+            if (sanphams == null || string.IsNullOrEmpty(sanphams.productname) || string.IsNullOrEmpty(sanphams.mota) || string.IsNullOrEmpty(sanphams.DMID))
             {
                 throw new ArgumentException("Missing Product ");
             }
@@ -49,8 +50,14 @@ namespace QuanLySinhVien.Controller.Admin
                 {
                     await file.CopyToAsync(fileStream);
                 }
-
-                var respone = await sqLServices.CreateProDucts(sanphams, FilePath);
+                Sanpham sp = new Sanpham()
+                {
+                    TenSp = sanphams.productname,
+                    DonGia = sanphams.donGia,
+                    MaDm = sanphams.DMID,
+                    Mota = sanphams.mota
+                };
+                var respone = await sqLServices.CreateProDucts(sp, FilePath);
 
                 if (respone == null)
                 {

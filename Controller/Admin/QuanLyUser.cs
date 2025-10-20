@@ -44,7 +44,7 @@ namespace QuanLySinhVien.Controller.Admin
                 {
                     throw new Exception("User can't be create");
                 }
-
+                respone.Passwords = "?????????????";
                 return Ok(respone);
             }
             catch (System.Exception)
@@ -65,10 +65,10 @@ namespace QuanLySinhVien.Controller.Admin
             throw new CustomError(400, "Bad Request", "Can't Update User Info");
         }
 
-        [HttpPut("DUser/{req}")]
-        public async Task<IActionResult> DeleteUser([FromRoute] string req)
+        [HttpPut("DUser/{id}")]
+        public async Task<IActionResult> DeleteUser([FromRoute] string id)
         {
-            if (await sqLServices.SoftDeleteUser(req) == 200)
+            if (await sqLServices.SoftDeleteUser(id) == 200)
             {
                 return Ok(new
                 {
@@ -94,6 +94,8 @@ namespace QuanLySinhVien.Controller.Admin
             PageRespone<Sysuser> respone = new PageRespone<Sysuser>();
             foreach (var U in lsUser)
             {
+
+                U.Passwords = "??????????????????";
                 Item<Sysuser> item = new Item<Sysuser>()
                 {
                     Value = U,
@@ -111,7 +113,7 @@ namespace QuanLySinhVien.Controller.Admin
             return Ok(respone);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("Detail/{id}")]
         public async Task<IActionResult> GetUserDetail([FromRoute] string id)
         {
             if (string.IsNullOrEmpty(id))
@@ -123,6 +125,7 @@ namespace QuanLySinhVien.Controller.Admin
             {
                 throw new KeyNotFoundException("User not Exists");
             }
+            respone.Passwords = "???????????????????";
             return Ok(respone);
         }
     }

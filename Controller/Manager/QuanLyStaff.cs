@@ -74,7 +74,7 @@ namespace QuanLySinhVien.Controller.Manager
 
             return Ok(respone);
         }
-        [HttpGet("{StaffId}")]
+        [HttpGet("Detail/{StaffId}")]
         public async Task<IActionResult> StaffDetailm([FromRoute] string StaffId)
         {
             if (string.IsNullOrEmpty(StaffId))
@@ -106,7 +106,7 @@ namespace QuanLySinhVien.Controller.Manager
         [HttpPost]
         public async Task<IActionResult> CreateStaffm ([FromBody] CreateStaffRequest staff, IFormFile file)
         {
-            if (string.IsNullOrEmpty(staff.Cccd) || string.IsNullOrEmpty(staff.CuaHangId) ||
+            if (string.IsNullOrEmpty(staff.Cccd)  ||
                 string.IsNullOrEmpty(staff.Ten) || string.IsNullOrEmpty(staff.DiaChi) ||
                 string.IsNullOrEmpty(staff.Vtri))
             {
@@ -120,6 +120,16 @@ namespace QuanLySinhVien.Controller.Manager
             if (staff.Luong <= 0)
             {
                 throw new ArgumentException("Param Luong must higher 0");
+            }
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                throw new KeyNotFoundException("Missing Token");
+            }
+            var user = await context.Sysusers.FindAsync(userId);
+            if (user == null)
+            {
+                throw new UnauthorizedAccessException("Fake Token");
             }
             try
             {
@@ -147,7 +157,7 @@ namespace QuanLySinhVien.Controller.Manager
                     Luong = staff.Luong,
                     NgaySinh = ngaySinh,
                     DiaChi = staff.DiaChi,
-                    CuaHangId = staff.CuaHangId
+                    CuaHangId = user.CuaHangId
                 };
                 var respone = await sqLServices.createStaff(newstaff, FilePath);
                 if (respone == null)
