@@ -50,8 +50,7 @@ namespace QuanLySinhVien.Controller.Cashier
                 }
                 // 3. Toàn bộ logic xử lý chính đặt trong try-catch
                 var donhang = await sqLServices.taoDon(
-                    ThanhTien: request.ThanhTien,
-                    CuaHangId: user.CuaHangId, // Tên thuộc tính nên nhất quán
+                    ThanhTien: request.ThanhTien, // Tên thuộc tính nên nhất quán
                     MaNV: userId,
                     dssp: request.dssp
                 );

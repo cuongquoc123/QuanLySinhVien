@@ -10,7 +10,7 @@ namespace QuanLySinhVien.Models;
 public partial class Staff
 {
     [Key]
-    [StringLength(11)]
+    [StringLength(10)]
     [Unicode(false)]
     public string StaffId { get; set; } = null!;
 
@@ -30,14 +30,17 @@ public partial class Staff
     [StringLength(50)]
     public string? Vtri { get; set; }
 
-    [Column(TypeName = "decimal(18, 3)")]
+    [Column(TypeName = "money")]
     public decimal? Luong { get; set; }
+
+    [Column(TypeName = "money")]
+    public decimal? Thuong { get; set; }
 
     [StringLength(500)]
     public string Avatar { get; set; } = null!;
 
     [StringLength(100)]
-    public string? StatuSs { get; set; }
+    public string? StatuSf { get; set; }
 
     [StringLength(10)]
     [Unicode(false)]
@@ -46,4 +49,7 @@ public partial class Staff
     [ForeignKey("CuaHangId")]
     [InverseProperty("Staff")]
     public virtual Cuahang? CuaHang { get; set; }
+
+    [InverseProperty("User")]
+    public virtual Sysuser? Sysuser { get; set; }
 }

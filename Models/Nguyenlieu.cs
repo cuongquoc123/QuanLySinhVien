@@ -22,8 +22,5 @@ public partial class Nguyenlieu
     public string Dvt { get; set; } = null!;
 
     [InverseProperty("MaNguyenLieuNavigation")]
-    public virtual ICollection<ChiTietYeuCau> ChiTietYeuCaus { get; set; } = new List<ChiTietYeuCau>();
-
-    [InverseProperty("MaNguyenLieuNavigation")]
-    public virtual ICollection<Kho> Khos { get; set; } = new List<Kho>();
+    public virtual ICollection<ChiTietPhieuNhap> ChiTietPhieuNhaps { get; set; } = new List<ChiTietPhieuNhap>();
 }

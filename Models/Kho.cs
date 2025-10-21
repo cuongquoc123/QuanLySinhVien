@@ -14,21 +14,20 @@ public partial class Kho
     [Unicode(false)]
     public string MaKho { get; set; } = null!;
 
-    public int? SoLuongTon { get; set; }
+    [StringLength(50)]
+    public string? TrangThai { get; set; }
+
+    [StringLength(50)]
+    public string? DiaChi { get; set; }
 
     [StringLength(10)]
     [Unicode(false)]
-    public string? MaNguyenLieu { get; set; }
-
-    [StringLength(10)]
-    [Unicode(false)]
-    public string? CuaHangId { get; set; }
+    public string CuaHangId { get; set; } = null!;
 
     [ForeignKey("CuaHangId")]
     [InverseProperty("Khos")]
-    public virtual Cuahang? CuaHang { get; set; }
+    public virtual Cuahang CuaHang { get; set; } = null!;
 
-    [ForeignKey("MaNguyenLieu")]
-    [InverseProperty("Khos")]
-    public virtual Nguyenlieu? MaNguyenLieuNavigation { get; set; }
+    [InverseProperty("MaKhoNavigation")]
+    public virtual ICollection<PhieuNhapNl> PhieuNhapNls { get; set; } = new List<PhieuNhapNl>();
 }

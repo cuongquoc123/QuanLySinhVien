@@ -1,4 +1,8 @@
+using System.Data;
+using System.Data.Common;
+using System.Runtime.InteropServices;
 using GeneticSharp;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using QuanLySinhVien.DTOS.Request;
@@ -25,7 +29,7 @@ namespace QuanLySinhVien.Service.SQL
             {
                 Random ran = new Random();
                 int chuKeTiep1 = ran.Next(65, 91);
-                int chuKeTiep2 = ran.Next(97 , 123);
+                int chuKeTiep2 = ran.Next(97, 123);
                 int luaChon = ran.Next(0, 2);
                 if (luaChon == 1)
                 {
@@ -37,8 +41,8 @@ namespace QuanLySinhVien.Service.SQL
                 }
             }
             return id;
-            
-        } 
+
+        }
         public SqLService(MyDbContext context, ILogger<SqLService> logger, IPassWordService passWordService)
         {
             this.context = context;
@@ -46,39 +50,16 @@ namespace QuanLySinhVien.Service.SQL
             this.passWordService = passWordService;
         }
 
-        
-
-        public async Task<int> deleteUser(string Id)
-        {
-            await using var Transaction = await context.Database.BeginTransactionAsync();
-            try
-            {
-                var user = await context.Sysusers.FindAsync(Id);
-                if (user == null)
-                {
-                    throw new KeyNotFoundException("Can't find User");
-                }
-                context.Sysusers.Remove(user);
-                await context.SaveChangesAsync();
-                await Transaction.CommitAsync();
-                return 200;
-            }
-            catch (System.Exception)
-            {
-                await Transaction.RollbackAsync();
-                throw;
-            }
-        }
 
         public async Task<int> SoftDeleteUser(string Id)
         {
             await using var Transaction = await context.Database.BeginTransactionAsync();
             try
             {
-                var user = await context.Sysusers.FindAsync(Id);
+                var user = await context.Staff.FindAsync(Id);
                 if (user != null)
                 {
-                    user.Status = "Ngưng Hoạt Động";
+                    user.StatuSf = "Nghỉ việc";
                     context.Entry(user).State = EntityState.Modified;
                     await context.SaveChangesAsync();
                     await Transaction.CommitAsync();
@@ -92,60 +73,110 @@ namespace QuanLySinhVien.Service.SQL
                 throw;
             }
         }
-
-        public async Task<Donhang?> taoDon(string CuaHangId, string MaNV, List<Product> dssp, decimal ThanhTien)
+        private DataTable? TaoBangThamSoSanPham(List<Product> dsP)
         {
-            await using var Transaction = await context.Database.BeginTransactionAsync();
-            try
+            if (dsP.Count == 0 || !dsP.Any() || dsP == null)
             {
-                Donhang moi = new Donhang();
-                moi.MaDon = this.GenerateId(so_luong_chu: 10, KyTuBatDau: "DH");
-                moi.CuaHangId = CuaHangId;
-                moi.UserId = MaNV;
-                moi.NgayNhan = DateOnly.FromDateTime(DateTime.Now);
-                moi.TrangThai = "Tiep Nhan";
-                moi.ThanhTien = ThanhTien;
-                await context.Donhangs.AddAsync(moi);
-                foreach (var sp in dssp)
-                {
-                    if (string.IsNullOrEmpty(sp.Masp))
-                    {
-                        throw new Exception("A Product in list Product null");
-                    }
-                    ChiTietDonHang mois = new ChiTietDonHang();
-                    mois.MaDon = moi.MaDon;
-                    mois.MaSp = sp.Masp;
-                    mois.SoLuong = sp.SoLuong;
-                    
-                    await context.ChiTietDonHangs.AddAsync(mois);
-                }
-                
-                await context.SaveChangesAsync();
-                await Transaction.CommitAsync();
-                return moi;
-            }
-            catch (System.Exception)
-            {
-                await Transaction.RollbackAsync();
                 return null;
+            }
+            DataTable dt = new DataTable();
+            dt.Columns.Add("Ma", typeof(String));
+            dt.Columns.Add("SoLuong", typeof(int));
+
+            foreach (Product product in dsP)
+            {
+                dt.Rows.Add(product.Masp, product.SoLuong);
+            }
+            return dt;
+        }
+        public async Task<Donhang?> taoDon(string MaNV, List<Product> dssp, string makhach)
+        {
+
+
+            DbConnection dbConnection = context.Database.GetDbConnection();
+            using (DbCommand command = dbConnection.CreateCommand())
+            {
+                if (dbConnection.State != ConnectionState.Open)
+                {
+                    await dbConnection.OpenAsync();
+                }
+
+                var returnValueParam = new SqlParameter
+                {
+                    ParameterName = "@ReturnValue",
+                    SqlDbType = SqlDbType.Int,
+                    Direction = ParameterDirection.ReturnValue // Đặt hướng là giá trị trả về
+                };
+
+                try
+                {
+                    string madon = GenerateId(10, "DH");
+                    command.CommandText = "TaoDonHang";
+                    command.CommandType = CommandType.StoredProcedure;
+
+                    command.Parameters.Add(new SqlParameter("@CustomerId", SqlDbType.Char, 10) { Value = makhach });
+                    command.Parameters.Add(new SqlParameter("@StaffId", SqlDbType.Char, 10) { Value = MaNV });
+                    command.Parameters.Add(new SqlParameter("@MaDon", SqlDbType.Char, 10) { Value = madon });
+
+                    DataTable? danhSachSanPham = TaoBangThamSoSanPham(dssp);
+                    if (danhSachSanPham == null)
+                    {
+                        throw new ArgumentException("Không có sản phẩm và số lượng tương ứng không thể tạo đơn");
+                    }
+
+                    SqlParameter tvpParam = new SqlParameter();
+                    tvpParam.ParameterName = "@DanhSachSP";
+                    tvpParam.SqlDbType = SqlDbType.Structured;
+                    tvpParam.TypeName = "dbo.ChiTietType";
+                    tvpParam.Value = danhSachSanPham;
+
+
+                    command.Parameters.Add(tvpParam);
+
+                    await command.ExecuteNonQueryAsync();
+
+                    if (returnValueParam.Value != DBNull.Value)
+                    {
+                        return await context.Donhangs.FindAsync(madon);
+                    }
+                    throw new Exception("Can't create DonHang");
+                }
+                catch (System.Exception ex)
+                {
+                    logger.LogError(ex.Message);
+                    return null;
+                }
+                finally
+                {
+
+                }
             }
         }
 
-        public async Task<Sysuser> UpdateUser(Sysuser sysuser)
+        public async Task<Staff> UpdateUser(Staff users,  string Password)
         {
             await using var Transaction = await context.Database.BeginTransactionAsync();
             try
             {
-                var user = await context.Sysusers.FindAsync(sysuser.UserId);
+                var user = await context.Staff.Include(x => x.Sysuser)
+                                            .FirstOrDefaultAsync(u => u.StaffId == users.StaffId);
+
                 if (user == null)
                 {
-                    throw new KeyNotFoundException("Can't Find User");    
+                    throw new KeyNotFoundException("Can't Find User");
                 }
-                user.Avatar = sysuser.Avatar;
-                user.CuaHangId = sysuser.CuaHangId;
-                user.DiaChi = sysuser.DiaChi;
-                user.NgaySinh = sysuser.NgaySinh;
-                user.Passwords = passWordService.HashPassWord(sysuser.Passwords);
+                user.Avatar = users.Avatar;
+                user.CuaHangId = users.CuaHangId;
+                user.DiaChi = users.DiaChi;
+                user.NgaySinh = users.NgaySinh;
+                if (user.Sysuser != null )
+                {
+                    if(Password != null && !passWordService.VerifyPassword(Password,user.Sysuser.Passwords))
+                    {
+                        user.Sysuser.Passwords = passWordService.HashPassWord(Password);
+                    }
+                    
+                }
                 context.Entry(user).State = EntityState.Modified;
                 await context.SaveChangesAsync();
                 await Transaction.CommitAsync();
@@ -158,12 +189,12 @@ namespace QuanLySinhVien.Service.SQL
             }
         }
 
-        public async Task<Sanpham?> CreateProDucts(Sanpham spMoi, string imgPath) 
+        public async Task<Sanpham?> CreateProDucts(Sanpham spMoi, string imgPath)
         {
             await using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
-                
+
                 Sanpham moi = new Sanpham();
                 moi.MaSp = GenerateId(10, "SP");
                 moi.TenSp = spMoi.TenSp;
@@ -182,7 +213,7 @@ namespace QuanLySinhVien.Service.SQL
                 transaction.Rollback();
                 return null;
             }
-            
+
         }
 
         public async Task<int> SoftDeleteProduct(string productId)
@@ -218,15 +249,7 @@ namespace QuanLySinhVien.Service.SQL
             try
             {
                 Sysuser USer = new Sysuser();
-                USer.UserId = GenerateId(10, "US");
-                USer.UserName = newUser.UserName;
-                USer.Passwords = passWordService.HashPassWord(newUser.Passwords);
-                USer.RoleId = newUser.RoleId;
-                USer.CuaHangId = newUser.CuaHangId;
-                USer.Status = "New User";
-                await context.Sysusers.AddAsync(USer);
-                await context.SaveChangesAsync();
-                await Transaction.CommitAsync();
+                
                 return USer;
             }
             catch (System.Exception)
@@ -239,8 +262,8 @@ namespace QuanLySinhVien.Service.SQL
         public async Task<Cuahang?> CreateStore(Cuahang NewStore)
         {
             var Transaction = await context.Database.BeginTransactionAsync();
-           try
-           {
+            try
+            {
                 Cuahang moi = new Cuahang();
                 moi.CuaHangId = GenerateId(10, "CH");
                 moi.TenCh = NewStore.TenCh;
@@ -251,12 +274,12 @@ namespace QuanLySinhVien.Service.SQL
                 await context.SaveChangesAsync();
                 await Transaction.CommitAsync();
                 return moi;
-           }
-           catch (System.Exception)
-           {
-            await Transaction.RollbackAsync();
-            return null;
-           }
+            }
+            catch (System.Exception)
+            {
+                await Transaction.RollbackAsync();
+                return null;
+            }
         }
 
         public async Task<int> SoftDeleteStore(string StoreId)
@@ -305,7 +328,8 @@ namespace QuanLySinhVien.Service.SQL
                 await context.Staff.AddAsync(moi);
                 await Transaction.CommitAsync();
                 return moi;
-            } catch (System.Exception)
+            }
+            catch (System.Exception)
             {
                 Transaction.Rollback();
                 return null;

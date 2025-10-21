@@ -508,7 +508,6 @@ create FUNCTION DoanhThuCuaHang (@From date, @To date, @MaCH char(10))
 RETURNS money
 as
 begin 
-	set nocount on;
 	Declare @DoanhThu money = (select iSnull(sum(chi_tiet_don_hang.SoLuong * sanpham.DonGia),0) as doanhthu
 					from donhang
 					join chi_tiet_don_hang on chi_tiet_don_hang.MaDon = donhang.MaDon
@@ -526,13 +525,13 @@ CREATE FUNCTION ThanhTienDonHang (@MaDon char(10))
 RETURNS money
 AS
 BEGIN
-	SET NOCOUNT ON;
+	
 	IF not exists (select 1 from donhang WHERE MaDon = @MaDon)
 	BEGIN
 		RETURN 0; 
 	END
 
-	DECLARE @ThanhTien money = (Select ISNULL(SUM(sanpham.DonGia * chi_tiet_don_hang.SoLuong),0) * 1,1 as ThanhTien
+	DECLARE @ThanhTien money = (Select ISNULL(SUM(sanpham.DonGia * chi_tiet_don_hang.SoLuong)* 1.1 ,0) as ThanhTien
 								from chi_tiet_don_hang
 								join sanpham on chi_tiet_don_hang.MaSP = sanpham.MaSP
 								WHERE chi_tiet_don_hang.MaDon = @MaDon)
@@ -550,7 +549,6 @@ AS
 		SELECT * 
 		FROM sanpham 
 		WHERE sanpham.maDM = @MaDM 
-		ORDER by sanpham.TenSP desc
 	);
 GO
 
@@ -559,7 +557,6 @@ CREATE FUNCTION ThoiGianXuLyDon (@maDon char(10))
 RETURNS INT
 AS
 BEGIN
-	SET NOCOUNT ON;
 	DECLARE @TGXuLy int;
 	select @TGXuLy = case 
 						when dh.TrangThai = N'Hoàn thành' and dh.NgayHoangThanh is not null
@@ -577,7 +574,6 @@ CREATE FUNCTION TongDonTheoNgayCuaCH (@date date, @MaCH CHAR(10),@TrangThai NVAR
 RETURNS INT
 as
 BEGIN
-	SET NOCOUNT ON;
 	if not exists (SELECT 1 from cuahang WHERE CuaHangId = @MaCH)
 	BEGIN
 		RETURN 0;
@@ -599,7 +595,6 @@ CREATE FUNCTION KiemTraHopLeEmail (@Email nvarchar(50))
 RETURNS BIT
 AS
 BEGIN
-	set NOCOUNT ON;
 	IF @Email IS NULL OR @Email = ''
 	BEGIN
 		RETURN 0 
@@ -644,7 +639,7 @@ BEGIN
 	BEGIN
 		IF @TrangThai = N'Hoàn thành'
 		BEGIN
-			PRINT N'đơn hàng: '+@@maDon + N'Đã hoàn thành' + N' ->  mail đến khách hàng: '+ @Customer
+			PRINT N'đơn hàng: '+ @maDon + N'Đã hoàn thành' + N' ->  mail đến khách hàng: '+ @Customer
 		END 
 		FETCH NEXT FROM Cur_KH into @maDon,  @Customer, @TrangThai;
 	END
@@ -782,7 +777,7 @@ BEGIN
 	DECLARE Cur_CH CURSOR FOR  SELECT CuaHangId from cuahang where statusS != N'Ngưng hoạt động';
 	DECLARE @maCH char(10);
 	OPEN Cur_CH;
-	FETCH NEXT FROM Cur_CH INTO @@maCH;
+	FETCH NEXT FROM Cur_CH INTO @maCH;
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
@@ -803,7 +798,7 @@ BEGIN
 		END
 
 		update cuahang SET statusS = @NewStatus WHERE CuaHangId = @maCH;
-		FETCH NEXT FROM Cur_CH INTO @@maCH;
+		FETCH NEXT FROM Cur_CH INTO @maCH;
 	END
 
 	CLOSE Cur_CH;
