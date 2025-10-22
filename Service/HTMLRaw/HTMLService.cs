@@ -16,8 +16,7 @@ namespace QuanLySinhVien.Service.HTMLRaw
         {
             // ... (phần code truy vấn dữ liệu của bạn giữ nguyên) ...
             var donHang = context.Donhangs
-                                 .Include(dh => dh.CuaHang) 
-                                 .Include(dh => dh.User)     
+                                 .Include(dh => dh.User)
                                  .FirstOrDefault(dh => dh.MaDon == Madon);
 
             if (donHang == null)
@@ -35,6 +34,7 @@ namespace QuanLySinhVien.Service.HTMLRaw
                 throw new KeyNotFoundException("Fake bills");
             }
             var viVNCulture = new System.Globalization.CultureInfo("vi-VN");
+            decimal thanhTien = 0;
             var Table = new StringBuilder();
             Table.AppendLine(@"
     <thead>
@@ -56,14 +56,16 @@ namespace QuanLySinhVien.Service.HTMLRaw
                 Table.AppendLine($@"
         <tr class='item'>
             <td>{tenSp}</td>
-            <td class='text-right'>{donGia.ToString("N0",viVNCulture)}đ</td>
+            <td class='text-right'>{donGia.ToString("N0", viVNCulture)}đ</td>
             <td class='text-center'>{item.SoLuong}</td>
-            <td class='text-right'>{thanhTienItem.ToString("N0",viVNCulture)}đ</td>
+            <td class='text-right'>{thanhTienItem.ToString("N0", viVNCulture)}đ</td>
         </tr>");
+
+                thanhTien += item.SoLuong * donGia;
             }
             Table.AppendLine(@"</tbody>");
 
-            var thanhTien = donHang.ThanhTien ;
+           
             var thue = thanhTien * 0.1m; // Giả sử VAT 10%
             var tamTinh = thanhTien - thue;
 
@@ -156,11 +158,6 @@ namespace QuanLySinhVien.Service.HTMLRaw
                     <tr>
                         <td>
                             <img src='https://i.imgur.com/vU2p3s2.png' alt='Company Logo' class='logo' />
-                        </td>
-                        <td class='company-details'>
-                            <strong>{donHang.CuaHang?.TenCh ?? "Tên Cửa Hàng"}</strong><br />
-                            {donHang.CuaHang?.DiaChi ?? "Địa chỉ cửa hàng"}<br />
-                            {donHang.CuaHang?.Email ?? "Email cửa hàng"}
                         </td>
                     </tr>
                 </table>

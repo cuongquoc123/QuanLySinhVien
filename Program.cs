@@ -13,7 +13,14 @@ using QuanLySinhVien.Service.HashPassword;
 using QuanLySinhVien.Service.HTMLRaw;
 
 using QuanLySinhVien.Service.SQL;
+using QuanLySinhVien.Service.SQL.Iventory;
+using QuanLySinhVien.Service.SQL.NguyenLieu;
+using QuanLySinhVien.Service.SQL.Order;
+using QuanLySinhVien.Service.SQL.ProductS;
+using QuanLySinhVien.Service.SQL.Store;
+using QuanLySinhVien.Service.SQL.StaffF;
 using Serilog;
+using QuanLySinhVien.Service.SQL.PhieuNhapKho;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -116,14 +123,24 @@ builder.Services.AddScoped<IPassWordService>(
     sp => new BCryptPasswordService(workFactor)
 );
 
-builder.Services.AddScoped<ISqLServices,SqLService>();
 
 builder.Services.AddScoped<IcheckFace, CheckFace>();
 
 builder.Services.AddScoped<IHtmService, HTMLService>();
 
-builder.Services.AddScoped<ISheetService,SheetService>();
+builder.Services.AddScoped<ISheetService, SheetService>();
+builder.Services.AddScoped<ISqlStaffServices, SqlStaffServices>();
+builder.Services.AddScoped<ISqlStoreServices, SqlStoreServices>();
 
+builder.Services.AddScoped<ISqlProductServiecs, SqlProductServiecs>();
+
+builder.Services.AddScoped<IOrderService, OrderService>();
+
+builder.Services.AddScoped<ISqlNguyenLieuServices, SqlNguyenLieuServices>();
+
+builder.Services.AddScoped<ISQLInventoryService,SQLInventoryServices>();
+
+builder.Services.AddScoped<ISqlPhieuNhapKho,SqlPhieuNhapKhoServices>();
 var app = builder.Build();
 
 var logger = app.Logger;

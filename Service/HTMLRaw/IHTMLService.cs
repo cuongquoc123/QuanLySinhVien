@@ -4,6 +4,6 @@ namespace QuanLySinhVien.Service.HTMLRaw
 {
     public interface IHtmService
     {
-        string HoaDonHTMl(string Madon);
+        public string HoaDonHTMl(String Madon);
     }
 }

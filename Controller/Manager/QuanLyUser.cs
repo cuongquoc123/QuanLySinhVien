@@ -6,6 +6,7 @@ using QuanLySinhVien.DTOS.Respone;
 using QuanLySinhVien.MidWare.Filter;
 using QuanLySinhVien.Models;
 using QuanLySinhVien.Service.SQL;
+using QuanLySinhVien.Service.SQL.StaffF;
 
 namespace QuanLySinhVien.Controller.Manager
 {
@@ -14,47 +15,80 @@ namespace QuanLySinhVien.Controller.Manager
     public class QuanlyUser: ControllerBase
     {
         private readonly MyDbContext context;
-        private readonly ISqLServices sqLServices;
-
-        public QuanlyUser(MyDbContext context, ISqLServices sqLServices)
+        private readonly ISqlStaffServices sqLServices;
+        private readonly IWebHostEnvironment webHostEnvironment;
+        public QuanlyUser(MyDbContext context, ISqlStaffServices sqLServices,IWebHostEnvironment webHostEnvironment)
         {
             this.context = context;
             this.sqLServices = sqLServices;
+            this.webHostEnvironment = webHostEnvironment;
         }
 
         [HttpPost("")]
-        public async Task<IActionResult> CreateUserm([FromBody]CreateUserRequest req)
+        public async Task<IActionResult> CreateUserm([FromBody]CreateUserRequest req,[FromForm] IFormFile file)
         {
-            if (string.IsNullOrEmpty(req.UserName) || string.IsNullOrEmpty(req.Password)
-             || string.IsNullOrEmpty(req.RoleId))
+            if (req == null || string.IsNullOrEmpty(req.Ten) || string.IsNullOrEmpty(req.DiaChi) 
+                || string.IsNullOrEmpty(req.DiaChi) || string.IsNullOrEmpty(req.NgaySinh) || string.IsNullOrEmpty(req.Vtri) 
+                || string.IsNullOrEmpty(req.Cccd))
             {
-                throw new ArgumentException("Missing Param UserName, Password or RoleId");
+                throw new ArgumentException("Request body is null");
             }
             var USID = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (USID == null)
             {
                 throw new KeyNotFoundException("Not Found User In Token");
             }
-            var Manager = await context.Sysusers.FindAsync(USID);
+            var Manager = await context.Sysusers.Include(x => x.User).FirstAsync(x => x.UserId == USID);
             if (Manager == null)
             {
                 throw new UnauthorizedAccessException("Token Not Valid");
             }
-            Sysuser user = new Sysuser()
+            if (string.IsNullOrEmpty(Manager.User.CuaHangId))
             {
-                UserName = req.UserName,
-                Passwords = req.Password,
-                RoleId = req.RoleId,
-                CuaHangId = Manager.CuaHangId,
+                throw new CustomError(403, "Forbiden", "User Fake");
+            }
+            if (DateOnly.TryParse(req.NgaySinh, out DateOnly date))
+            {
+                throw new ArgumentException("Date formate false");
+            }
+            Staff user = new Staff()
+            {
+                CuaHangId = Manager.User.CuaHangId,
+                Ten = req.Ten,
+                NgaySinh = date,
+                Vtri = req.Vtri,
+                DiaChi = req.DiaChi,
+                Cccd = req.Cccd
             };
+
+
             try
             {
-                var respone = await sqLServices.CreateUser(user);
+                
+                string wwwrootPath = webHostEnvironment.WebRootPath;
+                if (string.IsNullOrEmpty(wwwrootPath))
+                {
+                    throw new Exception("Can't take web root path");
+                }
+                string imgPath = Path.Combine(wwwrootPath, "img");
+                if (!Directory.Exists(imgPath))
+                {
+                    Directory.CreateDirectory(imgPath);
+                }
+
+                string uniqueNameFile = Guid.NewGuid().ToString() + "_" + file.FileName;
+                string FilePath = Path.Combine(imgPath, uniqueNameFile);
+
+                using (var fileStream = new FileStream(FilePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(fileStream);
+                }
+
+                var respone = await sqLServices.createStaff(user,FilePath);
                 if (respone == null)
                 {
                     throw new Exception("User can't be create");
                 }
-                respone.Passwords = string.Empty;
                 return Ok(respone);
             }
             catch (System.Exception)
@@ -63,53 +97,15 @@ namespace QuanLySinhVien.Controller.Manager
             }
         }
 
-        [HttpPut("")]
-        public async Task<IActionResult> UpdateUserm([FromBody]Sysuser req)
-        {
-            var USID = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (USID == null)
-            {
-                throw new KeyNotFoundException("Not Found User In Token");
-            }
-            var Manager = await context.Sysusers.FindAsync(USID);
-            if (Manager == null)
-            {
-                throw new UnauthorizedAccessException("Token Not Valid");
-            }
-            if (req.CuaHangId != Manager.CuaHangId)
-            {
-                throw new CustomError(403, "Not Permission", "Can't modify User");
-            }
-            if (ModelState.IsValid)
-            {
-                var user = await sqLServices.UpdateUser(req);
-                return Ok(user);
-            }
-            throw new CustomError(400, "Bad Request", "Can't Update User Info");
-        }
-
         [HttpPut("DUser/{req}")]
         public async Task<IActionResult> DeleteUserm([FromRoute] string req)
         {
-            var USID = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (USID == null)
-            {
-                throw new KeyNotFoundException("Not Found User In Token");
-            }
-            var Manager = await context.Sysusers.FindAsync(USID);
-            if (Manager == null)
-            {
-                throw new UnauthorizedAccessException("Token Not Valid");
-            }
             var user = await context.Sysusers.FindAsync(req);
             if (user == null)
             {
                 throw new KeyNotFoundException("User not exists in Database => can't delete");
             }
-            if (user.CuaHangId != Manager.CuaHangId)
-            {
-                throw new CustomError(403, "Not Permission", "Can't modify User");
-            }
+           
             if (await sqLServices.SoftDeleteUser(req) == 200)
             {
                 return Ok(new
@@ -135,12 +131,12 @@ namespace QuanLySinhVien.Controller.Manager
             {
                 throw new KeyNotFoundException("Not Found User In Token");
             }
-            var Manager = await context.Sysusers.FindAsync(USID);
+            var Manager = await context.Sysusers.Include(x => x.User).FirstAsync(x => x.UserId ==USID);
             if (Manager == null)
             {
                 throw new UnauthorizedAccessException("Token Not Valid");
             }
-            var lsUser = await context.Sysusers.Where(u => u.CuaHangId == Manager.CuaHangId)
+            var lsUser = await context.Sysusers.Where(u => u.User.CuaHangId == Manager.User.CuaHangId)
                                     .Skip((PageNum - 1) * pageSize)
                                     .Take(pageSize).ToListAsync();
             PageRespone<Sysuser> respone = new PageRespone<Sysuser>();
@@ -156,7 +152,7 @@ namespace QuanLySinhVien.Controller.Manager
             }
 
             int total = await context.Sysusers
-                            .Where(u => u.CuaHangId == Manager.CuaHangId).CountAsync();
+                            .Where(u => u.User.CuaHangId == Manager.User.CuaHangId).CountAsync();
             respone.TotalCount = total;
             respone.TotalPages = (int)Math.Ceiling(total / (double)pageSize);
             respone.PageIndex = PageNum;
@@ -172,7 +168,7 @@ namespace QuanLySinhVien.Controller.Manager
             {
                 throw new ArgumentNullException("Missing Param id");
             }
-            Sysuser? respone = await context.Sysusers.FindAsync(id);
+            Sysuser? respone = await context.Sysusers.Include(u => u.User).FirstAsync(u => u.UserId == id);
             if (respone == null)
             {
                 throw new KeyNotFoundException("User not Exists");

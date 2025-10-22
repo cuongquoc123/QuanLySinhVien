@@ -33,14 +33,14 @@ namespace QuanLySinhVien.MidWare.JWT
         private bool ValidateUser(string username, string password, out string? UserId, out string Roles)
         {
 
-            var user = context.Sysusers.FirstOrDefault(x => x.UserName == username);
+            var user = context.Sysusers.Include(s => s.User).First(x => x.UserName == username);
             if (user is not null)
             {
-                if (string.IsNullOrEmpty(user.Status))
+                if (string.IsNullOrEmpty(user.User.StatuSf))
                 {
                     throw new KeyNotFoundException("Server can't find user Status");
                 }
-                if (user.Status.Equals("Ngưng Hoạt Động") )
+                if (user.User.StatuSf.Equals("Nghỉ Việc") )
                 {
                     UserId = null;
                     Roles =  string.Empty ;

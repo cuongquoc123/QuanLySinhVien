@@ -3,22 +3,24 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLySinhVien.DTOS.Request;
+using QuanLySinhVien.DTOS.Respone;
 using QuanLySinhVien.Models;
 using QuanLySinhVien.Service.HTMLRaw;
 using QuanLySinhVien.Service.SQL;
+using QuanLySinhVien.Service.SQL.Order;
 
 namespace QuanLySinhVien.Controller.Cashier
 {
     [ApiController]
     [Route("api/order")]
-    [Authorize(Roles = "manager,cashier")]
+    [Authorize(Roles = "admin,manager,cashier")]
     public class ThuNgan : ControllerBase
     {
         private readonly IHtmService htmService;
         private readonly IWebHostEnvironment webHostEnvironment;
         private readonly MyDbContext context;
-        private readonly ISqLServices sqLServices;
-        public ThuNgan(MyDbContext context, ISqLServices sqLServices, IWebHostEnvironment webHostEnvironment, IHtmService htmService)
+        private readonly IOrderService sqLServices;
+        public ThuNgan(MyDbContext context, IOrderService sqLServices, IWebHostEnvironment webHostEnvironment, IHtmService htmService)
         {
             this.context = context;
             this.sqLServices = sqLServices;
@@ -30,11 +32,14 @@ namespace QuanLySinhVien.Controller.Cashier
 
         public async Task<IActionResult> taoDonHang([FromBody] HoaDonRequest request)
         {
-            if (request == null)
+            if (request == null )
             {
                 return BadRequest("Request body is empty."); // Trả về lỗi 400 Bad Request
             }
-
+            if (string.IsNullOrEmpty(request.makhach) )
+            {
+                request.makhach = "CTM01";
+            }
             try
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -42,16 +47,10 @@ namespace QuanLySinhVien.Controller.Cashier
                 {
                     throw new UnauthorizedAccessException("Token is not valid");
                 }
-                var user = await context.Sysusers.FindAsync(userId);
-
-                if (user == null)
-                {
-                    throw new UnauthorizedAccessException("User Not Exists in server");
-                }
-                // 3. Toàn bộ logic xử lý chính đặt trong try-catch
+                
                 var donhang = await sqLServices.taoDon(
-                    ThanhTien: request.ThanhTien, // Tên thuộc tính nên nhất quán
-                    MaNV: userId,
+                    makhach: request.makhach,
+                    MaNV: userId.Trim(),
                     dssp: request.dssp
                 );
 
@@ -62,14 +61,34 @@ namespace QuanLySinhVien.Controller.Cashier
                     throw new Exception("Failed to create order in database.");
 
                 }
-
-                var res = htmService.HoaDonHTMl(donhang.MaDon);
-                if (string.IsNullOrEmpty(res))
+                var customer = await context.CustomerDetails.FindAsync(request.makhach);
+                if (customer == null)
                 {
-                    return StatusCode(500, "Failed to generate HTML bill.");
+                    customer = new CustomerDetail();
+                    customer.TenKhach = "Khách vãng lai";
                 }
-
-                return Content(res, "text/html; charset=utf-8");
+                List<HoaDonRespone> ChiTietDonHang = new List<HoaDonRespone>();
+                foreach( var item in donhang.ChiTietDonHangs)
+                {
+                    var sp = await context.Sanphams.FindAsync(item.MaSp);
+                    if (sp == null)
+                    {
+                        continue;
+                    }
+                    ChiTietDonHang.Add(new HoaDonRespone
+                    {
+                        tenSP = sp.TenSp ,
+                        SoLuong = item.SoLuong,
+                        DonGia = sp.DonGia
+                    });
+                }  
+                return Ok(new
+                {
+                    KhachHang = customer.TenKhach,
+                    donhang = donhang.MaDon,
+                    NgayNhan = donhang.NgayNhan,
+                    ChiTiet = ChiTietDonHang
+                });
             }
             catch (Exception)
             {

@@ -6,6 +6,7 @@ using QuanLySinhVien.Models;
 using Microsoft.EntityFrameworkCore;
 using QuanLySinhVien.Service.SQL;
 using QuanLySinhVien.DTOS.Request;
+using QuanLySinhVien.Service.SQL.StaffF;
 
 namespace QuanLySinhVien.Controller.Manager
 {
@@ -14,9 +15,9 @@ namespace QuanLySinhVien.Controller.Manager
     public class QuanLyStaff : ControllerBase
     {
         private readonly MyDbContext context;
-        private readonly ISqLServices sqLServices;
+        private readonly ISqlStaffServices sqLServices;
         private readonly IWebHostEnvironment webHostEnvironment;
-        public QuanLyStaff(MyDbContext context, ISqLServices sqLServices, IWebHostEnvironment webHostEnvironment)
+        public QuanLyStaff(MyDbContext context, ISqlStaffServices sqLServices, IWebHostEnvironment webHostEnvironment)
         {
             this.context = context;
             this.sqLServices = sqLServices;
@@ -42,12 +43,12 @@ namespace QuanLySinhVien.Controller.Manager
             {
                 throw new KeyNotFoundException("Missing Token");
             }
-            var user = await context.Sysusers.FindAsync(userId);
+            var user = await context.Sysusers.Include(x => x.User).FirstAsync(x => x.UserId == userId);
             if (user == null)
             {
                 throw new UnauthorizedAccessException("Fake Token");
             }
-            var lsStaff = await context.Staff.Where(s => s.CuaHangId == user.CuaHangId)
+            var lsStaff = await context.Staff.Where(s => s.CuaHangId == user.User.CuaHangId)
                                 .Skip((pageNum - 1) * pageSize)
                                 .Take(pageSize).ToListAsync();
             if (lsStaff == null || lsStaff.Count == 0 || !lsStaff.Any())
@@ -66,7 +67,7 @@ namespace QuanLySinhVien.Controller.Manager
                 respone.Items.Append(item);
             }
 
-            int total = await context.Staff.Where(s => s.CuaHangId == user.CuaHangId).CountAsync();
+            int total = await context.Staff.Where(s => s.CuaHangId == user.User.CuaHangId).CountAsync();
             respone.TotalCount = total;
             respone.PageIndex = pageNum;
             respone.PageSize = pageSize;
@@ -87,14 +88,14 @@ namespace QuanLySinhVien.Controller.Manager
             {
                 throw new KeyNotFoundException("Missing Token");
             }
-            var user = await context.Sysusers.FindAsync(userId);
+            var user = await context.Sysusers.Include(x => x.User).FirstAsync(x => x.UserId == userId);
             if (user == null)
             {
                 throw new UnauthorizedAccessException("Fake Token");
             }
 
             Staff respone = await context.Staff
-                            .FirstAsync(s => s.Cccd == StaffId && s.CuaHangId == user.CuaHangId);
+                            .FirstAsync(s => s.Cccd == StaffId && s.CuaHangId == user.User.CuaHangId);
 
             if (respone == null)
             {
@@ -126,7 +127,7 @@ namespace QuanLySinhVien.Controller.Manager
             {
                 throw new KeyNotFoundException("Missing Token");
             }
-            var user = await context.Sysusers.FindAsync(userId);
+            var user = await context.Sysusers.Include(x => x.User).FirstAsync(x => x.UserId == userId);
             if (user == null)
             {
                 throw new UnauthorizedAccessException("Fake Token");
@@ -157,7 +158,7 @@ namespace QuanLySinhVien.Controller.Manager
                     Luong = staff.Luong,
                     NgaySinh = ngaySinh,
                     DiaChi = staff.DiaChi,
-                    CuaHangId = user.CuaHangId
+                    CuaHangId = user.User.CuaHangId
                 };
                 var respone = await sqLServices.createStaff(newstaff, FilePath);
                 if (respone == null)

@@ -24,8 +24,8 @@ namespace QuanLySinhVien.Controller.Manager
             {
                 throw new ArgumentException("Missing Param datestart or dateend");
             }
-            if (!DateOnly.TryParse(datestart, out DateOnly datestarts) ||
-                !DateOnly.TryParse(dateend, out DateOnly datends))
+            if (!DateTime.TryParse(datestart, out DateTime datestarts) ||
+                !DateTime.TryParse(dateend, out DateTime datends))
             {
                 throw new ArgumentException("Date Format not true");
             }
@@ -38,13 +38,17 @@ namespace QuanLySinhVien.Controller.Manager
                     throw new UnauthorizedAccessException("Token not valid");
                 }
 
-                var user = await context.Sysusers.FindAsync(userID);
+                var user = await context.Sysusers.Include(u => u.User)
+                                .FirstAsync(u => u.UserId == userID.Trim());
                 if (user == null)
                 {
                     throw new UnauthorizedAccessException("User not exists in Server");
                 }
+                
                 var respone = new PageRespone<Donhang>();
-                var Items = await context.Donhangs.Where(d => d.NgayNhan >= datestarts && d.NgayNhan <= datends && d.CuaHangId == user.CuaHangId).
+                var Items = await context.Donhangs.Where(d => d.NgayNhan >= datestarts && d.NgayNhan <= datends
+                                && d.User != null 
+                                && d.User.User.CuaHangId == user.User.CuaHangId).
                                 Skip((pageNum - 1) * pageSize)
                                 .Take(pageSize).ToListAsync();
                 if (Items == null || Items.Count == 0 || !Items.Any())
@@ -62,7 +66,11 @@ namespace QuanLySinhVien.Controller.Manager
                     respone.Items.Append(itemNew);
                 }
                 respone.PageIndex = pageNum;
-                respone.TotalCount = await context.Donhangs.Where(d => d.NgayNhan >= datestarts && d.NgayNhan <= datends && d.CuaHangId == user.CuaHangId).CountAsync();
+                respone.TotalCount = await context.Donhangs.
+                                        Where(d => d.NgayNhan >= datestarts && d.NgayNhan <= datends 
+                                        && d.User != null 
+                                         && d.User.User.CuaHangId == user.User.CuaHangId)
+                                        .CountAsync();
                 respone.TotalPages = (int)Math.Ceiling(respone.TotalCount / (double)10);
                 respone.PageSize = pageSize;
                 return Ok(respone);
@@ -97,14 +105,7 @@ namespace QuanLySinhVien.Controller.Manager
             {
                 throw new KeyNotFoundException("The bill doesn't exists");
             }
-            if (string.IsNullOrEmpty(DonHang.CuaHangId))
-            {
-                throw new CustomError(403, "Not Permission", "This Bill is on your store");
-            }
-            if (!DonHang.CuaHangId.Equals(user.CuaHangId))
-            {
-                throw new CustomError(403, "Not Permission", "This Bill is on your store");
-            }
+            
             var chiTiets = await context.ChiTietDonHangs.Where(d => d.MaDon == MaDon).ToListAsync();
             return Ok(new
             {

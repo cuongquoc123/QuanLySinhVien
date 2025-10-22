@@ -13,7 +13,7 @@ namespace QuanLySinhVien.DTOS.Respone
         public int PageSize { get; set; }  // Số lượng bản ghi trên mỗi trang
         public int TotalPages { get; set; } // Tổng số trang có thể có
         public int TotalCount { get; set; } // Tổng số bản ghi trong DB
-        public IEnumerable<Item<T>> Items { get; set; } = Enumerable.Empty<Item<T>>(); // Danh sách các bản ghi của trang hiện tại
+        public List<Item<T>> Items { get; set; } = new List<Item<T>>(); // Danh sách các bản ghi của trang hiện tại
 
         // Thuận tiện để biết liệu có trang trước hoặc trang tiếp theo không
         public bool HasPreviousPage => PageIndex > 1;

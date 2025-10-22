@@ -10,13 +10,12 @@ namespace QuanLySinhVien.Controller.Public
     [Route("/public")]
     public class PublicController : ControllerBase
     {
-       
+
         private readonly MyDbContext myDbContext;
-        private readonly ISqLServices sqLServices;
-        public PublicController(MyDbContext myDbContext, ISqLServices sqLServices)
+
+        public PublicController(MyDbContext myDbContext)
         {
             this.myDbContext = myDbContext;
-            this.sqLServices = sqLServices;
 
         }
 
@@ -35,7 +34,7 @@ namespace QuanLySinhVien.Controller.Public
             var items = await myDbContext.Sanphams.OrderBy(x => x.TenSp)
                                 .Skip((pageNum - 1) * pageSize)
                                 .Take(pageSize).ToListAsync();
-            
+
             if (items == null || items.Count == 0 || !items.Any())
             {
                 return NoContent();
@@ -61,7 +60,7 @@ namespace QuanLySinhVien.Controller.Public
         [HttpGet("ProductByCate/{pageNum}/{pageSize}/{CateId}")]
         public async Task<IActionResult> GetProduct([FromRoute] int pageNum, [FromRoute] int pageSize, [FromRoute] string CateId)
         {
-            
+
             if (pageNum < 1)
             {
                 throw new ArgumentOutOfRangeException("PageNum param is Out Of Range");
@@ -118,17 +117,33 @@ namespace QuanLySinhVien.Controller.Public
                     return NoContent();
                 }
 
-                 return Ok(danhmucs);
+                return Ok(danhmucs);
             }
             catch (System.Exception)
             {
-                
+
                 throw;
             }
-            
+
         }
-       
+
+        [HttpGet("NL")]
+        public async Task<IActionResult> ALLNl()
+        {
+            try
+            {
+                var respone = await myDbContext.Nguyenlieus.ToListAsync();
+                return Ok(respone);
+            }
+            catch (System.Exception)
+            {
+                throw;
+            }
+        }
+
     }
-    
+
+
+
 
 }

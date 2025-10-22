@@ -2,7 +2,9 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using DotNetEnv;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using QuanLySinhVien.DTOS.Respone;
+using QuanLySinhVien.MidWare.Filter;
 using QuanLySinhVien.Models;
 using QuanLySinhVien.Service.GGService;
 
@@ -27,16 +29,20 @@ namespace QuanLySinhVien.Controller.Manager
             {
                 throw new KeyNotFoundException("Not Found User In Token");
             }
-            var Manager = await context.Sysusers.FindAsync(USID);
+            var Manager = await context.Sysusers.Include(s => s.User).FirstAsync(s => s.UserId == USID);
             if (Manager == null)
             {
                 throw new UnauthorizedAccessException("Token Not Valid");
             }
+            if (string.IsNullOrEmpty( Manager.User.CuaHangId ))
+            {
+                throw new CustomError(403, "Forbiden", "User Fake");
+            }
             try
             {
-                var data = await sheetService.StoreReview(Manager.CuaHangId.Trim());
+                var data = await sheetService.StoreReview(Manager.User.CuaHangId.Trim());
                 ReviewRespone respone = new ReviewRespone();
-                respone.StoreId = Manager.CuaHangId.Trim();
+                respone.StoreId = Manager.User.CuaHangId.Trim();
                 foreach (var item in data)
                 {
                     if (item[1] == "")

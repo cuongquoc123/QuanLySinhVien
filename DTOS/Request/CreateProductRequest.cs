@@ -6,5 +6,6 @@ namespace QuanLySinhVien.DTOS.Request
         public string? DMID { get; set; }
         public string? mota { get; set; }
         public decimal donGia { get; set; }
+        public IFormFile? file { get; set; }
     }
 }

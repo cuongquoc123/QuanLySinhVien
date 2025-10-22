@@ -2,17 +2,18 @@ using Microsoft.AspNetCore.Mvc;
 using QuanLySinhVien.DTOS.Request;
 using QuanLySinhVien.Models;
 using QuanLySinhVien.Service.SQL;
+using QuanLySinhVien.Service.SQL.ProductS;
 
 namespace QuanLySinhVien.Controller.Admin
 {
     [ApiController]
-    [Route("/admin/Product")]
+    [Route("admin/Product")]
     public class QuanLyProduct : ControllerBase
     {
         private readonly MyDbContext context;
-        private readonly ISqLServices sqLServices;
+        private readonly ISqlProductServiecs sqLServices;
         private readonly IWebHostEnvironment webHostEnvironment;
-        public QuanLyProduct(MyDbContext context,ISqLServices sqLServices, IWebHostEnvironment webHostEnvironment)
+        public QuanLyProduct(MyDbContext context,ISqlProductServiecs sqLServices, IWebHostEnvironment webHostEnvironment)
         {
             this.context = context;
             this.sqLServices = sqLServices;
@@ -20,13 +21,13 @@ namespace QuanLySinhVien.Controller.Admin
         }
 
         [HttpPost("")]
-        public async Task<IActionResult> CreateProduct([FromBody] CreateProductRequest sanphams, [FromForm] IFormFile file)
+        public async Task<IActionResult> CreateProduct([FromForm] CreateProductRequest sanphams)
         {
             if (sanphams == null || string.IsNullOrEmpty(sanphams.productname) || string.IsNullOrEmpty(sanphams.mota) || string.IsNullOrEmpty(sanphams.DMID))
             {
                 throw new ArgumentException("Missing Product ");
             }
-            if (file == null || file.Length == 0)
+            if (sanphams.file == null || sanphams.file.Length == 0)
             {
                 throw new ArgumentException("Missing File");
             }
@@ -37,19 +38,21 @@ namespace QuanLySinhVien.Controller.Admin
                 {
                     throw new Exception("Can't take web root path");
                 }
+                string subDirectory = "img";
                 string imgPath = Path.Combine(wwwrootPath, "img");
                 if (!Directory.Exists(imgPath))
                 {
                     Directory.CreateDirectory(imgPath);
                 }
-
-                string uniqueNameFile = Guid.NewGuid().ToString() + "_" + file.FileName;
+                
+                string uniqueNameFile = Guid.NewGuid().ToString() + "_" + sanphams.file.FileName;
                 string FilePath = Path.Combine(imgPath, uniqueNameFile);
 
                 using (var fileStream = new FileStream(FilePath, FileMode.Create))
                 {
-                    await file.CopyToAsync(fileStream);
+                    await sanphams.file.CopyToAsync(fileStream);
                 }
+                string relativeFilePath = Path.Combine("/", subDirectory, uniqueNameFile).Replace('\\', '/');
                 Sanpham sp = new Sanpham()
                 {
                     TenSp = sanphams.productname,
@@ -57,7 +60,7 @@ namespace QuanLySinhVien.Controller.Admin
                     MaDm = sanphams.DMID,
                     Mota = sanphams.mota
                 };
-                var respone = await sqLServices.CreateProDucts(sp, FilePath);
+                var respone = await sqLServices.CreateProDucts(sp, relativeFilePath);
 
                 if (respone == null)
                 {

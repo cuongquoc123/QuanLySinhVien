@@ -6,40 +6,35 @@ using QuanLySinhVien.DTOS.Respone;
 using QuanLySinhVien.MidWare.Filter;
 using QuanLySinhVien.Models;
 using QuanLySinhVien.Service.SQL;
+using QuanLySinhVien.Service.SQL.StaffF;
 
 namespace QuanLySinhVien.Controller.Admin
 {
     [ApiController]
-    [Route("/admin/User")]
+    [Route("/User")]
     public class AdminController : ControllerBase
     {
         private readonly MyDbContext context;
-        private readonly ISqLServices sqLServices;
+        private readonly ISqlStaffServices sqLServices;
 
-        public AdminController(MyDbContext context, ISqLServices sqLServices)
+        public AdminController(MyDbContext context, ISqlStaffServices sqLServices)
         {
             this.context = context;
             this.sqLServices = sqLServices;
         }
 
         [HttpPost("")]
-        public async Task<IActionResult> CreateUser([FromBody]CreateUserRequest req)
+        public async Task<IActionResult> CreateUser([FromBody]createAccountRequest req)
         {
             if (string.IsNullOrEmpty(req.UserName) || string.IsNullOrEmpty(req.Password)
-             ||string.IsNullOrEmpty(req.RoleId)  || string.IsNullOrEmpty(req.StoreId) )
+             ||string.IsNullOrEmpty(req.RoleId)  || string.IsNullOrEmpty(req.AccountId) )
             {
                 throw new ArgumentException("Missing Param UserName, Password or RoleId");
             }
-            Sysuser user = new Sysuser()
-            {
-                UserName = req.UserName,
-                Passwords = req.Password,
-                RoleId = req.RoleId,
-                CuaHangId = req.StoreId,
-            };
+            
             try
             {
-                var respone = await sqLServices.CreateUser(user);
+                var respone = await sqLServices.createAccount(req.AccountId,req.UserName,req.Password,req.RoleId);
                 if (respone == null)
                 {
                     throw new Exception("User can't be create");
@@ -53,17 +48,7 @@ namespace QuanLySinhVien.Controller.Admin
             }
         }
 
-        [HttpPut("")]
-        public async Task<IActionResult> UpdateUser([FromBody]Sysuser req)
-        {
-            if (ModelState.IsValid)
-            {
-
-                var user = await sqLServices.UpdateUser(req);
-                return Ok(user);
-            }
-            throw new CustomError(400, "Bad Request", "Can't Update User Info");
-        }
+        
 
         [HttpPut("DUser/{id}")]
         public async Task<IActionResult> DeleteUser([FromRoute] string id)
@@ -88,23 +73,21 @@ namespace QuanLySinhVien.Controller.Admin
             {
                 throw new ArgumentOutOfRangeException("Page size is between 1 and 100");
             }
-            var lsUser = await context.Sysusers
+            var lsUser = await context.Staff
                                     .Skip((PageNum - 1) * pageSize)
                                     .Take(pageSize).ToListAsync();
-            PageRespone<Sysuser> respone = new PageRespone<Sysuser>();
+            PageRespone<Staff> respone = new PageRespone<Staff>();
             foreach (var U in lsUser)
-            {
-
-                U.Passwords = "??????????????????";
-                Item<Sysuser> item = new Item<Sysuser>()
+            {   
+                Item<Staff> item = new Item<Staff>()
                 {
                     Value = U,
-                    PathChiTiet = $"admin/User/{U.UserId}"
+                    PathChiTiet = $"admin/User/{U.StaffId}"
                 };
-                respone.Items.Append(item);
+                respone.Items.Add(item);
             }
 
-            int total = await context.Sysusers.CountAsync();
+            int total = await context.Staff.CountAsync();
             respone.TotalCount = total;
             respone.TotalPages = (int)Math.Ceiling(total / (double)pageSize);
             respone.PageIndex = PageNum;
@@ -120,12 +103,11 @@ namespace QuanLySinhVien.Controller.Admin
             {
                 throw new ArgumentNullException("Missing Param id");
             }
-            Sysuser? respone = await context.Sysusers.FindAsync(id);
+            Staff? respone = await context.Staff.FindAsync(id);
             if (respone == null)
             {
                 throw new KeyNotFoundException("User not Exists");
             }
-            respone.Passwords = "???????????????????";
             return Ok(respone);
         }
     }

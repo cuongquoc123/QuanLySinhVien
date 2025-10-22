@@ -11,7 +11,7 @@ namespace QuanLySinhVien.DTOS.Request
     public class HoaDonRequest
     {
         public List<Product> dssp { get; set;}
-        public Decimal ThanhTien {  get; set; }
+        public string? makhach {  get; set; }
         public HoaDonRequest()
         {
             dssp = new List<Product>();

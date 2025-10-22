@@ -6,17 +6,18 @@ using QuanLySinhVien.DTOS.Request;
 using QuanLySinhVien.DTOS.Respone;
 using QuanLySinhVien.Models;
 using QuanLySinhVien.Service.SQL;
+using QuanLySinhVien.Service.SQL.Store;
 
 namespace QuanLySinhVien.Controller.Admin
 {
     [ApiController]
-    [Route("/admin/Store")]
+    [Route("admin/Store")]
     public class QuanLyCH : ControllerBase
     {
-        private readonly ISqLServices sqLServices;
+        private readonly ISqlStoreServices sqLServices;
         private readonly IWebHostEnvironment webHostEnvironment;
         private readonly MyDbContext myDbContext;
-        public QuanLyCH(ISqLServices sqLServices, IWebHostEnvironment webHostEnvironment, MyDbContext myDbContext)
+        public QuanLyCH(ISqlStoreServices sqLServices, IWebHostEnvironment webHostEnvironment, MyDbContext myDbContext)
         {
             this.sqLServices = sqLServices;
             this.webHostEnvironment = webHostEnvironment;
