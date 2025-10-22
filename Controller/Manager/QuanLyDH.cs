@@ -37,7 +37,7 @@ namespace QuanLySinhVien.Controller.Manager
                 {
                     throw new UnauthorizedAccessException("Token not valid");
                 }
-
+                userID = userID.Trim();
                 var user = await context.Sysusers.Include(u => u.User)
                                 .FirstAsync(u => u.UserId == userID.Trim());
                 if (user == null)
@@ -94,7 +94,7 @@ namespace QuanLySinhVien.Controller.Manager
             {
                 throw new UnauthorizedAccessException("Token not valid");
             }
-
+            userID = userID.Trim();
             var user = await context.Sysusers.FindAsync(userID);
             if (user == null)
             {
