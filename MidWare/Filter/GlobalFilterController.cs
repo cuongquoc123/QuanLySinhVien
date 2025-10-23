@@ -31,6 +31,12 @@ namespace QuanLySinhVien.MidWare.Filter
                 Error = "Bad Request";
                 status = (int)HttpStatusCode.BadRequest;
             }
+            else if (context.Exception is ArgumentOutOfRangeException)
+            {
+                logger.LogError(respone.message);
+                Error = "Bad Request";
+                status = (int)HttpStatusCode.BadRequest;
+            }
             else if (context.Exception is KeyNotFoundException)
             {   //Lỗi NotFound
                 logger.LogWarning(respone.message);

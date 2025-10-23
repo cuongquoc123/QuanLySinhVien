@@ -8,9 +8,19 @@ using QuanLySinhVien.MidWare.Filter;
 using QuanLySinhVien.MidWare.JWT;
 using QuanLySinhVien.Models;
 using QuanLySinhVien.Service.CheckFace;
+using QuanLySinhVien.Service.GGService;
 using QuanLySinhVien.Service.HashPassword;
-using QuanLySinhVien.Service.Schedule;
+using QuanLySinhVien.Service.HTMLRaw;
+
 using QuanLySinhVien.Service.SQL;
+using QuanLySinhVien.Service.SQL.Iventory;
+using QuanLySinhVien.Service.SQL.NguyenLieu;
+using QuanLySinhVien.Service.SQL.Order;
+using QuanLySinhVien.Service.SQL.ProductS;
+using QuanLySinhVien.Service.SQL.Store;
+using QuanLySinhVien.Service.SQL.StaffF;
+using Serilog;
+using QuanLySinhVien.Service.SQL.PhieuNhapKho;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +29,14 @@ Env.Load();
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 
+Log.Logger = new LoggerConfiguration()
+            .WriteTo.Console()
+            .WriteTo.File("Logs/system_log.txt", //Tạo ra file log 
+                             rollingInterval: RollingInterval.Day ,//file log được tạo ra hằng ngày 
+                             retainedFileCountLimit: 7) // Tự động xóa sau 7 ngày 
+            .CreateLogger();
+
+builder.Host.UseSerilog();
 
 builder.Services.AddControllers(options =>
 {
@@ -89,32 +107,40 @@ builder.Services.AddCors(option =>
 );
 
 //Cấu hình kết nối MS SQL server 
-var db_host2 = Env.GetString("db_host2");
-var db2 = Env.GetString("db2");
-var db_user2 = Env.GetString("db_user2");
-var db_password2 = Env.GetString("db_password2");
-var TrustServerCertificate = Env.GetString("TrustServerCertificate");
-var connectionString2 = $"Server={db_host2};Database={db2};User Id={db_user2};Password={db_password2};TrustServerCertificate={TrustServerCertificate};";
-
-builder.Services.AddDbContext<MyDbContext>(
-    options => options.UseSqlServer(connectionString2)
-);
+var server = Env.GetString("db_host2");
+var database = Env.GetString("db2");
+var user = Env.GetString("db_user2");
+var password = Env.GetString("db_password2");
+var trustCert = Env.GetString("TrustServerCertificate");
+var connectionString = $"Server={server};Database={database};User Id={user};Password={password};TrustServerCertificate={trustCert};";
+builder.Services.AddDbContext<MyDbContext>(options =>
+    options.UseSqlServer(connectionString));
 
 
 //Add các service tự viết của project
-builder.Services.AddScoped<IGAServices>(
-    sp => new GA()
-);
-
 int workFactor = int.Parse(Environment.GetEnvironmentVariable("WorkFactor") ?? "9");
 builder.Services.AddScoped<IPassWordService>(
     sp => new BCryptPasswordService(workFactor)
 );
 
-builder.Services.AddScoped<ISqLServices,SqLService>();
 
 builder.Services.AddScoped<IcheckFace, CheckFace>();
 
+builder.Services.AddScoped<IHtmService, HTMLService>();
+
+builder.Services.AddScoped<ISheetService, SheetService>();
+builder.Services.AddScoped<ISqlStaffServices, SqlStaffServices>();
+builder.Services.AddScoped<ISqlStoreServices, SqlStoreServices>();
+
+builder.Services.AddScoped<ISqlProductServiecs, SqlProductServiecs>();
+
+builder.Services.AddScoped<IOrderService, OrderService>();
+
+builder.Services.AddScoped<ISqlNguyenLieuServices, SqlNguyenLieuServices>();
+
+builder.Services.AddScoped<ISQLInventoryService,SQLInventoryServices>();
+
+builder.Services.AddScoped<ISqlPhieuNhapKho,SqlPhieuNhapKhoServices>();
 var app = builder.Build();
 
 var logger = app.Logger;
@@ -142,9 +168,12 @@ app.UseMiddleware<GlabalLogger>();
 app.UseAuthentication();
 
 //Cấu hình các đường dẫn API theo quyền
-app.MapGroup("/admin").RequireAuthorization(policy => policy.RequireRole("GiangVien"));
+app.MapGroup("/admin").RequireAuthorization(policy => policy.RequireRole("admin"));
+app.MapGroup("/manager").RequireAuthorization(policy => policy.RequireRole("manager"));
+app.MapGroup("/cashier").RequireAuthorization(policy => policy.RequireRole("cashier"));
 
 app.UseAuthorization();
 
 app.MapControllers();
+logger.LogInformation("Server start at {Time}",DateTime.Now.ToString());
 app.Run();
