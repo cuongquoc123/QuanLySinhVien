@@ -8,5 +8,6 @@ namespace QuanLySinhVien.DTOS.Request
         public string? Vtri { get; set; }
         public decimal Luong { get; set; }    
         public string? NgaySinh { get; set; }
+        public IFormFile? file { get; set; }
     }
 }

@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Threading.Tasks;
 using DotNetEnv;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLySinhVien.DTOS.Respone;
@@ -12,6 +13,7 @@ namespace QuanLySinhVien.Controller.Manager
 {
     [ApiController]
     [Route("/manager/review")]
+    [Authorize(Roles = "admin,manager")]
     public class reviewController : ControllerBase
     {
         private readonly ISheetService sheetService;
@@ -43,6 +45,7 @@ namespace QuanLySinhVien.Controller.Manager
                 var data = await sheetService.StoreReview(Manager.User.CuaHangId.Trim());
                 ReviewRespone respone = new ReviewRespone();
                 respone.StoreId = Manager.User.CuaHangId.Trim();
+                
                 foreach (var item in data)
                 {
                     if (item[1] == "")

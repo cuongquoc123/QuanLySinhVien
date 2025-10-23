@@ -97,7 +97,6 @@ namespace QuanLySinhVien.MidWare.JWT
         [HttpPost("refresh")]
         public IActionResult Refresh([FromBody] RefeshRequest request)
         {
-            logger.LogInformation($"API Refesh is being called:");
             if (!refreshStore.TryGetValue(request.RefreshToken, out var userId))
             {
                 throw new UnauthorizedAccessException("Refresh Token Not Valid");

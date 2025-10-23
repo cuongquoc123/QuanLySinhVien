@@ -31,7 +31,7 @@ namespace QuanLySinhVien.Controller.Public
             {
                 throw new ArgumentOutOfRangeException("Max page size is 100");
             }
-            var items = await myDbContext.Sanphams.OrderBy(x => x.TenSp)
+            var items = await myDbContext.Sanphams.OrderBy(x => x.TenSp )
                                 .Skip((pageNum - 1) * pageSize)
                                 .Take(pageSize).ToListAsync();
 
@@ -47,7 +47,7 @@ namespace QuanLySinhVien.Controller.Public
                     PathChiTiet = $"/ChiTiet/{item.MaSp}"
                 };
 
-                res.Items.Append(itemNew);
+                res.Items.Add(itemNew);
             }
             int totalCount = await myDbContext.Sanphams.CountAsync();
             res.TotalCount = totalCount;
@@ -69,7 +69,7 @@ namespace QuanLySinhVien.Controller.Public
             {
                 throw new ArgumentOutOfRangeException("Max page size is 100");
             }
-            var items = await myDbContext.Sanphams.Where(p => p.MaDm == CateId).OrderBy(x => x.TenSp)
+            var items = await myDbContext.Sanphams.Where(p => p.MaDm == CateId ).OrderBy(x => x.TenSp)
                                 .Skip((pageNum - 1) * pageSize)
                                 .Take(pageSize).ToListAsync();
             if (items.Count == 0 || !items.Any() || items == null)
@@ -87,7 +87,7 @@ namespace QuanLySinhVien.Controller.Public
 
                 res.Items.Append(itemNew);
             }
-            int totalCount = await myDbContext.Sanphams.Where(p => p.MaDm == CateId).CountAsync();
+            int totalCount = await myDbContext.Sanphams.Where(p => p.MaDm == CateId ).CountAsync();
             res.TotalCount = totalCount;
             res.TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
             res.PageIndex = pageNum;
@@ -111,13 +111,32 @@ namespace QuanLySinhVien.Controller.Public
         {
             try
             {
-                var danhmucs = await myDbContext.Danhmucs.ToListAsync();
-                if (danhmucs.Count == 0 || danhmucs == null || !danhmucs.Any())
+                var danhmucCha = await myDbContext.LoaiDanhMucs.ToListAsync();
+                if (danhmucCha == null || danhmucCha.Count == 0)
                 {
                     return NoContent();
                 }
-
-                return Ok(danhmucs);
+                List<DanhMucRespone> danhMucRespones = new List<DanhMucRespone>();
+                foreach (var cha in danhmucCha)
+                {
+                    var danhmucCon = await myDbContext.Danhmucs.Where(d => d.MaLoaiDm == cha.MaLoaiDm).ToListAsync();
+                    List<DMRes> res = new List<DMRes>();
+                    foreach (var con in danhmucCon)
+                    {
+                        res.Add(new DMRes()
+                        {
+                            tenDM = con.TenDm,
+                            MaDm = con.MaDm
+                        });
+                    }
+                    danhMucRespones.Add(new DanhMucRespone()
+                    {
+                        MaLoaiDm = cha.MaLoaiDm,
+                        ten = cha.TenLoaiDm,
+                        danhMucCon = res
+                    });
+                }
+                return Ok(danhMucRespones);
             }
             catch (System.Exception)
             {

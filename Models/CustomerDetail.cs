@@ -7,8 +7,8 @@ using Microsoft.EntityFrameworkCore;
 namespace QuanLySinhVien.Models;
 
 [Table("CustomerDetail")]
-[Index("Email", Name = "UQ__Customer__A9D105344B8AA8FC", IsUnique = true)]
-[Index("Sdt", Name = "UQ__Customer__CA1930A5E3491A21", IsUnique = true)]
+[Index("Email", Name = "UQ__Customer__A9D1053403406F57", IsUnique = true)]
+[Index("Sdt", Name = "UQ__Customer__CA1930A50F04E490", IsUnique = true)]
 public partial class CustomerDetail
 {
     [Key]

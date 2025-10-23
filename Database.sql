@@ -85,15 +85,13 @@ go
 drop table if exists chi_tiet_phieu_nhap;
 create table chi_tiet_phieu_nhap (
 	MaNguyenLieu char(10) not null, 
-	SoLuong int Check(SoLuong > 0),
+	SoLuong int Check(SoLuong > 0) not null,
 	MaPhieu char(10) not null,
 	Primary key (MaNguyenLieu,MaPhieu),
 	Constraint FK_CTYC_PHIEU foreign key (MaPhieu) references phieu_nhapNL(MaPhieu),
 	Constraint FK_CTYC_NL foreign key (MaNguyenLieu) references nguyenlieu(MaNguyenLieu)
 );
 go
-
-
 
 drop table if exists sysrole;
 create table sysrole(
@@ -223,7 +221,8 @@ insert into LoaiDanhMuc(MaLoaiDM,TenLoaiDM) values
 
 insert into staff(StaffId,Ten,DiaChi,CCCD,NgaySinh,CuaHangId,StatuSf) values
 ('ST01',N'admin hệ thống',N'Onlive','012356547','01/01/1999','CH01',N'Hoạt động');
-
+insert into sysuser (UserId,UserName,Passwords,RoleId) values 
+('ST01',N'admin1',N'$2a$10$YWJzGnAtUGlGGm2fjwK8/.arjFegAdxgGVVm7kCsrCtEDcR.XxRTm','R01');
 INSERT INTO sanpham (MaSP, DonGia, TenSP, Anh, status, Mota, maDM) VALUES
 -- =================================================================================
 -- Danh mục 1: Cà Phê (DM01)
@@ -336,6 +335,8 @@ select * from CustomerDetail
 select* from sysuser
 select * from staff
 delete from sanpham
+select * from donhang
+
 go
 --Tạo Trigger 
 --Trigger khi create bảng chi tiết yêu cầu sẽ cập nhật số lượng tồn kho của cửa hàng tương ứng
@@ -384,11 +385,11 @@ begin
 						DATEDIFF(YEAR,@NgaySinh,@NgayHienTai)
 					end;
 	if (@tuoi >= 18)
-		commit tran
+		print 'Staff đã đủ tuổi'
 	else
 		begin
-			print 'Staff vừa thêm vào không đủ 18 tuổi'
-			rollback tran
+			RAISERROR ('Staff vừa thêm vào không đủ 18 tuổi', 16, 1);
+			
 		end;
 end;
 go

@@ -15,7 +15,7 @@ public partial class ChiTietPhieuNhap
     [Unicode(false)]
     public string MaNguyenLieu { get; set; } = null!;
 
-    public int? SoLuong { get; set; }
+    public int SoLuong { get; set; }
 
     [Key]
     [StringLength(10)]

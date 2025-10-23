@@ -41,8 +41,8 @@ namespace QuanLySinhVien.Service.GGService
 
                 ValueRange respone = await request.ExecuteAsync();
                 IList<IList<object>> values = respone.Values;
-
-                if (values != null && values.Count > 0)
+                System.Console.WriteLine( values.Count);
+                
                 {
                     // Bỏ qua dòng đầu tiên (tiêu đề) và bắt đầu xử lý dữ liệu
                     // Dùng LINQ để lọc
@@ -52,7 +52,7 @@ namespace QuanLySinhVien.Service.GGService
                                 // 1. Dòng phải có đủ 6 cột (để không bị lỗi khi truy cập cột F)
                                 // 2. Giá trị ở cột F (index 5) không được rỗng
                                 // 3. Giá trị ở cột F phải khớp với mã cửa hàng cần lọc 
-                                row[5].ToString().Trim().Equals(storeId)
+                                row[5].ToString().Equals(storeId)
                                 select row.Select(cell => cell.ToString()).ToList();
                     data = query.ToList();
                 }

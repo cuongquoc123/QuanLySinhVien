@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLySinhVien.DTOS.Request;
@@ -12,6 +13,7 @@ namespace QuanLySinhVien.Controller.Manager
 {
     [ApiController]
     [Route("manager/Kho")]
+    [Authorize(Roles = "admin,manager")]
     public class QuanLyKho : ControllerBase
     {
         private readonly ISQLInventoryService sQLInventoryService;
@@ -64,7 +66,7 @@ namespace QuanLySinhVien.Controller.Manager
                     PathChiTiet = $"/manager/Kho/Detail/{item.MaKho}"
                 };
 
-                res.Items.Append(itemNew);
+                res.Items.Add(itemNew);
             }
             int totalCount = await context.Khos.Where(p => p.CuaHangId == Manager.User.CuaHangId)
                                 .CountAsync();
@@ -83,13 +85,23 @@ namespace QuanLySinhVien.Controller.Manager
             {
                 throw new ArgumentNullException("Missing Param MaKho");
             }
-            var respone = await context.TonKhos.Where(TK => TK.MaKho == MaKho).ToListAsync();
+            var respone = await context.TonKhos.Include(tk => tk.MaNguyenLieuNavigation).Where(TK => TK.MaKho == MaKho).ToListAsync();
             var Khos = await context.Khos.FindAsync(MaKho);
-
+            List<TonKhoRespone> tonKhoRespones = new List<TonKhoRespone>();
+            foreach (var item in respone)
+            {
+                tonKhoRespones.Add(new TonKhoRespone()
+                {
+                    maNL = item.MaNguyenLieuNavigation.MaNguyenLieu,
+                    tenNL = item.MaNguyenLieuNavigation.TenNguyenLieu,
+                    DVT = item.MaNguyenLieuNavigation.Dvt,
+                    SoLuong = item.SoLuongTon
+                });
+            }
             return Ok(new
             {
                 Kho = Khos,
-                TonKho = respone
+                TonKho = tonKhoRespones
             });
         }
 
@@ -103,8 +115,29 @@ namespace QuanLySinhVien.Controller.Manager
             try
             {
                 var respone = await sqlPhieuNhapKho.TaoPhieuNhat(Makho: MaKho, dsNL: dsNL);
-
-                return Ok(respone);
+                if (respone == null)
+                {
+                    throw new Exception("Can't create PhieuNhat");
+                }
+                var CTPH = await context.ChiTietPhieuNhaps.Include(ct => ct.MaNguyenLieuNavigation).Where(ph => ph.MaPhieu == respone.MaPhieu).ToListAsync();
+                List<TonKhoRespone> tonKhoRespones = new List<TonKhoRespone>();
+                foreach (var item in CTPH)
+                {
+                    tonKhoRespones.Add(new TonKhoRespone()
+                    {
+                        maNL = item.MaNguyenLieuNavigation.MaNguyenLieu,
+                        tenNL = item.MaNguyenLieuNavigation.TenNguyenLieu,
+                        DVT = item.MaNguyenLieuNavigation.Dvt,
+                        SoLuong = item.SoLuong,
+                    });
+                }
+                return Ok(new
+                {
+                    MaPhieu = respone.MaPhieu,
+                    MaKho = respone.MaKho,
+                    NgayNhap = respone.NgayNhap,
+                    ChiTietPhieu = tonKhoRespones
+                });
             }
             catch (System.Exception)
             {
@@ -112,7 +145,7 @@ namespace QuanLySinhVien.Controller.Manager
             }
 
         }
-        
+
         [HttpPost()]
         public async Task<IActionResult> TaoKho([FromQuery] string DiaChi)
         {
@@ -155,9 +188,9 @@ namespace QuanLySinhVien.Controller.Manager
             }
 
         }
-        
+
         [HttpPut("{Makho}")]
-        public async Task<IActionResult> SoftDeleteKho ([FromRoute] string Makho)
+        public async Task<IActionResult> SoftDeleteKho([FromRoute] string Makho)
         {
             if (string.IsNullOrEmpty(Makho))
             {
@@ -170,7 +203,10 @@ namespace QuanLySinhVien.Controller.Manager
                 {
                     throw new Exception("Can't delete Inventory");
                 }
-                return Ok(respone);
+                return Ok(new
+                {
+                    message = "Delete SuccesFull"
+                });
             }
             catch (System.Exception)
             {

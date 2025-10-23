@@ -20,10 +20,7 @@ namespace QuanLySinhVien.Service.SQL.StaffF
             var Transaction = await context.Database.BeginTransactionAsync();
             try
             {
-                if (string.IsNullOrEmpty(imgPath))
-                {
-                    imgPath = "https://bla.edu.vn/wp-content/uploads/2025/09/avatar-fb.jpg";
-                }
+                
                 Staff moi = new Staff();
                 moi.Avatar = imgPath;
                 moi.Ten = newStaff.Ten;
@@ -36,6 +33,7 @@ namespace QuanLySinhVien.Service.SQL.StaffF
                 moi.Cccd = newStaff.Cccd;
                 moi.NgaySinh = newStaff.NgaySinh;
                 await context.Staff.AddAsync(moi);
+                await context.SaveChangesAsync();
                 await Transaction.CommitAsync();
                 return moi;
             }

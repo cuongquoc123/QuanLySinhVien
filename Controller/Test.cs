@@ -17,23 +17,12 @@ namespace QuanLySinhVien.Controller
             this.context = context;
             this.sheetService = sheetService;
         }
-        [HttpGet("RateLimit")]
+        [HttpGet("calling")]
         public IActionResult Index()
         {
 
             return Ok(new { Message = "Hello from APi" });
         }
-        [HttpGet("")]
-        public async Task<IActionResult> test_connect_db()
-        {
-            var data = await sheetService.StoreReview("CH001");
-            
-            foreach (var item in data)
-            {
-                System.Console.WriteLine(item[5]);
-            }
-            // context.TestConnect();
-            return NoContent();
-        }
+        
     }
 }
