@@ -184,153 +184,165 @@ create table chi_tiet_don_hang (
 );
 go
 
-set dateformat dmy;
+SET DATEFORMAT dmy;
+GO
+
 INSERT into sysrole (RoleId,RoleName) VALUES
-('R01','admin'),
-('R02','manager'),
-('R03','cashier');
+('R000000001','admin'),
+('R000000002','manager'),
+('R000000003','cashier');
+GO
+
 insert into cuahang (CuaHangId,TenCH,DiaChi,statusS,SDT) values 
-('CH01',N'Cửa hàng mặc định',N'Cửa hàng online',N'Đang hoạt động','0123125451');
+('CH00000001',N'Cửa hàng mặc định',N'Cửa hàng online',N'Đang hoạt động','0123125451');
+GO
 
 insert into Customer (CustomerId,UserName,Passwords) values 
-('CTM01',N'MĐ','123456467865453121432');
+('CTM0000001',N'MĐ','123456467865453121432');
+GO
+
 insert into CustomerDetail (CustomerId,TenKhach) values
-('CTM01',N'Khách vãn lai');
+('CTM0000001',N'Khách vãn lai');
+GO
+
 insert into LoaiDanhMuc(MaLoaiDM,TenLoaiDM) values 
-('LDM1',N'Thức Uống'),
-('LDM2',N'Món ăn kèm'),
-('LDM3',N'Khác');
- INSERT INTO DanhMuc (MaDM, MaLoaiDM, TenDM) VALUES
+('LDM0000001',N'Thức Uống'),
+('LDM0000002',N'Món ăn kèm'),
+('LDM0000003',N'Khác');
+GO
 
-('DM01', 'LDM1', N'Cà Phê'),
-('DM02', 'LDM1', N'Trà Sữa'),
-('DM03', 'LDM1', N'Nước Ép Trái Cây'),
-('DM04', 'LDM1', N'Sinh Tố'),
-
-
-('DM05', 'LDM2', N'Bánh Ngọt'),
-('DM06', 'LDM2', N'Bánh Mì Kẹp'),
-('DM07', 'LDM2', N'Khoai Tây Chiên'),
-('DM08', 'LDM2', N'Salad'),
-
-
-('DM09', 'LDM3', N'Đồ Uống Đóng Lon'),
-('DM10', 'LDM3', N'Nguyên Liệu Pha Chế'),
-('DM11', 'LDM3', N'Dụng Cụ Bán Hàng'),
-('DM12', 'LDM3', N'Khuyến Mãi');
+INSERT INTO DanhMuc (MaDM, MaLoaiDM, TenDM) VALUES
+('DM00000001', 'LDM0000001', N'Cà Phê'),
+('DM00000002', 'LDM0000001', N'Trà Sữa'),
+('DM00000003', 'LDM0000001', N'Nước Ép Trái Cây'),
+('DM00000004', 'LDM0000001', N'Sinh Tố'),
+('DM00000005', 'LDM0000002', N'Bánh Ngọt'),
+('DM00000006', 'LDM0000002', N'Bánh Mì Kẹp'),
+('DM00000007', 'LDM0000002', N'Khoai Tây Chiên'),
+('DM00000008', 'LDM0000002', N'Salad'),
+('DM00000009', 'LDM0000003', N'Đồ Uống Đóng Lon'),
+('DM00000010', 'LDM0000003', N'Nguyên Liệu Pha Chế'),
+('DM00000011', 'LDM0000003', N'Dụng Cụ Bán Hàng'),
+('DM00000012', 'LDM0000003', N'Khuyến Mãi');
+GO
 
 insert into staff(StaffId,Ten,DiaChi,CCCD,NgaySinh,CuaHangId,StatuSf) values
-('ST01',N'admin hệ thống',N'Onlive','012356547','01/01/1999','CH01',N'Hoạt động');
+('ST00000001',N'admin hệ thống',N'Onlive','012356547','01/01/1999','CH00000001',N'Hoạt động');
+GO
+
 insert into sysuser (UserId,UserName,Passwords,RoleId) values 
-('ST01',N'admin1',N'$2a$10$YWJzGnAtUGlGGm2fjwK8/.arjFegAdxgGVVm7kCsrCtEDcR.XxRTm','R01');
+('ST00000001',N'admin1',N'$2a$10$YWJzGnAtUGlGGm2fjwK8/.arjFegAdxgGVVm7kCsrCtEDcR.XxRTm','R000000001');
+GO
+
 INSERT INTO sanpham (MaSP, DonGia, TenSP, Anh, status, Mota, maDM) VALUES
 -- =================================================================================
--- Danh mục 1: Cà Phê (DM01)
+-- Danh mục 1: Cà Phê (DM00000001)
 -- =================================================================================
-('SP001', 35000, N'Cà Phê Đen Đá', '/img/cf_den.jpg', N'Còn hàng', N'Cà phê đen truyền thống, đậm đà.', 'DM01'),
-('SP002', 40000, N'Cà Phê Sữa Đá', '/img/cf_sua.jpg', N'Còn hàng', N'Cà phê sữa béo ngậy, ngọt ngào.', 'DM01'),
-('SP003', 55000, N'Latte Hạnh Nhân', '/img/cf_latte.jpg', N'Còn hàng', N'Latte thơm mùi hạnh nhân.', 'DM01'),
-('SP004', 60000, N'Cappuccino', '/img/cf_capu.jpg', N'Còn hàng', N'Cappuccino với lớp bọt sữa dày.', 'DM01'),
-('SP005', 45000, N'Espresso', '/img/cf_espr.jpg', N'Hết hàng', N'Tinh chất cà phê đậm đặc.', 'DM01'),
+('SP00000001', 35000, N'Cà Phê Đen Đá', '/img/cf_den.jpg', N'Còn hàng', N'Cà phê đen truyền thống, đậm đà.', 'DM00000001'),
+('SP00000002', 40000, N'Cà Phê Sữa Đá', '/img/cf_sua.jpg', N'Còn hàng', N'Cà phê sữa béo ngậy, ngọt ngào.', 'DM00000001'),
+('SP00000003', 55000, N'Latte Hạnh Nhân', '/img/cf_latte.jpg', N'Còn hàng', N'Latte thơm mùi hạnh nhân.', 'DM00000001'),
+('SP00000004', 60000, N'Cappuccino', '/img/cf_capu.jpg', N'Còn hàng', N'Cappuccino với lớp bọt sữa dày.', 'DM00000001'),
+('SP00000005', 45000, N'Espresso', '/img/cf_espr.jpg', N'Hết hàng', N'Tinh chất cà phê đậm đặc.', 'DM00000001'),
 
 -- =================================================================================
--- Danh mục 2: Trà Sữa (DM02)
+-- Danh mục 2: Trà Sữa (DM00000002)
 -- =================================================================================
-('SP006', 45000, N'Trà Sữa Trân Châu', '/img/ts_tc.jpg', N'Còn hàng', N'Trà sữa truyền thống kèm trân châu đen.', 'DM02'),
-('SP007', 50000, N'Trà Sữa Matcha', '/img/ts_matcha.jpg', N'Còn hàng', N'Trà sữa vị trà xanh Nhật Bản.', 'DM02'),
-('SP008', 55000, N'Trà Sữa Kem Phô Mai', '/img/ts_cheese.jpg', N'Sắp về', N'Trà sữa với lớp kem phô mai mặn béo.', 'DM02'),
-('SP009', 40000, N'Hồng Trà Sữa', '/img/ts_hong.jpg', N'Còn hàng', N'Trà sữa làm từ hồng trà.', 'DM02'),
-('SP010', 48000, N'Trà Sữa Khoai Môn', '/img/ts_khoaimon.jpg', N'Còn hàng', N'Trà sữa vị khoai môn thơm lừng.', 'DM02'),
+('SP00000006', 45000, N'Trà Sữa Trân Châu', '/img/ts_tc.jpg', N'Còn hàng', N'Trà sữa truyền thống kèm trân châu đen.', 'DM00000002'),
+('SP00000007', 50000, N'Trà Sữa Matcha', '/img/ts_matcha.jpg', N'Còn hàng', N'Trà sữa vị trà xanh Nhật Bản.', 'DM00000002'),
+('SP00000008', 55000, N'Trà Sữa Kem Phô Mai', '/img/ts_cheese.jpg', N'Sắp về', N'Trà sữa với lớp kem phô mai mặn béo.', 'DM00000002'),
+('SP00000009', 40000, N'Hồng Trà Sữa', '/img/ts_hong.jpg', N'Còn hàng', N'Trà sữa làm từ hồng trà.', 'DM00000002'),
+('SP00000010', 48000, N'Trà Sữa Khoai Môn', '/img/ts_khoaimon.jpg', N'Còn hàng', N'Trà sữa vị khoai môn thơm lừng.', 'DM00000002'),
 
 -- =================================================================================
--- Danh mục 3: Nước Ép Trái Cây (DM03)
+-- Danh mục 3: Nước Ép Trái Cây (DM00000003)
 -- =================================================================================
-('SP011', 50000, N'Nước Ép Cam Tươi', '/img/ep_cam.jpg', N'Còn hàng', N'Cam tươi 100%, nguyên chất.', 'DM03'),
-('SP012', 55000, N'Nước Ép Dứa', '/img/ep_dua.jpg', N'Còn hàng', N'Ép dứa thơm lừng, giải khát.', 'DM03'),
-('SP013', 60000, N'Nước Ép Ổi', '/img/ep_oi.jpg', N'Sắp về', N'Nước ép ổi thanh mát, ít đường.', 'DM03'),
-('SP014', 65000, N'Nước Ép Bưởi', '/img/ep_buoi.jpg', N'Còn hàng', N'Ép bưởi hồng, hơi đắng nhẹ.', 'DM03'),
-('SP015', 52000, N'Nước Ép Táo Xanh', '/img/ep_tao.jpg', N'Còn hàng', N'Táo xanh chua nhẹ, cân bằng.', 'DM03'),
+('SP00000011', 50000, N'Nước Ép Cam Tươi', '/img/ep_cam.jpg', N'Còn hàng', N'Cam tươi 100%, nguyên chất.', 'DM00000003'),
+('SP00000012', 55000, N'Nước Ép Dứa', '/img/ep_dua.jpg', N'Còn hàng', N'Ép dứa thơm lừng, giải khát.', 'DM00000003'),
+('SP00000013', 60000, N'Nước Ép Ổi', '/img/ep_oi.jpg', N'Sắp về', N'Nước ép ổi thanh mát, ít đường.', 'DM00000003'),
+('SP00000014', 65000, N'Nước Ép Bưởi', '/img/ep_buoi.jpg', N'Còn hàng', N'Ép bưởi hồng, hơi đắng nhẹ.', 'DM00000003'),
+('SP00000015', 52000, N'Nước Ép Táo Xanh', '/img/ep_tao.jpg', N'Còn hàng', N'Táo xanh chua nhẹ, cân bằng.', 'DM00000003'),
 
 -- =================================================================================
--- Danh mục 4: Sinh Tố (DM04)
+-- Danh mục 4: Sinh Tố (DM00000004)
 -- =================================================================================
-('SP016', 60000, N'Sinh Tố Bơ', '/img/st_bo.jpg', N'Còn hàng', N'Sinh tố bơ xay nhuyễn với sữa.', 'DM04'),
-('SP017', 65000, N'Sinh Tố Xoài', '/img/st_xoai.jpg', N'Còn hàng', N'Xoài chín ngọt, đá xay.', 'DM04'),
-('SP018', 70000, N'Sinh Tố Dâu', '/img/st_dau.jpg', N'Còn hàng', N'Dâu tây tươi, chua ngọt hài hòa.', 'DM04'),
-('SP019', 75000, N'Sinh Tố Mãng Cầu', '/img/st_mangcau.jpg', N'Hết hàng', N'Mãng cầu xiêm chua ngọt tự nhiên.', 'DM04'),
-('SP020', 68000, N'Sinh Tố Chuối Yến Mạch', '/img/st_chuoi.jpg', N'Còn hàng', N'Sinh tố bổ sung năng lượng.', 'DM04'),
+('SP00000016', 60000, N'Sinh Tố Bơ', '/img/st_bo.jpg', N'Còn hàng', N'Sinh tố bơ xay nhuyễn với sữa.', 'DM00000004'),
+('SP00000017', 65000, N'Sinh Tố Xoài', '/img/st_xoai.jpg', N'Còn hàng', N'Xoài chín ngọt, đá xay.', 'DM00000004'),
+('SP00000018', 70000, N'Sinh Tố Dâu', '/img/st_dau.jpg', N'Còn hàng', N'Dâu tây tươi, chua ngọt hài hòa.', 'DM00000004'),
+('SP00000019', 75000, N'Sinh Tố Mãng Cầu', '/img/st_mangcau.jpg', N'Hết hàng', N'Mãng cầu xiêm chua ngọt tự nhiên.', 'DM00000004'),
+('SP00000020', 68000, N'Sinh Tố Chuối Yến Mạch', '/img/st_chuoi.jpg', N'Còn hàng', N'Sinh tố bổ sung năng lượng.', 'DM00000004'),
 
 -- =================================================================================
--- Danh mục 5: Bánh Ngọt (DM05)
+-- Danh mục 5: Bánh Ngọt (DM00000005)
 -- =================================================================================
-('SP021', 80000, N'Bánh Tiramisu', '/img/banh_tira.jpg', N'Còn hàng', N'Bánh Ý cổ điển, vị cà phê và cacao.', 'DM05'),
-('SP022', 95000, N'Cheesecake Chanh Dây', '/img/banh_cheese.jpg', N'Còn hàng', N'Cheesecake béo ngậy với sốt chanh dây chua.', 'DM05'),
-('SP023', 75000, N'Bánh Muffin Việt Quất', '/img/banh_muffin.jpg', N'Còn hàng', N'Muffin mềm xốp với quả việt quất.', 'DM05'),
-('SP024', 65000, N'Bánh Sừng Bò (Croissant)', '/img/banh_cross.jpg', N'Còn hàng', N'Bánh sừng bò Pháp, giòn rụm.', 'DM05'),
-('SP025', 85000, N'Bánh Red Velvet', '/img/banh_red.jpg', N'Sắp về', N'Bánh nhung đỏ với lớp kem phô mai.', 'DM05'),
+('SP00000021', 80000, N'Bánh Tiramisu', '/img/banh_tira.jpg', N'Còn hàng', N'Bánh Ý cổ điển, vị cà phê và cacao.', 'DM00000005'),
+('SP00000022', 95000, N'Cheesecake Chanh Dây', '/img/banh_cheese.jpg', N'Còn hàng', N'Cheesecake béo ngậy với sốt chanh dây chua.', 'DM00000005'),
+('SP00000023', 75000, N'Bánh Muffin Việt Quất', '/img/banh_muffin.jpg', N'Còn hàng', N'Muffin mềm xốp với quả việt quất.', 'DM00000005'),
+('SP00000024', 65000, N'Bánh Sừng Bò (Croissant)', '/img/banh_cross.jpg', N'Còn hàng', N'Bánh sừng bò Pháp, giòn rụm.', 'DM00000005'),
+('SP00000025', 85000, N'Bánh Red Velvet', '/img/banh_red.jpg', N'Sắp về', N'Bánh nhung đỏ với lớp kem phô mai.', 'DM00000005'),
 
 -- =================================================================================
--- Danh mục 6: Bánh Mì Kẹp (DM06)
+-- Danh mục 6: Bánh Mì Kẹp (DM00000006)
 -- =================================================================================
-('SP026', 70000, N'Sandwich Trứng Cá Ngừ', '/img/bm_tunna.jpg', N'Còn hàng', N'Sandwich trứng và cá ngừ mayonnaise.', 'DM06'),
-('SP027', 85000, N'Bánh Mì Kẹp Gà BBQ', '/img/bm_bbq.jpg', N'Còn hàng', N'Thịt gà nướng sốt BBQ, rau tươi.', 'DM06'),
-('SP028', 90000, N'Burger Bò Phô Mai', '/img/bm_burger.jpg', N'Còn hàng', N'Thịt bò nướng, phô mai Cheddar.', 'DM06'),
-('SP029', 75000, N'Panini Rau Củ', '/img/bm_pani.jpg', N'Hết hàng', N'Bánh mì Ý Panini kẹp rau củ nướng.', 'DM06'),
-('SP030', 80000, N'Wrap Gà Caesar', '/img/bm_wrap.jpg', N'Còn hàng', N'Thịt gà và salad Caesar cuộn trong bánh mỏng.', 'DM06'),
+('SP00000026', 70000, N'Sandwich Trứng Cá Ngừ', '/img/bm_tunna.jpg', N'Còn hàng', N'Sandwich trứng và cá ngừ mayonnaise.', 'DM00000006'),
+('SP00000027', 85000, N'Bánh Mì Kẹp Gà BBQ', '/img/bm_bbq.jpg', N'Còn hàng', N'Thịt gà nướng sốt BBQ, rau tươi.', 'DM00000006'),
+('SP00000028', 90000, N'Burger Bò Phô Mai', '/img/bm_burger.jpg', N'Còn hàng', N'Thịt bò nướng, phô mai Cheddar.', 'DM00000006'),
+('SP00000029', 75000, N'Panini Rau Củ', '/img/bm_pani.jpg', N'Hết hàng', N'Bánh mì Ý Panini kẹp rau củ nướng.', 'DM00000006'),
+('SP00000030', 80000, N'Wrap Gà Caesar', '/img/bm_wrap.jpg', N'Còn hàng', N'Thịt gà và salad Caesar cuộn trong bánh mỏng.', 'DM00000006'),
 
 -- =================================================================================
--- Danh mục 7: Khoai Tây Chiên (DM07)
+-- Danh mục 7: Khoai Tây Chiên (DM00000007)
 -- =================================================================================
-('SP031', 45000, N'Khoai Tây Chiên Cơ Bản', '/img/ktc_basic.jpg', N'Còn hàng', N'Khoai tây cắt lát truyền thống.', 'DM07'),
-('SP032', 55000, N'Khoai Tây Chiên Phô Mai', '/img/ktc_cheese.jpg', N'Còn hàng', N'Khoai tây phủ sốt phô mai béo.', 'DM07'),
-('SP033', 60000, N'Khoai Tây Lắc Xí Muội', '/img/ktc_ximuoi.jpg', N'Còn hàng', N'Khoai tây chiên giòn lắc bột xí muội.', 'DM07'),
-('SP034', 50000, N'Khoai Tây Chiên Cay', '/img/ktc_cay.jpg', N'Còn hàng', N'Khoai tây rắc bột ớt paprika.', 'DM07'),
-('SP035', 65000, N'Khoai Tây Chiên Lượn Sóng', '/img/ktc_luon.jpg', N'Sắp về', N'Cắt lượn sóng, giòn hơn.', 'DM07'),
+('SP00000031', 45000, N'Khoai Tây Chiên Cơ Bản', '/img/ktc_basic.jpg', N'Còn hàng', N'Khoai tây cắt lát truyền thống.', 'DM00000007'),
+('SP00000032', 55000, N'Khoai Tây Chiên Phô Mai', '/img/ktc_cheese.jpg', N'Còn hàng', N'Khoai tây phủ sốt phô mai béo.', 'DM00000007'),
+('SP00000033', 60000, N'Khoai Tây Lắc Xí Muội', '/img/ktc_ximuoi.jpg', N'Còn hàng', N'Khoai tây chiên giòn lắc bột xí muội.', 'DM00000007'),
+('SP00000034', 50000, N'Khoai Tây Chiên Cay', '/img/ktc_cay.jpg', N'Còn hàng', N'Khoai tây rắc bột ớt paprika.', 'DM00000007'),
+('SP00000035', 65000, N'Khoai Tây Chiên Lượn Sóng', '/img/ktc_luon.jpg', N'Sắp về', N'Cắt lượn sóng, giòn hơn.', 'DM00000007'),
 
 -- =================================================================================
--- Danh mục 8: Salad (DM08)
+-- Danh mục 8: Salad (DM00000008)
 -- =================================================================================
-('SP036', 105000, N'Salad Caesar Gà', '/img/salad_caesar.jpg', N'Còn hàng', N'Rau tươi, gà nướng, sốt Caesar.', 'DM08'),
-('SP037', 95000, N'Salad Rau Tổng Hợp', '/img/salad_rau.jpg', N'Còn hàng', N'Nhiều loại rau xanh, dressing dầu giấm.', 'DM08'),
-('SP038', 115000, N'Salad Tôm Bơ', '/img/salad_tom.jpg', N'Còn hàng', N'Tôm luộc, bơ tươi, sốt chua ngọt.', 'DM08'),
-('SP039', 85000, N'Salad Trái Cây', '/img/salad_traicay.jpg', N'Còn hàng', N'Các loại trái cây tươi, sữa chua.', 'DM08'),
-('SP040', 100000, N'Salad Trứng Cút', '/img/salad_trung.jpg', N'Hết hàng', N'Trứng cút luộc và rau xà lách.', 'DM08'),
+('SP00000036', 105000, N'Salad Caesar Gà', '/img/salad_caesar.jpg', N'Còn hàng', N'Rau tươi, gà nướng, sốt Caesar.', 'DM00000008'),
+('SP00000037', 95000, N'Salad Rau Tổng Hợp', '/img/salad_rau.jpg', N'Còn hàng', N'Nhiều loại rau xanh, dressing dầu giấm.', 'DM00000008'),
+('SP00000038', 115000, N'Salad Tôm Bơ', '/img/salad_tom.jpg', N'Còn hàng', N'Tôm luộc, bơ tươi, sốt chua ngọt.', 'DM00000008'),
+('SP00000039', 85000, N'Salad Trái Cây', '/img/salad_traicay.jpg', N'Còn hàng', N'Các loại trái cây tươi, sữa chua.', 'DM00000008'),
+('SP00000040', 100000, N'Salad Trứng Cút', '/img/salad_trung.jpg', N'Hết hàng', N'Trứng cút luộc và rau xà lách.', 'DM00000008'),
 
 -- =================================================================================
--- Danh mục 9: Đồ Uống Đóng Lon (DM09)
+-- Danh mục 9: Đồ Uống Đóng Lon (DM00000009)
 -- =================================================================================
-('SP041', 25000, N'Coca Cola', '/img/lon_coca.jpg', N'Còn hàng', N'Nước ngọt có ga.', 'DM09'),
-('SP042', 28000, N'Bia Lúa Mạch', '/img/lon_bia.jpg', N'Còn hàng', N'Bia không cồn, lúa mạch.', 'DM09'),
-('SP043', 30000, N'Nước Suối Lavie', '/img/lon_lavie.jpg', N'Còn hàng', N'Nước khoáng đóng chai.', 'DM09'),
-('SP044', 35000, N'Nước Tăng Lực', '/img/lon_energy.jpg', N'Còn hàng', N'Nước uống bổ sung năng lượng.', 'DM09'),
-('SP045', 32000, N'Trà Chanh Nestea', '/img/lon_tea.jpg', N'Hết hàng', N'Trà chanh đóng hộp.', 'DM09'),
+('SP00000041', 25000, N'Coca Cola', '/img/lon_coca.jpg', N'Còn hàng', N'Nước ngọt có ga.', 'DM00000009'),
+('SP00000042', 28000, N'Bia Lúa Mạch', '/img/lon_bia.jpg', N'Còn hàng', N'Bia không cồn, lúa mạch.', 'DM00000009'),
+('SP00000043', 30000, N'Nước Suối Lavie', '/img/lon_lavie.jpg', N'Còn hàng', N'Nước khoáng đóng chai.', 'DM00000009'),
+('SP00000044', 35000, N'Nước Tăng Lực', '/img/lon_energy.jpg', N'Còn hàng', N'Nước uống bổ sung năng lượng.', 'DM00000009'),
+('SP00000045', 32000, N'Trà Chanh Nestea', '/img/lon_tea.jpg', N'Hết hàng', N'Trà chanh đóng hộp.', 'DM00000009'),
 
 -- =================================================================================
--- Danh mục 10: Nguyên Liệu Pha Chế (DM10)
+-- Danh mục 10: Nguyên Liệu Pha Chế (DM00000010)
 -- =================================================================================
-('SP046', 120000, N'Siro Dâu (1L)', '/img/nl_siro.jpg', N'Còn hàng', N'Siro dâu tây đậm đặc.', 'DM10'),
-('SP047', 90000, N'Bột Kem Béo (1KG)', '/img/nl_botkem.jpg', N'Còn hàng', N'Bột kem không sữa.', 'DM10'),
-('SP048', 150000, N'Cà Phê Hạt Arabica (500G)', '/img/nl_coffee.jpg', N'Còn hàng', N'Hạt cà phê Arabica nguyên chất.', 'DM10'),
-('SP049', 80000, N'Trân Châu Đen Khô (1KG)', '/img/nl_tc.jpg', N'Còn hàng', N'Trân châu khô cần luộc.', 'DM10'),
-('SP050', 110000, N'Đường Nước (1L)', '/img/nl_duong.jpg', N'Sắp về', N'Đường đã pha sẵn, tiện dụng.', 'DM10'),
+('SP00000046', 120000, N'Siro Dâu (1L)', '/img/nl_siro.jpg', N'Còn hàng', N'Siro dâu tây đậm đặc.', 'DM00000010'),
+('SP00000047', 90000, N'Bột Kem Béo (1KG)', '/img/nl_botkem.jpg', N'Còn hàng', N'Bột kem không sữa.', 'DM00000010'),
+('SP00000048', 150000, N'Cà Phê Hạt Arabica (500G)', '/img/nl_coffee.jpg', N'Còn hàng', N'Hạt cà phê Arabica nguyên chất.', 'DM00000010'),
+('SP00000049', 80000, N'Trân Châu Đen Khô (1KG)', '/img/nl_tc.jpg', N'Còn hàng', N'Trân châu khô cần luộc.', 'DM00000010'),
+('SP00000050', 110000, N'Đường Nước (1L)', '/img/nl_duong.jpg', N'Sắp về', N'Đường đã pha sẵn, tiện dụng.', 'DM00000010'),
 
 -- =================================================================================
--- Danh mục 11: Dụng Cụ Bán Hàng (DM11)
+-- Danh mục 11: Dụng Cụ Bán Hàng (DM00000011)
 -- =================================================================================
-('SP051', 15000, N'Ống Hút Giấy (100 cái)', '/img/dc_hut.jpg', N'Còn hàng', N'Ống hút thân thiện môi trường.', 'DM11'),
-('SP052', 20000, N'Ly Nhựa PET (50 cái)', '/img/dc_ly.jpg', N'Còn hàng', N'Ly nhựa dùng một lần.', 'DM11'),
-('SP053', 500000, N'Máy Đánh Kem Cầm Tay', '/img/dc_may.jpg', N'Còn hàng', N'Máy đánh kem nhỏ gọn.', 'DM11'),
-('SP054', 25000, N'Khăn Giấy Hộp Lớn', '/img/dc_khan.jpg', N'Còn hàng', N'Khăn giấy ăn.', 'DM11'),
-('SP055', 18000, N'Túi Đựng Ly (100 cái)', '/img/dc_tui.jpg', N'Hết hàng', N'Túi giấy đựng 2 ly.', 'DM11'),
+('SP00000051', 15000, N'Ống Hút Giấy (100 cái)', '/img/dc_hut.jpg', N'Còn hàng', N'Ống hút thân thiện môi trường.', 'DM00000011'),
+('SP00000052', 20000, N'Ly Nhựa PET (50 cái)', '/img/dc_ly.jpg', N'Còn hàng', N'Ly nhựa dùng một lần.', 'DM00000011'),
+('SP00000053', 500000, N'Máy Đánh Kem Cầm Tay', '/img/dc_may.jpg', N'Còn hàng', N'Máy đánh kem nhỏ gọn.', 'DM00000011'),
+('SP00000054', 25000, N'Khăn Giấy Hộp Lớn', '/img/dc_khan.jpg', N'Còn hàng', N'Khăn giấy ăn.', 'DM00000011'),
+('SP00000055', 18000, N'Túi Đựng Ly (100 cái)', '/img/dc_tui.jpg', N'Hết hàng', N'Túi giấy đựng 2 ly.', 'DM00000011'),
 
 -- =================================================================================
--- Danh mục 12: Khuyến Mãi (DM12)
+-- Danh mục 12: Khuyến Mãi (DM00000012)
 -- =================================================================================
-('SP056', 10000, N'Voucher Giảm 10K', '/img/km_vc.jpg', N'Còn hàng', N'Voucher giảm giá cho đơn hàng tiếp theo.', 'DM12'),
-('SP057', 15000, N'Tặng Kèm Bánh Quy', '/img/km_banh.jpg', N'Còn hàng', N'Bánh quy miễn phí khi mua cà phê.', 'DM12'),
-('SP058', 5000, N'Miễn Phí Up Size', '/img/km_up.jpg', N'Còn hàng', N'Nâng cấp size L không tính phí.', 'DM12'),
-('SP059', 8000, N'Mua 2 Tặng 1', '/img/km_m2t1.jpg', N'Còn hàng', N'Áp dụng cho trà sữa cơ bản.', 'DM12'),
-('SP060', 12000, N'Tích Điểm X2', '/img/km_x2.jpg', N'Còn hàng', N'Tích điểm thưởng gấp đôi.', 'DM12');
+('SP00000056', 10000, N'Voucher Giảm 10K', '/img/km_vc.jpg', N'Còn hàng', N'Voucher giảm giá cho đơn hàng tiếp theo.', 'DM00000012'),
+('SP00000057', 15000, N'Tặng Kèm Bánh Quy', '/img/km_banh.jpg', N'Còn hàng', N'Bánh quy miễn phí khi mua cà phê.', 'DM00000012'),
+('SP00000058', 5000, N'Miễn Phí Up Size', '/img/km_up.jpg', N'Còn hàng', N'Nâng cấp size L không tính phí.', 'DM00000012'),
+('SP00000059', 8000, N'Mua 2 Tặng 1', '/img/km_m2t1.jpg', N'Còn hàng', N'Áp dụng cho trà sữa cơ bản.', 'DM00000012'),
+('SP00000060', 12000, N'Tích Điểm X2', '/img/km_x2.jpg', N'Còn hàng', N'Tích điểm thưởng gấp đôi.', 'DM00000012');
+GO
 select * from CustomerDetail
 select* from sysuser
 select * from staff
