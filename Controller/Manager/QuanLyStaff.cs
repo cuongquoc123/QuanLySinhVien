@@ -138,6 +138,7 @@ namespace QuanLySinhVien.Controller.Manager
         }
 
         [HttpPost]
+        [Authorize(Roles = "manager,admin")]
         public async Task<IActionResult> CreateStaffm([FromForm] CreateStaffRequest staff)
         {
             if (string.IsNullOrEmpty(staff.Cccd) ||
@@ -162,6 +163,10 @@ namespace QuanLySinhVien.Controller.Manager
                 throw new KeyNotFoundException("Missing Token");
             }
             var user = await context.Sysusers.Include(x => x.User).FirstAsync(x => x.UserId == userId);
+            if (user.RoleId == "R000000001" && !string.IsNullOrEmpty(staff.cuaHangId))
+            {
+                user.User.CuaHangId = staff.cuaHangId;
+            }
             if (user == null)
             {
                 throw new UnauthorizedAccessException("Fake Token");
