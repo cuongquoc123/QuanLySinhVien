@@ -107,12 +107,8 @@ builder.Services.AddCors(option =>
 );
 
 //Cấu hình kết nối MS SQL server 
-var server = Env.GetString("db_host2");
-var database = Env.GetString("db2");
-var user = Env.GetString("db_user2");
-var password = Env.GetString("db_password2");
-var trustCert = Env.GetString("TrustServerCertificate");
-var connectionString = $"Server={server};Database={database};User Id={user};Password={password};TrustServerCertificate={trustCert};";
+
+var connectionString = Env.GetString("constr");
 builder.Services.AddDbContext<MyDbContext>(options =>
     options.UseSqlServer(connectionString));
 
