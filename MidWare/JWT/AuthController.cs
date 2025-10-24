@@ -115,8 +115,9 @@ namespace QuanLySinhVien.MidWare.JWT
             {
                 throw new CustomError(403,"UnAuthentiacion","You don't have permision");
             }
-            var pair = _tokenService.CreateTokenPair(user.UserId,  user.Role.RoleName );
+            var pair = _tokenService.CreateTokenPair(user.UserId, user.Role.RoleName);
              //Lưu token mới vào CSDL
+            reFreshTokenService.AddRefreshToken(pair.RefreshToken, user.UserId);
             //Nếu có thì mới tạo token mới
             //Nếu không thì trả về 401
             reFreshTokenService.RemoveRefreshToken(request.RefreshToken); //Xoá token cũ đi để tránh tấn công phát lại (replay attack)

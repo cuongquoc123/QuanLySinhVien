@@ -68,7 +68,7 @@ namespace QuanLySinhVien.MidWare.JWT
 
             // Refresh Token
             string refreshToken = GenerateRefreshToken();
-
+            
             return new TokenPair
             {
                 AccessToken = accessTokenString,
