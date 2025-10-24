@@ -28,21 +28,7 @@ create table cuahang(
 );
 go
 
-drop table if exists staff;
-create table staff(
-	StaffId char(10) primary key,
-	CCCD char(11) not null,
-	Ten nvarchar(50) not null,
-	DiaChi nvarchar(50) not null,
-	NgaySinh date,
-	Vtri nvarchar(50),
-	Luong money check(Luong > 0),
-	Thuong money,
-	Avatar nvarchar(500) not null Default('https://bla.edu.vn/wp-content/uploads/2025/09/avatar-fb.jpg'),
-	StatuSf nvarchar(100),
-	CuaHangId char(10),
-	Constraint FK_CH_STAFF foreign key (CuaHangId) references cuahang (CuaHangId) 
-)
+
 go
 
 drop table if exists nguyenlieu;
@@ -96,19 +82,11 @@ go
 drop table if exists sysrole;
 create table sysrole(
 	RoleId char(10) primary key,
-	RoleName nvarchar(20) not null
+	RoleName nvarchar(50) not null
 ); 
 go
 
-drop table if exists sysuser;
-create table sysuser (
-	UserId char(10) primary key,
-	UserName nvarchar(100) unique not null,
-	Passwords nvarchar(100) not null,
-	RoleId char(10)
-	Constraint FK_USER_ROLE foreign key (RoleId) references sysrole(RoleId),
-	Constraint FK_USER_STAFF foreign key (UserId) references Staff(StaffId)
-);
+
 go
 
 drop table if exists LoaiDanhMuc;
@@ -160,6 +138,31 @@ create table CustomerDetail(
 	constraint FK_Detail_Customer foreign key (CustomerId) references Customer(CustomerId)
 );
 go
+drop table if exists staff;
+create table staff(
+	StaffId char(10) primary key,
+	CCCD char(11) not null,
+	Ten nvarchar(50) not null,
+	DiaChi nvarchar(50) not null,
+	NgaySinh date,
+	Luong money check(Luong > 0),
+	Thuong money,
+	Avatar nvarchar(500) not null Default('https://bla.edu.vn/wp-content/uploads/2025/09/avatar-fb.jpg'),
+	StatuSf nvarchar(100),
+	CuaHangId char(10),
+	RoleId char(10),
+	Constraint FK_CH_STAFF foreign key (CuaHangId) references cuahang (CuaHangId),
+	Constraint FK_USER_ROLE foreign key (RoleId) references sysrole(RoleId),
+);
+go
+drop table if exists sysuser;
+create table sysuser (
+	UserId char(10) primary key,
+	UserName nvarchar(100) unique not null,
+	Passwords nvarchar(100) not null,
+	Constraint FK_USER_STAFF foreign key (UserId) references Staff(StaffId)
+);
+go
 drop table if exists donhang;
 create table donhang(
 	MaDon char(10) primary key,
@@ -169,7 +172,7 @@ create table donhang(
 	CustomerId char(10),
 	Constraint FK_Cus_DH foreign key (CustomerId) references Customer(CustomerId),
 	UserId char(10), 
-	Constraint FK_NV_DH foreign key (UserId) references sysuser(UserId)
+	Constraint FK_NV_DH foreign key (UserId) references staff(StaffId)
 ); 
 go
 
@@ -188,9 +191,13 @@ SET DATEFORMAT dmy;
 GO
 
 INSERT into sysrole (RoleId,RoleName) VALUES
-('R000000001','admin'),
-('R000000002','manager'),
-('R000000003','cashier');
+('R000000001',N'admin'),
+('R000000002',N'manager'),
+('R000000003',N'cashier'),
+('R000000004',N'Bảo vệ'),
+('R000000005',N'Lao Công'),
+('R000000006',N'Phục Vụ'),
+('R000000007',N'Pha Chế');
 GO
 
 insert into cuahang (CuaHangId,TenCH,DiaChi,statusS,SDT) values 
@@ -200,7 +207,7 @@ GO
 insert into Customer (CustomerId,UserName,Passwords) values 
 ('CTM0000001',N'MĐ','$2a$10$YWJzGnAtUGlGGm2fjwK8/.arjFegAdxgGVVm7kCsrCtEDcR.XxRTm',N'Hoạt động');
 GO
-update cú
+
 insert into CustomerDetail (CustomerId,TenKhach) values
 ('CTM0000001',N'Khách vãn lai');
 GO
@@ -226,13 +233,11 @@ INSERT INTO DanhMuc (MaDM, MaLoaiDM, TenDM) VALUES
 ('DM00000012', 'LDM0000003', N'Khuyến Mãi');
 GO
 
-insert into staff(StaffId,Ten,DiaChi,CCCD,NgaySinh,CuaHangId,StatuSf) values
-('ST00000001',N'admin hệ thống',N'Onlive','012356547','01/01/1999','CH00000001',N'Hoạt động');
+insert into staff(StaffId,Ten,DiaChi,CCCD,NgaySinh,CuaHangId,StatuSf,RoleId) values
+('ST00000001',N'admin hệ thống',N'Onlive','012356547','01/01/1999','CH00000001',N'Hoạt động','R000000001');
 GO
 
-insert into sysuser (UserId,UserName,Passwords,RoleId) values 
-('ST00000001',N'admin1',N'$2a$10$YWJzGnAtUGlGGm2fjwK8/.arjFegAdxgGVVm7kCsrCtEDcR.XxRTm','R000000001');
-GO
+
 
 INSERT INTO sanpham (MaSP, DonGia, TenSP, Anh, status, Mota, maDM) VALUES
 -- =================================================================================
@@ -343,14 +348,85 @@ INSERT INTO sanpham (MaSP, DonGia, TenSP, Anh, status, Mota, maDM) VALUES
 ('SP00000059', 8000, N'Mua 2 Tặng 1', '/img/km_m2t1.jpg', N'Còn hàng', N'Áp dụng cho trà sữa cơ bản.', 'DM00000012'),
 ('SP00000060', 12000, N'Tích Điểm X2', '/img/km_x2.jpg', N'Còn hàng', N'Tích điểm thưởng gấp đôi.', 'DM00000012');
 GO
-select * from CustomerDetail
-select* from sysuser
-select * from staff
-delete from sanpham
-select * from donhang
+
 
 go
 --Tạo Trigger 
+--trigger khi thêm mới staff nếu role là admin, manager, cashier thì tạo acc với username và password mặc định là $2a$10$YWJzGnAtUGlGGm2fjwK8/.arjFegAdxgGVVm7kCsrCtEDcR.XxRTm
+DROP TRIGGER IF EXISTS trg_AfterInsertStaff;
+GO
+
+CREATE TRIGGER trg_AfterInsertStaff
+ON staff
+AFTER INSERT
+AS
+BEGIN
+    -- Tắt thông báo số hàng bị ảnh hưởng
+    SET NOCOUNT ON;
+
+    -- Chèn tài khoản mới vào sysuser cho các nhân viên mới
+    -- có vai trò là admin, manager, hoặc cashier
+    INSERT INTO sysuser (UserId, UserName, Passwords)
+    SELECT
+        i.StaffId,
+        i.CCCD, -- Sử dụng CCCD làm UserName mặc định để đảm bảo tính duy nhất
+        '$2a$10$YWJzGnAtUGlGGm2fjwK8/.arjFegAdxgGVVm7kCsrCtEDcR.XxRTm' -- Mật khẩu mặc định
+    FROM
+        inserted i -- Bảng ảo 'inserted' chứa các hàng vừa được thêm
+    WHERE
+        i.RoleId IN ('R000000001', 'R000000002', 'R000000003'); -- Kiểm tra RoleId
+END;
+GO
+
+DROP TRIGGER IF EXISTS trg_AfterUpdateStaffRole;
+GO
+--trigger khi đổi role cho staff nếu role đổi từ khác admin, manager, cashier thì Phải xóa tài khoản mật khẩu ở bảng sysuser và ngược lại thì cấp tài khoản với username và password mặc định là $2a$10$YWJzGnAtUGlGGm2fjwK8/.arjFegAdxgGVVm7kCsrCtEDcR.XxRTm
+CREATE TRIGGER trg_AfterUpdateStaffRole
+ON staff
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Nếu cột RoleId không bị cập nhật, thì không làm gì cả
+    IF NOT UPDATE(RoleId)
+        RETURN;
+
+    -- Định nghĩa các vai trò được phép có tài khoản
+    DECLARE @PrivilegedRoles TABLE (RoleId char(10) PRIMARY KEY);
+    INSERT INTO @PrivilegedRoles (RoleId)
+    VALUES
+        ('R000000001'), -- admin
+        ('R000000002'), -- manager
+        ('R000000003'); -- cashier
+
+    -- 1. Xử lý "Thăng chức": Thêm tài khoản nếu role mới là đặc biệt
+    -- VÀ tài khoản chưa tồn tại
+    INSERT INTO sysuser (UserId, UserName, Passwords)
+    SELECT
+        i.StaffId,
+        i.StaffId, -- Dùng StaffId làm UserName
+        '$2a$10$YWJzGnAtUGlGGm2fjwK8/.arjFegAdxgGVVm7kCsrCtEDcR.XxRTm' -- Mật khẩu mặc định
+    FROM
+        inserted i
+    WHERE
+        i.RoleId IN (SELECT RoleId FROM @PrivilegedRoles) -- Role MỚI là đặc biệt
+        AND NOT EXISTS ( -- VÀ tài khoản chưa tồn tại
+            SELECT 1 FROM sysuser su WHERE su.UserId = i.StaffId
+        );
+
+    -- 2. Xử lý "Giáng chức": Xóa tài khoản nếu role mới KHÔNG phải là đặc biệt
+    -- (Trigger sẽ tự động chỉ ảnh hưởng đến những user đang có tài khoản nhờ phép JOIN)
+    DELETE su
+    FROM
+        sysuser su
+    JOIN
+        inserted i ON su.UserId = i.StaffId
+    WHERE
+        i.RoleId NOT IN (SELECT RoleId FROM @PrivilegedRoles); -- Role MỚI KHÔNG đặc biệt
+
+END;
+GO
 --Trigger khi create bảng chi tiết yêu cầu sẽ cập nhật số lượng tồn kho của cửa hàng tương ứng
 create trigger UpdateSoLuongTonKho on chi_tiet_phieu_nhap
 after Insert 
@@ -592,32 +668,6 @@ begin
 		end catch
 end;
 go
---proc tạo tài khoản cho staff (điều kiện là staff đã tồn tại ở bảng staff)
-CREATE PROCEDURE TaoTaiKhoanStaff @StaffId CHAR(10), @UserName NVARCHAR(100), @PassWord NVARCHAR(100), @RoleId char(10)
-AS
-BEGIN
-	set nocount ON;
-	IF not exists (select 1 from staff where StaffId = @StaffId)
-	BEGIN
-		PRINT N'Không thể tạo vì staff này không có thông tin trong hệ thống'
-		RETURN -1;
-	END
-	if exists (select 1 from sysuser where UserName = @UserName)
-	BEGIN
-		print N'Tên người dùng đã tồn tại'
-		RETURN -1;
-	END
-	if @RoleId is null or @RoleId = '' 
-	begin
-		set @RoleId = 'R03'
-	end;
-	INSERT into sysuser (UserId,UserName,Passwords,RoleId) VALUES
-	(@StaffId,@UserName,@PassWord,@RoleId);
-
-	PRINT N'Tạo thành công'
-	RETURN 0;
-END;
-GO
 --Proc tạo 1 customer mới 
 CREATE PROC TaoCustomer @Email NVARCHAR(50),@Ten NVARCHAR(50), @Id char(10),@DiaChi NVARCHAR(100),@SDT char(11),@PassWord CHAR(100)
 AS
