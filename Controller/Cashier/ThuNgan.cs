@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using QuanLySinhVien.DTOS.Request;
 using QuanLySinhVien.DTOS.Respone;
 using QuanLySinhVien.Models;
-using QuanLySinhVien.Service.HTMLRaw;
 using QuanLySinhVien.Service.SQL;
 using QuanLySinhVien.Service.SQL.Order;
 
@@ -13,19 +12,17 @@ namespace QuanLySinhVien.Controller.Cashier
 {
     [ApiController]
     [Route("api/order")]
-    [Authorize(Roles = "admin,manager,cashier")]
+    [Authorize(Roles = "Admin,Manager,Cashier")]
     public class ThuNgan : ControllerBase
     {
-        private readonly IHtmService htmService;
         private readonly IWebHostEnvironment webHostEnvironment;
         private readonly MyDbContext context;
         private readonly IOrderService sqLServices;
-        public ThuNgan(MyDbContext context, IOrderService sqLServices, IWebHostEnvironment webHostEnvironment, IHtmService htmService)
+        public ThuNgan(MyDbContext context, IOrderService sqLServices, IWebHostEnvironment webHostEnvironment)
         {
             this.context = context;
             this.sqLServices = sqLServices;
             this.webHostEnvironment = webHostEnvironment;
-            this.htmService = htmService;
         }
 
         [HttpPost("")]
@@ -38,7 +35,7 @@ namespace QuanLySinhVien.Controller.Cashier
             }
             if (string.IsNullOrEmpty(request.makhach) )
             {
-                request.makhach = "CTM01";
+                request.makhach = "";
             }
             try
             {
@@ -53,7 +50,6 @@ namespace QuanLySinhVien.Controller.Cashier
                     MaNV: userId.Trim(),
                     dssp: request.dssp
                 );
-
                 if (donhang == null)
                 {
 
@@ -67,8 +63,9 @@ namespace QuanLySinhVien.Controller.Cashier
                     customer = new CustomerDetail();
                     customer.TenKhach = "Khách vãng lai";
                 }
+                List<ChiTietDonHang> CTdonhangs = await context.ChiTietDonHangs.Where(ct => ct.MaDon == donhang.MaDon).ToListAsync();
                 List<HoaDonRespone> ChiTietDonHang = new List<HoaDonRespone>();
-                foreach( var item in donhang.ChiTietDonHangs)
+                foreach( var item in CTdonhangs)
                 {
                     var sp = await context.Sanphams.FindAsync(item.MaSp);
                     if (sp == null)

@@ -101,7 +101,7 @@ create table danhmuc (
 	maDM char(10) primary key,
 	tenDM nvarchar(50) not null,
 	MaLoaiDM char(10) not null,
-	Constraint FK_DM_LDM foreign key (MaLoaiDM) references LoaiDanhMuc(MaLoaiDM)
+	Constraint FK_DM_LDM foreign key (MaLoaiDM) references LoaiDanhMuc(MaLoaiDM)	
 );
 go
 
@@ -150,7 +150,7 @@ create table staff(
 	Avatar nvarchar(500) not null Default('https://bla.edu.vn/wp-content/uploads/2025/09/avatar-fb.jpg'),
 	StatuSf nvarchar(100),
 	CuaHangId char(10),
-	RoleId char(10),
+	RoleId char(10) not null,
 	Constraint FK_CH_STAFF foreign key (CuaHangId) references cuahang (CuaHangId),
 	Constraint FK_USER_ROLE foreign key (RoleId) references sysrole(RoleId),
 );
@@ -191,9 +191,9 @@ SET DATEFORMAT dmy;
 GO
 
 INSERT into sysrole (RoleId,RoleName) VALUES
-('R000000001',N'admin'),
-('R000000002',N'manager'),
-('R000000003',N'cashier'),
+('R000000001',N'Admin'),
+('R000000002',N'Manager'),
+('R000000003',N'Cashier'),
 ('R000000004',N'Bảo vệ'),
 ('R000000005',N'Lao Công'),
 ('R000000006',N'Phục Vụ'),
@@ -204,7 +204,7 @@ insert into cuahang (CuaHangId,TenCH,DiaChi,statusS,SDT) values
 ('CH00000001',N'Cửa hàng mặc định',N'Cửa hàng online',N'Đang hoạt động','0123125451');
 GO
 
-insert into Customer (CustomerId,UserName,Passwords) values 
+insert into Customer (CustomerId,UserName,Passwords,statusC) values 
 ('CTM0000001',N'MĐ','$2a$10$YWJzGnAtUGlGGm2fjwK8/.arjFegAdxgGVVm7kCsrCtEDcR.XxRTm',N'Hoạt động');
 GO
 
@@ -236,8 +236,9 @@ GO
 insert into staff(StaffId,Ten,DiaChi,CCCD,NgaySinh,CuaHangId,StatuSf,RoleId) values
 ('ST00000001',N'admin hệ thống',N'Onlive','012356547','01/01/1999','CH00000001',N'Hoạt động','R000000001');
 GO
-
-
+select * from staff
+select * from sysuser
+update sysuser set UserName = N'admin1'
 
 INSERT INTO sanpham (MaSP, DonGia, TenSP, Anh, status, Mota, maDM) VALUES
 -- =================================================================================
@@ -348,8 +349,8 @@ INSERT INTO sanpham (MaSP, DonGia, TenSP, Anh, status, Mota, maDM) VALUES
 ('SP00000059', 8000, N'Mua 2 Tặng 1', '/img/km_m2t1.jpg', N'Còn hàng', N'Áp dụng cho trà sữa cơ bản.', 'DM00000012'),
 ('SP00000060', 12000, N'Tích Điểm X2', '/img/km_x2.jpg', N'Còn hàng', N'Tích điểm thưởng gấp đôi.', 'DM00000012');
 GO
-
-
+select * from Customer
+select * from donhang
 go
 --Tạo Trigger 
 --trigger khi thêm mới staff nếu role là admin, manager, cashier thì tạo acc với username và password mặc định là $2a$10$YWJzGnAtUGlGGm2fjwK8/.arjFegAdxgGVVm7kCsrCtEDcR.XxRTm
@@ -493,7 +494,7 @@ begin
 	end;
 	
 	update dh set  dh.NgayHoangThanh = case 
-											when i.TrangThai = N'hoàn thành' then SYSDATETIME()
+											when i.TrangThai = N'Hoàn thành' then SYSDATETIME()
 											else null 
 										end
 	from donhang dh
@@ -540,6 +541,8 @@ create type dbo.ChiTietType as table
 	SoLuong int not null check(SoLuong >= 0)
 );
 go
+drop proc if exists TaoDonHang;
+go
 create proc TaoDonHang @CustomerId char(10), @StaffId char(10), @MaDon char(10),@DanhSachSP dbo.ChiTietType readonly
 as
 begin
@@ -550,8 +553,8 @@ begin
 		print N'Phải có ít nhất 1 sản phẩm mới tạo đơn được hoặc chưa truyền mã đơn'
 		return -1;
 	end;
-	declare @Customer char(10) = Isnull(Nullif(@CustomerId,''), 'CTM01');
-	declare @Staff char(10) = isnull(Nullif(@StaffId,''),'ST01');
+	declare @Customer char(10) = Isnull(Nullif(@CustomerId,''), 'CTM0000001');
+	declare @Staff char(10) = isnull(Nullif(@StaffId,''),'ST00000001');
 
 	begin tran
 		begin try
@@ -561,13 +564,13 @@ begin
 			insert into chi_tiet_don_hang(MaDon,MaSP,SoLuong)
 			select @MaDon, sps.Ma,sps.SoLuong from @DanhSachSP as sps
 			IF @@TRANCOUNT > 0
-            COMMIT TRANSACTION;
+				COMMIT TRANSACTION;
 			return 0;
 		end try
 		begin catch
 			IF @@TRANCOUNT > 0
             ROLLBACK TRANSACTION;
-			return -1;
+			throw
 		end catch
 
 end;

@@ -14,9 +14,9 @@ public partial class Sysrole
     [Unicode(false)]
     public string RoleId { get; set; } = null!;
 
-    [StringLength(20)]
+    [StringLength(50)]
     public string RoleName { get; set; } = null!;
 
     [InverseProperty("Role")]
-    public virtual ICollection<Sysuser> Sysusers { get; set; } = new List<Sysuser>();
+    public virtual ICollection<Staff> Staff { get; set; } = new List<Staff>();
 }

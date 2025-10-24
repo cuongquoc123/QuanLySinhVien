@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace QuanLySinhVien.Models;
 
 [Table("sysuser")]
-[Index("UserName", Name = "UQ__sysuser__C9F284560315A9F0", IsUnique = true)]
+[Index("UserName", Name = "UQ__sysuser__C9F284563D75F844", IsUnique = true)]
 public partial class Sysuser
 {
     [Key]
@@ -20,17 +20,6 @@ public partial class Sysuser
 
     [StringLength(100)]
     public string Passwords { get; set; } = null!;
-
-    [StringLength(10)]
-    [Unicode(false)]
-    public string? RoleId { get; set; }
-
-    [InverseProperty("User")]
-    public virtual ICollection<Donhang> Donhangs { get; set; } = new List<Donhang>();
-
-    [ForeignKey("RoleId")]
-    [InverseProperty("Sysusers")]
-    public virtual Sysrole? Role { get; set; }
 
     [ForeignKey("UserId")]
     [InverseProperty("Sysuser")]

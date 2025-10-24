@@ -79,9 +79,19 @@ namespace QuanLySinhVien.Service.SQL.Order
 
                     await command.ExecuteNonQueryAsync();
 
-                    if (returnValueParam.Value != DBNull.Value)
+                    if (returnValueParam.Value == null )
                     {
-                        return await context.Donhangs.Include(x => x.ChiTietDonHangs).FirstAsync(x => x.MaDon == madon);
+                        var donhang = await context.Donhangs.FirstOrDefaultAsync(dh => dh.MaDon == madon);
+                        if (donhang == null)
+                        {
+                            System.Console.WriteLine("Don hang bị null");
+                        }
+                        else
+                        {
+                            System.Console.WriteLine(donhang.MaDon);
+                        }
+                        
+                        return donhang;
                     }
                     throw new Exception("Can't create DonHang");
                 }

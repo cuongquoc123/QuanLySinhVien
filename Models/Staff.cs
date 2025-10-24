@@ -27,9 +27,6 @@ public partial class Staff
 
     public DateOnly? NgaySinh { get; set; }
 
-    [StringLength(50)]
-    public string? Vtri { get; set; }
-
     [Column(TypeName = "money")]
     public decimal? Luong { get; set; }
 
@@ -46,9 +43,20 @@ public partial class Staff
     [Unicode(false)]
     public string? CuaHangId { get; set; }
 
+    [StringLength(10)]
+    [Unicode(false)]
+    public string RoleId { get; set; } = null!;
+
     [ForeignKey("CuaHangId")]
     [InverseProperty("Staff")]
     public virtual Cuahang? CuaHang { get; set; }
+
+    [InverseProperty("User")]
+    public virtual ICollection<Donhang> Donhangs { get; set; } = new List<Donhang>();
+
+    [ForeignKey("RoleId")]
+    [InverseProperty("Staff")]
+    public virtual Sysrole? Role { get; set; }
 
     [InverseProperty("User")]
     public virtual Sysuser? Sysuser { get; set; }

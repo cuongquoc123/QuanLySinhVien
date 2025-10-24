@@ -38,5 +38,5 @@ public partial class Donhang
 
     [ForeignKey("UserId")]
     [InverseProperty("Donhangs")]
-    public virtual Sysuser? User { get; set; }
+    public virtual Staff? User { get; set; }
 }

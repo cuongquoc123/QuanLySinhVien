@@ -55,7 +55,7 @@ namespace QuanLySinhVien.Controller.Manager
                 var respone = new PageRespone2();
                 var Items = await context.Donhangs.Where(d => d.NgayNhan >= datestarts && d.NgayNhan <= datends
                                 && d.User != null
-                                && d.User.User.CuaHangId == user.CuaHangId).
+                                && d.User.CuaHangId == user.CuaHangId).
                                 Skip((pageNum - 1) * pageSize)
                                 .Take(pageSize).ToListAsync();
                 if (Items == null || Items.Count == 0 || !Items.Any())
@@ -96,7 +96,7 @@ namespace QuanLySinhVien.Controller.Manager
                 respone.TotalCount = await context.Donhangs.
                                         Where(d => d.NgayNhan >= datestarts && d.NgayNhan <= datends
                                         && d.User != null
-                                         && d.User.User.CuaHangId == user.CuaHangId)
+                                         && d.User.CuaHangId == user.CuaHangId)
                                         .CountAsync();
                 respone.TotalPages = (int)Math.Ceiling(respone.TotalCount / (double)10);
                 respone.PageSize = pageSize;

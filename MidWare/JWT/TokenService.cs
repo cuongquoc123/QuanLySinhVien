@@ -10,7 +10,7 @@ namespace QuanLySinhVien.MidWare.JWT
     public class TokenPair
     {
         public string AccessToken { get; set; } = null!;
-        public string RefreshToken { get; set; } = null!;
+
     }
 
     public class TokenService
@@ -72,7 +72,6 @@ namespace QuanLySinhVien.MidWare.JWT
             return new TokenPair
             {
                 AccessToken = accessTokenString,
-                RefreshToken = refreshToken
             };
         }
     }

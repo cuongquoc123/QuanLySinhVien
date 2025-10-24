@@ -10,7 +10,6 @@ using QuanLySinhVien.Models;
 using QuanLySinhVien.Service.CheckFace;
 using QuanLySinhVien.Service.GGService;
 using QuanLySinhVien.Service.HashPassword;
-using QuanLySinhVien.Service.HTMLRaw;
 
 using QuanLySinhVien.Service.SQL;
 using QuanLySinhVien.Service.SQL.Iventory;
@@ -21,7 +20,6 @@ using QuanLySinhVien.Service.SQL.Store;
 using QuanLySinhVien.Service.SQL.StaffF;
 using Serilog;
 using QuanLySinhVien.Service.SQL.PhieuNhapKho;
-using QuanLySinhVien.Services.ReFreshTokenService;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -123,9 +121,6 @@ builder.Services.AddScoped<IPassWordService>(
 
 
 builder.Services.AddScoped<IcheckFace, CheckFace>();
-
-builder.Services.AddScoped<IHtmService, HTMLService>();
-
 builder.Services.AddScoped<ISheetService, SheetService>();
 builder.Services.AddScoped<ISqlStaffServices, SqlStaffServices>();
 builder.Services.AddScoped<ISqlStoreServices, SqlStoreServices>();
@@ -139,7 +134,7 @@ builder.Services.AddScoped<ISqlNguyenLieuServices, SqlNguyenLieuServices>();
 builder.Services.AddScoped<ISQLInventoryService,SQLInventoryServices>();
 
 builder.Services.AddScoped<ISqlPhieuNhapKho, SqlPhieuNhapKhoServices>();
-builder.Services.AddSingleton<IReFreshTokenService,ReFreshTokenService>();
+
 var app = builder.Build();
 
 var logger = app.Logger;
@@ -167,9 +162,9 @@ app.UseMiddleware<GlabalLogger>();
 app.UseAuthentication();
 
 //Cấu hình các đường dẫn API theo quyền
-app.MapGroup("/admin").RequireAuthorization(policy => policy.RequireRole("admin"));
-app.MapGroup("/manager").RequireAuthorization(policy => policy.RequireRole("manager"));
-app.MapGroup("/cashier").RequireAuthorization(policy => policy.RequireRole("cashier"));
+app.MapGroup("/admin").RequireAuthorization(policy => policy.RequireRole("Admin"));
+app.MapGroup("/manager").RequireAuthorization(policy => policy.RequireRole("Manager"));
+app.MapGroup("/cashier").RequireAuthorization(policy => policy.RequireRole("Cashier"));
 
 app.UseAuthorization();
 

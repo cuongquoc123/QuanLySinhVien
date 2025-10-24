@@ -5,7 +5,6 @@ using QuanLySinhVien.DTOS.Respone;
 using QuanLySinhVien.MidWare.Filter;
 using QuanLySinhVien.Models;
 using QuanLySinhVien.Service.HashPassword;
-using QuanLySinhVien.Services.ReFreshTokenService;
 
 namespace QuanLySinhVien.MidWare.JWT
 {
@@ -19,20 +18,18 @@ namespace QuanLySinhVien.MidWare.JWT
         private readonly MyDbContext context;
 
         private readonly IPassWordService passWordService;
-        private readonly IReFreshTokenService reFreshTokenService;
-        public AuthController(TokenService tokenService, ILogger<AuthController> logger, MyDbContext context, IPassWordService passWordService, IReFreshTokenService reFreshTokenService)
+        public AuthController(TokenService tokenService, ILogger<AuthController> logger, MyDbContext context, IPassWordService passWordService)
         {
             _tokenService = tokenService;
             this.logger = logger;
             this.context = context;
             this.passWordService = passWordService;
-            this.reFreshTokenService = reFreshTokenService;
         }
 
         //Chưa có cơ sở dữ liệu nên phải làm tạm thế này, có rồi phải luư token vào CSDL và lấy ra để làm Refesh
         
         //Thay thế hàm này bằng hàm kiểm tra người dùng thật tế có trả về UserId và Roles để Làm JWT
-        private bool ValidateUser(string username, string password, out string? UserId, out string Roles)
+        private bool ValidateUser(string username, string password, out Staff? User, out string Roles)
         {
 
             var user = context.Sysusers.Include(s => s.User).First(x => x.UserName == username);
@@ -44,7 +41,7 @@ namespace QuanLySinhVien.MidWare.JWT
                 }
                 if (user.User.StatuSf.Equals("Nghỉ Việc") )
                 {
-                    UserId = null;
+                    User = null;
                     Roles =  string.Empty ;
                     return false;
                 }
@@ -54,7 +51,7 @@ namespace QuanLySinhVien.MidWare.JWT
                 }
                 if (passWordService.VerifyPassword(password, user.Passwords))
                 {
-                    var Role = context.Sysroles.Find(user.RoleId);
+                    var Role = context.Sysroles.Find(user.User.RoleId);
                     if (Role != null)
                     {
                         Roles = Role.RoleName ;
@@ -63,7 +60,7 @@ namespace QuanLySinhVien.MidWare.JWT
                     {
                         throw new KeyNotFoundException("Can't be Authentication");
                     }
-                    UserId = user.UserId;
+                    User = user.User;
                     return true;
                 }
                 else
@@ -81,47 +78,30 @@ namespace QuanLySinhVien.MidWare.JWT
         public IActionResult Login(LoginRequest request)
         {
             logger.LogInformation($"API Login is being called:");
-            if (!ValidateUser(request.UserName, request.Password, out string? userId, out string roles))
+            if (!ValidateUser(request.UserName, request.Password, out var user, out string roles))
             {
                 throw new UnauthorizedAccessException("User Infor not true");
             }
-            if (string.IsNullOrEmpty(userId))
+            if (user == null)
             {
                 throw new UnauthorizedAccessException("User infor not true");
             }
-
-            var pair = _tokenService.CreateTokenPair(userId, roles);
-            reFreshTokenService.AddRefreshToken(pair.RefreshToken, userId);
-            return Ok(new LoginResponse(pair.AccessToken, pair.RefreshToken));
+            var SysU = context.Sysusers.Find(user.StaffId);
+            if (SysU == null)
+            {
+                logger.LogCritical("User not found by can valid");
+                throw new UnauthorizedAccessException("User not valid");
+            }
+            if (string.IsNullOrEmpty(SysU.UserName))
+            {
+                logger.LogWarning("Username is null or empty");
+                throw new UnauthorizedAccessException("User not valid");
+            }
+            var pair = _tokenService.CreateTokenPair(user.StaffId, roles);
+            return Ok(new LoginResponse(pair.AccessToken,SysU.UserName,user.Ten,roles,user.Avatar));
         }
 
 
-        [HttpPost("refresh")]
-        public IActionResult Refresh([FromBody] RefeshRequest request)
-        {
-            if (!reFreshTokenService.ValidateRefreshToken(request.RefreshToken, out var userId))
-            {
-                throw new UnauthorizedAccessException("Refresh Token Not Valid");
-            }
-
-            //Có cơ sở dữ liệu thật thì phải xác thực validate lại cho Token Refesh xem có hợp lệ không
-            
-            var user = context.Sysusers.Where(u => u.UserName == userId).First();
-            if (user.Role == null)
-            {
-                throw new UnauthorizedAccessException("You don't have permision");
-            }
-            if ( user.Role.RoleName is null)
-            {
-                throw new CustomError(403,"UnAuthentiacion","You don't have permision");
-            }
-            var pair = _tokenService.CreateTokenPair(user.UserId, user.Role.RoleName);
-             //Lưu token mới vào CSDL
-            reFreshTokenService.AddRefreshToken(pair.RefreshToken, user.UserId);
-            //Nếu có thì mới tạo token mới
-            //Nếu không thì trả về 401
-            reFreshTokenService.RemoveRefreshToken(request.RefreshToken); //Xoá token cũ đi để tránh tấn công phát lại (replay attack)
-            return Ok(new LoginResponse(pair.AccessToken, string.Empty));
-        }
+       
     }
 }

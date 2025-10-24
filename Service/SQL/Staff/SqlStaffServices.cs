@@ -24,9 +24,9 @@ namespace QuanLySinhVien.Service.SQL.StaffF
                 Staff moi = new Staff();
                 moi.Avatar = imgPath;
                 moi.Ten = newStaff.Ten;
-                moi.Vtri = newStaff.Vtri;
+                moi.RoleId = newStaff.RoleId;
                 moi.CuaHangId = newStaff.CuaHangId;
-                moi.StatuSf = "Đang làm";
+                moi.StatuSf = "Hoạt động";
                 moi.StaffId = GenerateId(10, "ST");
                 moi.DiaChi = newStaff.DiaChi;
                 moi.Luong = newStaff.Luong;

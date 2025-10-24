@@ -14,7 +14,7 @@ namespace QuanLySinhVien.Controller.Manager
 {
     [ApiController]
     [Route("/manager/Staff")]
-    
+    [Authorize(Roles = "admin,manager")]
     public class QuanLyStaff : ControllerBase
     {
         private readonly MyDbContext context;
@@ -143,7 +143,7 @@ namespace QuanLySinhVien.Controller.Manager
         {
             if (string.IsNullOrEmpty(staff.Cccd) ||
                 string.IsNullOrEmpty(staff.Ten) || string.IsNullOrEmpty(staff.DiaChi) ||
-                string.IsNullOrEmpty(staff.Vtri))
+                string.IsNullOrEmpty(staff.RoleId))
             {
                 throw new ArgumentNullException("Missing Staff request body");
             }
@@ -162,10 +162,14 @@ namespace QuanLySinhVien.Controller.Manager
             {
                 throw new KeyNotFoundException("Missing Token");
             }
-            var user = await context.Sysusers.Include(x => x.User).FirstAsync(x => x.UserId == userId);
+            var user = await context.Staff.FindAsync(userId);
+            if (user == null)
+            {
+                throw new UnauthorizedAccessException("Token Not Valid");
+            }
             if (user.RoleId == "R000000001" && !string.IsNullOrEmpty(staff.cuaHangId))
             {
-                user.User.CuaHangId = staff.cuaHangId;
+                user.CuaHangId = staff.cuaHangId;
             }
             if (user == null)
             {
@@ -202,11 +206,11 @@ namespace QuanLySinhVien.Controller.Manager
                 {
                     Ten = staff.Ten,
                     Cccd = staff.Cccd,
-                    Vtri = staff.Vtri,
+                    RoleId = staff.RoleId,
                     Luong = staff.Luong,
                     NgaySinh = ngaySinh,
                     DiaChi = staff.DiaChi,
-                    CuaHangId = user.User.CuaHangId
+                    CuaHangId = user.CuaHangId
                 };
                 var respone = await sqLServices.createStaff(newstaff, FilePath);
                 if (respone == null)
