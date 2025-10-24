@@ -19,12 +19,14 @@ namespace QuanLySinhVien.MidWare.JWT
         private readonly string _key;
         private readonly string _issuer;
         private readonly string _audience;
+        private readonly int TokenAccessMinutes; 
 
         public TokenService(IConfiguration config)
         {
             _key = Env.GetString("JWT_secret");
             _issuer = config["Jwt:Issuer"]!;
             _audience = config["Jwt:Audience"]!;
+            TokenAccessMinutes = int.Parse(config["Jwt:AccessTokenMinutes"] ?? "15");
         }
 
         private string GenerateRefreshToken()
@@ -59,7 +61,7 @@ namespace QuanLySinhVien.MidWare.JWT
                 issuer: _issuer,
                 audience: _audience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(15),
+                expires: DateTime.UtcNow.AddMinutes(TokenAccessMinutes),
                 signingCredentials: creds);
 
             string accessTokenString = new JwtSecurityTokenHandler().WriteToken(accessToken);

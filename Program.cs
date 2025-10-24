@@ -32,7 +32,8 @@ Env.Load();
 Log.Logger = new LoggerConfiguration()
             .WriteTo.Console()
             .WriteTo.File("Logs/system_log.txt", //Tạo ra file log 
-                             rollingInterval: RollingInterval.Day ,//file log được tạo ra hằng ngày 
+
+                             rollingInterval: RollingInterval.Day,//file log được tạo ra hằng ngày 
                              retainedFileCountLimit: 7) // Tự động xóa sau 7 ngày 
             .CreateLogger();
 
