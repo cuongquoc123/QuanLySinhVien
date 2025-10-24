@@ -81,7 +81,7 @@ namespace QuanLySinhVien.Service.SQL.Order
 
                     if (returnValueParam.Value != DBNull.Value)
                     {
-                        return await context.Donhangs.Include(x => x.ChiTietDonHangs).FirstAsync(x => x.MaDon == madon);
+                        return await context.Donhangs.FindAsync(madon);
                     }
                     throw new Exception("Can't create DonHang");
                 }
