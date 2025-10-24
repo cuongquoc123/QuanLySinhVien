@@ -198,9 +198,9 @@ insert into cuahang (CuaHangId,TenCH,DiaChi,statusS,SDT) values
 GO
 
 insert into Customer (CustomerId,UserName,Passwords) values 
-('CTM0000001',N'MĐ','123456467865453121432');
+('CTM0000001',N'MĐ','$2a$10$YWJzGnAtUGlGGm2fjwK8/.arjFegAdxgGVVm7kCsrCtEDcR.XxRTm',N'Hoạt động');
 GO
-
+update cú
 insert into CustomerDetail (CustomerId,TenKhach) values
 ('CTM0000001',N'Khách vãn lai');
 GO

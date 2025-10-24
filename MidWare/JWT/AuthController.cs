@@ -5,6 +5,7 @@ using QuanLySinhVien.DTOS.Respone;
 using QuanLySinhVien.MidWare.Filter;
 using QuanLySinhVien.Models;
 using QuanLySinhVien.Service.HashPassword;
+using QuanLySinhVien.Services.ReFreshTokenService;
 
 namespace QuanLySinhVien.MidWare.JWT
 {
@@ -18,17 +19,18 @@ namespace QuanLySinhVien.MidWare.JWT
         private readonly MyDbContext context;
 
         private readonly IPassWordService passWordService;
-
-        public AuthController(TokenService tokenService, ILogger<AuthController> logger, MyDbContext context, IPassWordService passWordService)
+        private readonly IReFreshTokenService reFreshTokenService;
+        public AuthController(TokenService tokenService, ILogger<AuthController> logger, MyDbContext context, IPassWordService passWordService, IReFreshTokenService reFreshTokenService)
         {
             _tokenService = tokenService;
             this.logger = logger;
             this.context = context;
             this.passWordService = passWordService;
+            this.reFreshTokenService = reFreshTokenService;
         }
 
         //Chưa có cơ sở dữ liệu nên phải làm tạm thế này, có rồi phải luư token vào CSDL và lấy ra để làm Refesh
-        Dictionary<string, string> refreshStore = new Dictionary<string, string>();
+        
         //Thay thế hàm này bằng hàm kiểm tra người dùng thật tế có trả về UserId và Roles để Làm JWT
         private bool ValidateUser(string username, string password, out string? UserId, out string Roles)
         {
@@ -89,7 +91,7 @@ namespace QuanLySinhVien.MidWare.JWT
             }
 
             var pair = _tokenService.CreateTokenPair(userId, roles);
-            refreshStore[pair.RefreshToken] = userId; //Lưu refresh token vào CSDL
+            reFreshTokenService.AddRefreshToken(pair.RefreshToken, userId);
             return Ok(new LoginResponse(pair.AccessToken, pair.RefreshToken));
         }
 
@@ -97,7 +99,7 @@ namespace QuanLySinhVien.MidWare.JWT
         [HttpPost("refresh")]
         public IActionResult Refresh([FromBody] RefeshRequest request)
         {
-            if (!refreshStore.TryGetValue(request.RefreshToken, out var userId))
+            if (!reFreshTokenService.ValidateRefreshToken(request.RefreshToken, out var userId))
             {
                 throw new UnauthorizedAccessException("Refresh Token Not Valid");
             }
@@ -113,11 +115,11 @@ namespace QuanLySinhVien.MidWare.JWT
             {
                 throw new CustomError(403,"UnAuthentiacion","You don't have permision");
             }
-            var pair = _tokenService.CreateTokenPair(userId,  user.Role.RoleName );
+            var pair = _tokenService.CreateTokenPair(user.UserId,  user.Role.RoleName );
              //Lưu token mới vào CSDL
             //Nếu có thì mới tạo token mới
             //Nếu không thì trả về 401
-            refreshStore.Remove(request.RefreshToken); //Xoá token cũ đi để tránh tấn công phát lại (replay attack)
+            reFreshTokenService.RemoveRefreshToken(request.RefreshToken); //Xoá token cũ đi để tránh tấn công phát lại (replay attack)
             return Ok(new LoginResponse(pair.AccessToken, string.Empty));
         }
     }

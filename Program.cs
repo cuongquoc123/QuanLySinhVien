@@ -21,6 +21,7 @@ using QuanLySinhVien.Service.SQL.Store;
 using QuanLySinhVien.Service.SQL.StaffF;
 using Serilog;
 using QuanLySinhVien.Service.SQL.PhieuNhapKho;
+using QuanLySinhVien.Services.ReFreshTokenService;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -137,7 +138,8 @@ builder.Services.AddScoped<ISqlNguyenLieuServices, SqlNguyenLieuServices>();
 
 builder.Services.AddScoped<ISQLInventoryService,SQLInventoryServices>();
 
-builder.Services.AddScoped<ISqlPhieuNhapKho,SqlPhieuNhapKhoServices>();
+builder.Services.AddScoped<ISqlPhieuNhapKho, SqlPhieuNhapKhoServices>();
+builder.Services.AddSingleton<IReFreshTokenService,ReFreshTokenService>();
 var app = builder.Build();
 
 var logger = app.Logger;
