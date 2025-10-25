@@ -154,7 +154,7 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
 });
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 app.UseCors();
 //Cấu hình kích hoạt các tệp tĩnh 
 //Dùng để sử dụng các tẹp tĩnh trong folder wwwroot
