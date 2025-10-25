@@ -20,6 +20,7 @@ using QuanLySinhVien.Service.SQL.Store;
 using QuanLySinhVien.Service.SQL.StaffF;
 using Serilog;
 using QuanLySinhVien.Service.SQL.PhieuNhapKho;
+using Microsoft.AspNetCore.HttpOverrides;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -149,7 +150,10 @@ if (app.Environment.IsDevelopment())
         c.RoutePrefix = string.Empty; // Mở trực tiếp ở root URL: http://localhost:5000/
     });
 }
-
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
 app.UseHttpsRedirection();
 app.UseCors();
 //Cấu hình kích hoạt các tệp tĩnh 
