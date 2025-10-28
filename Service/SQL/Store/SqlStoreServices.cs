@@ -7,18 +7,18 @@ namespace QuanLySinhVien.Service.SQL.Store
     {
         public SqlStoreServices(MyDbContext context, ILoggerFactory logger)
         : base(context, logger) { }
-        public async Task<Cuahang?> CreateStore(Cuahang NewStore)
+        public async Task<Models.Store?> CreateStore(Models.Store NewStore)
         {
             var Transaction = await context.Database.BeginTransactionAsync();
             try
             {
-                Cuahang moi = new Cuahang();
-                moi.CuaHangId = GenerateId(10, "CH");
-                moi.TenCh = NewStore.TenCh;
-                moi.StatusS = "Đang Hoạt động";
-                moi.DiaChi = NewStore.DiaChi;
-                moi.Sdt = NewStore.Sdt;
-                await context.Cuahangs.AddAsync(moi);
+                Models.Store moi = new Models.Store();
+                moi.StoreId = GenerateId(10, "CH");
+                moi.StoreName = NewStore.StoreName;
+                moi.StoreAddr = NewStore.StoreAddr;
+                moi.PhoneNum = NewStore.PhoneNum;
+                moi.StoreStatus = "Hoạt Động";
+                await context.Stores.AddAsync(moi);
                 await context.SaveChangesAsync();
                 await Transaction.CommitAsync();
                 return moi;
@@ -34,12 +34,12 @@ namespace QuanLySinhVien.Service.SQL.Store
             var Transaction = await context.Database.BeginTransactionAsync();
             try
             {
-                Cuahang? DeleteSore = await context.Cuahangs.FindAsync(StoreId);
+                Models.Store? DeleteSore = await context.Stores.FindAsync(StoreId);
                 if (DeleteSore == null)
                 {
                     return 404;
                 }
-                DeleteSore.StatusS = "Ngưng hoạt động";
+                DeleteSore.StoreStatus = "Ngưng hoạt động";
                 context.Entry(DeleteSore).State = EntityState.Modified;
                 await context.SaveChangesAsync();
                 await Transaction.CommitAsync();

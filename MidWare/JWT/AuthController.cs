@@ -26,32 +26,23 @@ namespace QuanLySinhVien.MidWare.JWT
             this.passWordService = passWordService;
         }
 
-        //Chưa có cơ sở dữ liệu nên phải làm tạm thế này, có rồi phải luư token vào CSDL và lấy ra để làm Refesh
+
         
         //Thay thế hàm này bằng hàm kiểm tra người dùng thật tế có trả về UserId và Roles để Làm JWT
-        private bool ValidateUser(string username, string password, out Staff? User, out string Roles)
+        private bool ValidateUser(string username, string password, out Staff? User, out string Roles,out int UserId)
         {
 
-            var user = context.Sysusers.Include(s => s.User).First(x => x.UserName == username);
+            var user = context.Sysusers.Include(u => u.Staff).First(x => x.UserName == username);
             if (user is not null)
             {
-                if (string.IsNullOrEmpty(user.User.StatuSf))
-                {
-                    throw new KeyNotFoundException("Server can't find user Status");
-                }
-                if (user.User.StatuSf.Equals("Nghỉ Việc") )
-                {
-                    User = null;
-                    Roles =  string.Empty ;
-                    return false;
-                }
-                if (string.IsNullOrEmpty(user.Passwords))
+                
+                if (string.IsNullOrEmpty(user.Password))
                 {
                     throw new CustomError(422, "Unprocessable Entity", "Your KeyWord not true");
                 }
-                if (passWordService.VerifyPassword(password, user.Passwords))
+                if (passWordService.VerifyPassword(password, user.Password))
                 {
-                    var Role = context.Sysroles.Find(user.User.RoleId);
+                    var Role = context.Sysroles.Find(user.RoleId);
                     if (Role != null)
                     {
                         Roles = Role.RoleName ;
@@ -60,7 +51,8 @@ namespace QuanLySinhVien.MidWare.JWT
                     {
                         throw new KeyNotFoundException("Can't be Authentication");
                     }
-                    User = user.User;
+                    User = user.Staff;
+                    UserId = user.UserId;
                     return true;
                 }
                 else
@@ -78,7 +70,7 @@ namespace QuanLySinhVien.MidWare.JWT
         public IActionResult Login(LoginRequest request)
         {
             logger.LogInformation($"API Login is being called:");
-            if (!ValidateUser(request.UserName, request.Password, out var user, out string roles))
+            if (!ValidateUser(request.UserName, request.Password, out var user, out string roles, out int UserId))
             {
                 throw new UnauthorizedAccessException("User Infor not true");
             }
@@ -86,19 +78,9 @@ namespace QuanLySinhVien.MidWare.JWT
             {
                 throw new UnauthorizedAccessException("User infor not true");
             }
-            var SysU = context.Sysusers.Find(user.StaffId);
-            if (SysU == null)
-            {
-                logger.LogCritical("User not found by can valid");
-                throw new UnauthorizedAccessException("User not valid");
-            }
-            if (string.IsNullOrEmpty(SysU.UserName))
-            {
-                logger.LogWarning("Username is null or empty");
-                throw new UnauthorizedAccessException("User not valid");
-            }
-            var pair = _tokenService.CreateTokenPair(user.StaffId, roles);
-            return Ok(new LoginResponse(pair.AccessToken,SysU.UserName,user.Ten,roles,user.Avatar));
+            
+            var pair = _tokenService.CreateTokenPair(UserId, roles);
+            return Ok(new LoginResponse(pair.AccessToken,request.UserName,user.StaffName,roles,user.Avatar));
         }
 
 

@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using DotNetEnv;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using QuanLySinhVien.DTOS.Respone;
 using QuanLySinhVien.MidWare.Filter;
 using QuanLySinhVien.Models;
@@ -26,25 +25,25 @@ namespace QuanLySinhVien.Controller.Manager
         [HttpGet]
         public async Task<IActionResult> StoreReview()
         {
-            var USID = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (USID == null)
+            var managerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (managerId == null)
             {
                 throw new KeyNotFoundException("Not Found User In Token");
             }
-            var Manager = await context.Sysusers.Include(s => s.User).FirstAsync(s => s.UserId == USID);
+            var Manager = await context.Sysusers.FindAsync(int.Parse(managerId));
             if (Manager == null)
             {
                 throw new UnauthorizedAccessException("Token Not Valid");
             }
-            if (string.IsNullOrEmpty( Manager.User.CuaHangId ))
+            if (string.IsNullOrEmpty( Manager.StoreId ))
             {
                 throw new CustomError(403, "Forbiden", "User Fake");
             }
             try
             {
-                var data = await sheetService.StoreReview(Manager.User.CuaHangId.Trim());
+                var data = await sheetService.StoreReview(Manager.StoreId);
                 ReviewRespone respone = new ReviewRespone();
-                respone.StoreId = Manager.User.CuaHangId.Trim();
+                respone.StoreId = Manager.StoreId;
                 
                 foreach (var item in data)
                 {

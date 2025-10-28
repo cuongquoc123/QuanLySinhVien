@@ -49,7 +49,7 @@ namespace QuanLySinhVien.Service.SQL
 
 
         
-        protected DataTable? TaoBangThamSoSanPham(List<Product> dsP)
+        protected DataTable? TaoBangThamSoSanPham(List<ProductItem> dsP)
         {
             if (dsP.Count == 0 || !dsP.Any() || dsP == null)
             {
@@ -59,7 +59,7 @@ namespace QuanLySinhVien.Service.SQL
             dt.Columns.Add("Ma", typeof(String));
             dt.Columns.Add("SoLuong", typeof(int));
 
-            foreach (Product product in dsP)
+            foreach (ProductItem product in dsP)
             {
                 dt.Rows.Add(product.Masp, product.SoLuong);
             }

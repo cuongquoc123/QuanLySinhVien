@@ -13,7 +13,7 @@ namespace QuanLySinhVien.Service.SQL.PhieuNhapKho
         public SqlPhieuNhapKhoServices(MyDbContext context, ILoggerFactory logger)
         : base(context, logger) { }
 
-        public async Task<PhieuNhapNl?> TaoPhieuNhat(List<Product> dsNL, string Makho)
+        public async Task<Grn?> TaoPhieuNhat(List<ProductItem> dsNL, string Makho)
         {
             DbConnection dbConnection = context.Database.GetDbConnection();
             using (DbCommand command = dbConnection.CreateCommand())
@@ -37,18 +37,18 @@ namespace QuanLySinhVien.Service.SQL.PhieuNhapKho
                     {
                         throw new ArgumentException("Need List NguyenLieu to create Bill");
                     }
-                    command.CommandText = "dbo.TaoPhieuNhap";
+                    command.CommandText = "management.usp_CreateGRN";
                     command.CommandType = CommandType.StoredProcedure;
 
-                    string maphieu = base.GenerateId(10, "NL");
+                    string maphieu = base.GenerateId(10, "PH");
 
-                    command.Parameters.Add(new SqlParameter("@MaPhieu", SqlDbType.Char, 10) { Value = maphieu });
-                    command.Parameters.Add(new SqlParameter("@MaKho", SqlDbType.Char, 10) { Value = Makho });
+                    command.Parameters.Add(new SqlParameter("@GRN_ID", SqlDbType.Char, 10) { Value = maphieu });
+                    command.Parameters.Add(new SqlParameter("@inventoryId", SqlDbType.Char, 10) { Value = Makho });
 
                     SqlParameter tvpParam = new SqlParameter();
-                    tvpParam.ParameterName = "@DanhSachNL";
+                    tvpParam.ParameterName = "@ListGoods";
                     tvpParam.SqlDbType = SqlDbType.Structured;
-                    tvpParam.TypeName = "dbo.ChiTietType";
+                    tvpParam.TypeName = "dbo.DetailType";
                     tvpParam.Value = DanhSachNL;
 
                     command.Parameters.Add(tvpParam);
@@ -57,7 +57,7 @@ namespace QuanLySinhVien.Service.SQL.PhieuNhapKho
 
                     if (returnValueParam.Value != DBNull.Value)
                     {
-                        return await context.PhieuNhapNls.FindAsync(maphieu);
+                        return await context.Grns.Include(grn => grn.Grndetails).ThenInclude(detail => detail.Good).FirstAsync(grn => grn.GrnId ==  maphieu);
                     }
                     throw new ArgumentException("Mã kho bị trùng hoặc hoặc kho không tồn tại");
                 }

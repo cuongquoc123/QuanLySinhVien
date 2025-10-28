@@ -4,7 +4,7 @@ namespace QuanLySinhVien.Service.SQL.Store
 {
     public interface ISqlStoreServices
     {
-        Task<Cuahang?> CreateStore(Cuahang NewStore);
+        Task<Models.Store?> CreateStore(Models.Store NewStore);
         Task<int> SoftDeleteStore(string StoreId);
     }
 }

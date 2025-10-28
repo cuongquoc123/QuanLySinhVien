@@ -5,7 +5,7 @@ namespace QuanLySinhVien.Service.SQL.PhieuNhapKho
 {
     public interface ISqlPhieuNhapKho
     {
-        Task<PhieuNhapNl?> TaoPhieuNhat(List<Product> dsNL, string Makho);
+        Task<Grn?> TaoPhieuNhat(List<ProductItem> dsNL, string Makho);
          
     }
 } 

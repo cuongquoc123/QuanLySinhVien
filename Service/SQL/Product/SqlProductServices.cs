@@ -9,21 +9,20 @@ namespace QuanLySinhVien.Service.SQL.ProductS
 
         public SqlProductServiecs(MyDbContext context, ILoggerFactory logger) : base(context, logger) { }
         
-        public async Task<Sanpham?> CreateProDucts(Sanpham spMoi, string imgPath)
+        public async Task<Product?> CreateProDucts(Product spMoi, string imgPath)
         {
             await using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
 
-                Sanpham moi = new Sanpham();
-                moi.MaSp = GenerateId(10, "SP");
-                moi.TenSp = spMoi.TenSp;
-                moi.Status = "Sản phẩm mới";
-                moi.Anh = imgPath;
-                moi.DonGia = spMoi.DonGia;
-                moi.MaDm = spMoi.MaDm;
-                moi.Mota = spMoi.Mota;
-                await context.Sanphams.AddAsync(moi);
+                Product moi = new Product();
+                moi.ProductId = GenerateId(10, "SP");
+                moi.ProductName = spMoi.ProductName;
+                moi.Img = imgPath;
+                moi.Price = spMoi.Price;
+                moi.SubcategoryId = spMoi.SubcategoryId;
+                moi.Decription = spMoi.Decription;
+                await context.Products.AddAsync(moi);
                 await context.SaveChangesAsync();
                 await transaction.CommitAsync();
                 return moi;
@@ -44,7 +43,7 @@ namespace QuanLySinhVien.Service.SQL.ProductS
             var Transaction = await context.Database.BeginTransactionAsync();
             try
             {
-                Sanpham? sp = await context.Sanphams.FindAsync(productId);
+                Product? sp = await context.Products.FindAsync(productId);
                 if (sp == null)
                 {
                     return 404;

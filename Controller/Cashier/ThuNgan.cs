@@ -15,14 +15,12 @@ namespace QuanLySinhVien.Controller.Cashier
     [Authorize(Roles = "Admin,Manager,Cashier")]
     public class ThuNgan : ControllerBase
     {
-        private readonly IWebHostEnvironment webHostEnvironment;
-        private readonly MyDbContext context;
+
         private readonly IOrderService sqLServices;
-        public ThuNgan(MyDbContext context, IOrderService sqLServices, IWebHostEnvironment webHostEnvironment)
+        public ThuNgan( IOrderService sqLServices)
         {
-            this.context = context;
             this.sqLServices = sqLServices;
-            this.webHostEnvironment = webHostEnvironment;
+
         }
 
         [HttpPost("")]
@@ -35,7 +33,7 @@ namespace QuanLySinhVien.Controller.Cashier
             }
             if (string.IsNullOrEmpty(request.makhach) )
             {
-                request.makhach = "";
+                request.makhach = "CTM0000001";
             }
             try
             {
@@ -44,12 +42,9 @@ namespace QuanLySinhVien.Controller.Cashier
                 {
                     throw new UnauthorizedAccessException("Token is not valid");
                 }
+
+                var donhang = await sqLServices.taoDon(makhach: request.makhach, MaNV: int.Parse(userId), dssp: request.dssp);
                 
-                var donhang = await sqLServices.taoDon(
-                    makhach: request.makhach,
-                    MaNV: userId.Trim(),
-                    dssp: request.dssp
-                );
                 if (donhang == null)
                 {
 
@@ -57,33 +52,20 @@ namespace QuanLySinhVien.Controller.Cashier
                     throw new Exception("Failed to create order in database.");
 
                 }
-                var customer = await context.CustomerDetails.FindAsync(request.makhach);
-                if (customer == null)
-                {
-                    customer = new CustomerDetail();
-                    customer.TenKhach = "Khách vãng lai";
-                }
-                List<ChiTietDonHang> CTdonhangs = await context.ChiTietDonHangs.Where(ct => ct.MaDon == donhang.MaDon).ToListAsync();
                 List<HoaDonRespone> ChiTietDonHang = new List<HoaDonRespone>();
-                foreach( var item in CTdonhangs)
+                foreach( var item in donhang.OrderDetails)
                 {
-                    var sp = await context.Sanphams.FindAsync(item.MaSp);
-                    if (sp == null)
-                    {
-                        continue;
-                    }
                     ChiTietDonHang.Add(new HoaDonRespone
                     {
-                        tenSP = sp.TenSp ,
-                        SoLuong = item.SoLuong,
-                        DonGia = sp.DonGia
+                        tenSP = item.Product.ProductName ,
+                        SoLuong = item.Quantity,
+                        DonGia = item.Product.Price
                     });
                 }  
                 return Ok(new
                 {
-                    KhachHang = customer.TenKhach,
-                    donhang = donhang.MaDon,
-                    NgayNhan = donhang.NgayNhan,
+                    donhang = donhang.OrderId,
+                    NgayNhan = donhang.RecivingDate,
                     ChiTiet = ChiTietDonHang
                 });
             }

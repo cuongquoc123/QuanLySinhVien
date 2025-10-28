@@ -37,12 +37,12 @@ namespace QuanLySinhVien.MidWare.JWT
             return Convert.ToBase64String(randomNumber);
         }
 
-        public TokenPair CreateTokenPair(string userID, string roles)
+        public TokenPair CreateTokenPair(int userID, string roles)
         {
             // Claims
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub, userID),
+                new Claim(JwtRegisteredClaimNames.Sub, userID.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 

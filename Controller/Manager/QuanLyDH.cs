@@ -44,18 +44,18 @@ namespace QuanLySinhVien.Controller.Manager
                 {
                     throw new UnauthorizedAccessException("Token not valid");
                 }
-                userID = userID.Trim();
-                var user = await context.Staff
-                                .FirstAsync(u => u.StaffId == userID.Trim());
+                var user = await context.Sysusers.FindAsync(int.Parse(userID));
                 if (user == null)
                 {
                     throw new UnauthorizedAccessException("User not exists in Server");
                 }
 
                 var respone = new PageRespone2();
-                var Items = await context.Donhangs.Where(d => d.NgayNhan >= datestarts && d.NgayNhan <= datends
-                                && d.User != null
-                                && d.User.CuaHangId == user.CuaHangId).
+                var Items = await context.Orders.Include(ord => ord.SysUser).Include(ord => ord.OrderDetails)
+                                .ThenInclude(detail => detail.Product)
+                                .Where(d => d.RecivingDate >= datestarts && d.RecivingDate <= datends
+                                && d.SysUser != null
+                                && d.SysUser.StoreId == user.StoreId).
                                 Skip((pageNum - 1) * pageSize)
                                 .Take(pageSize).ToListAsync();
                 if (Items == null || Items.Count == 0 || !Items.Any())
@@ -67,24 +67,23 @@ namespace QuanLySinhVien.Controller.Manager
                 {
                     Item2 itemNew = new Item2()
                     {
-                        maDon = item.MaDon,
-                        TrangTHai = item.TrangThai,
-                        NgayNhan = item.NgayNhan,
-                        NgayHoangThanh = item.NgayHoangThanh,
-                        UserId = item.UserId,
-                        PathChiTiet = $"/manager/DH/chitiet/{item.MaDon}"
+                        maDon = item.OrderId,
+                        TrangTHai = item.Status,
+                        NgayNhan = item.RecivingDate,
+                        NgayHoangThanh = item.CompleteDate,
+                        User = item.SysUser?.UserName,
+                        PathChiTiet = $"/manager/DH/chitiet/{item.OrderId}"
                     };
-                    var CTDH = await context.ChiTietDonHangs.Include(d => d.MaSpNavigation).Where(d => d.MaDon == item.MaDon).ToListAsync();
                     
-                    foreach (var item2 in CTDH)
+                    foreach (var item2 in item.OrderDetails)
                     {
                         CTDHRespone CTDHS = new CTDHRespone()
                         {
-                            masp = item2.MaSp,
-                            tenSP = item2.MaSpNavigation.TenSp,
-                            SoLuong = item2.SoLuong,
-                            Gia = item2.MaSpNavigation.DonGia,
-                            ThanhTiem = item2.SoLuong * item2.MaSpNavigation.DonGia
+                            masp = item2.ProductId,
+                            tenSP = item2.Product.ProductName,
+                            SoLuong = item2.Quantity,
+                            Gia = item2.Product.Price,
+                            ThanhTiem = item2.Quantity * item2.Product.Price
                         };
                         itemNew.CTDH.Add(CTDHS);
                     }
@@ -93,10 +92,10 @@ namespace QuanLySinhVien.Controller.Manager
                     respone.Items.Add(itemNew);
                 }
                 respone.PageIndex = pageNum;
-                respone.TotalCount = await context.Donhangs.
-                                        Where(d => d.NgayNhan >= datestarts && d.NgayNhan <= datends
-                                        && d.User != null
-                                         && d.User.CuaHangId == user.CuaHangId)
+                respone.TotalCount = await context.Orders.
+                                        Where(d => d.RecivingDate >= datestarts && d.RecivingDate <= datends
+                                        && d.SysUser != null
+                                         && d.SysUser.StoreId == user.StoreId)
                                         .CountAsync();
                 respone.TotalPages = (int)Math.Ceiling(respone.TotalCount / (double)10);
                 respone.PageSize = pageSize;
@@ -106,9 +105,6 @@ namespace QuanLySinhVien.Controller.Manager
             {
                 throw new Exception("Bad Request to Database");
             }
-
-
-
         }
 
 
@@ -121,46 +117,42 @@ namespace QuanLySinhVien.Controller.Manager
             {
                 throw new UnauthorizedAccessException("Token not valid");
             }
-            userID = userID.Trim();
-            var user = await context.Sysusers.FindAsync(userID);
-            if (user == null)
-            {
-                throw new UnauthorizedAccessException("User not exists in Server");
-            }
-            var DonHang = await context.Donhangs.FindAsync(MaDon);
+            var DonHang = await context.Orders.Include(ord => ord.SysUser).Include(ord => ord.OrderDetails)
+                        .ThenInclude(detail => detail.Product)
+                        .FirstAsync(ord => ord.OrderId == MaDon);
             if (DonHang == null)
             {
                 throw new KeyNotFoundException("The bill doesn't exists");
             }
-
-            var chiTiets = await context.ChiTietDonHangs.Include(ct => ct.MaSpNavigation).Where(d => d.MaDon == MaDon).ToListAsync();
             List<CTDHRespone> CTDHS = new List<CTDHRespone>();
             decimal TongCong = 0;
-            foreach (var CT in chiTiets)
+            foreach (var CT in DonHang.OrderDetails)
             {
                 CTDHRespone CTDH = new CTDHRespone()
-                        {
-                            masp = CT.MaSp,
-                            tenSP = CT.MaSpNavigation.TenSp,
-                            SoLuong = CT.SoLuong,
-                            Gia = CT.MaSpNavigation.DonGia,
-                            ThanhTiem = CT.SoLuong * CT.MaSpNavigation.DonGia
-                        };
+                {
+                    masp = CT.ProductId,
+                    tenSP = CT.Product.ProductName,
+                    SoLuong = CT.Quantity,
+                    Gia = CT.Product.Price,
+                    ThanhTiem = CT.Quantity * CT.Product.Price
+                };
                 CTDHS.Add(CTDH);
                 TongCong += CTDH.ThanhTiem;
             }
             return Ok(new
             {
-                MaDon = DonHang.MaDon,
-                User = DonHang.UserId,
-                NgayNhan = DonHang.NgayNhan,
-                NgayHoangThanh = DonHang.NgayHoangThanh,
+                MaDon = DonHang.OrderId,
+                User = DonHang.SysUser?.UserName,
+                NgayNhan = DonHang.RecivingDate,
+                NgayHoangThanh = DonHang.CompleteDate,
                 customer = DonHang.CustomerId,
-                TrangThai = DonHang.TrangThai,
+                TrangThai = DonHang.Status,
                 ThanhTien = TongCong * (decimal)1.1,
                 TaxVat = "10%",
                 chi_tiet = CTDHS
             });
         }
+
+        
     }
 }

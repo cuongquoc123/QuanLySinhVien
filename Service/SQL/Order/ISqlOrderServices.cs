@@ -5,7 +5,7 @@ namespace QuanLySinhVien.Service.SQL.Order
 {
     public interface IOrderService
     {
-        Task<Donhang?> taoDon( string MaNV, List<Product> dssp, string makhach);
-        Task<Donhang?> updateDonStatus(string madon, string status);
+        Task<Models.Order?> taoDon( int MaNV, List<ProductItem> dssp, string makhach);
+        Task<Models.Order?> updateDonStatus(string madon, string status);
     }
 }

@@ -4,11 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 using QuanLySinhVien.DTOS.Respone;
 using QuanLySinhVien.Models;
 using Microsoft.EntityFrameworkCore;
-using QuanLySinhVien.Service.SQL;
 using QuanLySinhVien.DTOS.Request;
 using QuanLySinhVien.Service.SQL.StaffF;
 using Microsoft.AspNetCore.Authorization;
-using QuanLySinhVien.MidWare.Filter;
+using QuanLySinhVien.Service.ImgServices;
 
 namespace QuanLySinhVien.Controller.Manager
 {
@@ -19,12 +18,12 @@ namespace QuanLySinhVien.Controller.Manager
     {
         private readonly MyDbContext context;
         private readonly ISqlStaffServices sqLServices;
-        private readonly IWebHostEnvironment webHostEnvironment;
-        public QuanLyStaff(MyDbContext context, ISqlStaffServices sqLServices, IWebHostEnvironment webHostEnvironment)
+        private readonly IImgService imgService;
+        public QuanLyStaff(MyDbContext context, ISqlStaffServices sqLServices, IImgService imgService)
         {
             this.context = context;
             this.sqLServices = sqLServices;
-            this.webHostEnvironment = webHostEnvironment;
+            this.imgService = imgService;
         }
 
 
@@ -41,17 +40,17 @@ namespace QuanLySinhVien.Controller.Manager
             {
                 throw new ArgumentOutOfRangeException("Max page size is 100");
             }
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null)
+            var ManagerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (ManagerId == null)
             {
                 throw new KeyNotFoundException("Missing Token");
             }
-            var user = await context.Sysusers.Include(x => x.User).FirstAsync(x => x.UserId == userId);
-            if (user == null)
+            var manager = await context.Sysusers.FindAsync(int.Parse(ManagerId));
+            if (manager == null)
             {
                 throw new UnauthorizedAccessException("Fake Token");
             }
-            var lsStaff = await context.Staff.Where(s => s.CuaHangId == user.User.CuaHangId)
+            var lsStaff = await context.Staff.Where(s => s.StoreId == manager.StoreId)
                                 .Skip((pageNum - 1) * pageSize)
                                 .Take(pageSize).ToListAsync();
             if (lsStaff == null || lsStaff.Count == 0 || !lsStaff.Any())
@@ -62,17 +61,9 @@ namespace QuanLySinhVien.Controller.Manager
 
             foreach (var s in lsStaff)
             {
-                if (s.NgaySinh == null)
+                if (s.DoB == null)
                 {
                     throw new Exception("An Error while add DoB");
-                }
-                if (s.Thuong == null)
-                {
-                    s.Thuong = 0;
-                }
-                if (s.Luong == null)
-                {
-                    s.Luong = 0;
                 }
                 Item<StaffRespone> item = new Item<StaffRespone>()
                 {
@@ -80,21 +71,21 @@ namespace QuanLySinhVien.Controller.Manager
                     Value = new StaffRespone()
                     {
                         staffId = s.StaffId,
-                        cccd = s.Cccd,
-                        ten = s.Ten,
-                        ngaySinh = s.NgaySinh.Value,
-                        luong = s.Luong.Value,
-                        thuong = s.Thuong.Value,
+                        cccd = s.IdNumber,
+                        ten = s.StaffName,
+                        ngaySinh = s.DoB.Value,
+                        luong = s.Salary,
+                        thuong = s.Bonus,
                         avatar = s.Avatar,
-                        statuSf = s.StatuSf,
-                        cuaHangId = s.CuaHangId
+                        statuSf = s.Status,
+                        cuaHangId = s.StoreId
                     },
-                    PathChiTiet = $"/manager/Staff/{s.Cccd}"
+                    PathChiTiet = $"/manager/Staff/{s.StaffId}"
                 };
                 respone.Items.Add(item);
             }
 
-            int total = await context.Staff.Where(s => s.CuaHangId == user.User.CuaHangId).CountAsync();
+            int total = await context.Staff.Where(s => s.StoreId == manager.StoreId).CountAsync();
             respone.TotalCount = total;
             respone.PageIndex = pageNum;
             respone.PageSize = pageSize;
@@ -110,30 +101,28 @@ namespace QuanLySinhVien.Controller.Manager
                 throw new ArgumentNullException("Missing Param StaffId");
             }
 
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null)
+            var managerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (managerId == null)
             {
                 throw new KeyNotFoundException("Missing Token");
             }
-            var user = await context.Staff.FindAsync(userId);
-            if (user == null)
+            var manager = await context.Sysusers.FindAsync(int.Parse(StaffId));
+            if (manager == null)
             {
                 throw new UnauthorizedAccessException("Fake Token");
             }
-            if (user.CuaHangId == null)
+            if (manager.StaffId == null)
             {
                 throw new UnauthorizedAccessException("user exists in store ");
             }
-            Staff? respone = await context.Staff.FindAsync(StaffId);
+
+            Staff? respone = await context.Staff.FirstAsync(s => s.StaffId == StaffId && s.StoreId == manager.StoreId);
 
             if (respone == null)
             {
                 throw new KeyNotFoundException("Your Store do not have this staff or you don't have permision this staff");
             }
-            if (respone.CuaHangId !=  user.CuaHangId)
-            {
-                throw new CustomError(401,"Forbidden","User not permission");
-            }
+            
             return Ok(respone);
         }
 
@@ -162,14 +151,14 @@ namespace QuanLySinhVien.Controller.Manager
             {
                 throw new KeyNotFoundException("Missing Token");
             }
-            var user = await context.Staff.FindAsync(userId);
+            var user = await context.Staff.FindAsync(int.Parse(userId));
             if (user == null)
             {
                 throw new UnauthorizedAccessException("Token Not Valid");
             }
             if (user.RoleId == "R000000001" && !string.IsNullOrEmpty(staff.cuaHangId))
             {
-                user.CuaHangId = staff.cuaHangId;
+                user.StoreId = staff.cuaHangId;
             }
             if (user == null)
             {
@@ -177,42 +166,18 @@ namespace QuanLySinhVien.Controller.Manager
             }
             try
             {
-                string FilePath = "https://bla.edu.vn/wp-content/uploads/2025/09/avatar-fb.jpg";
-                if (staff.file != null && staff.file.Length > 0)
-                {
-                    string WWWroot = webHostEnvironment.WebRootPath;
-                    if (string.IsNullOrEmpty(WWWroot))
-                    {
-                        throw new Exception("Can't take web root path");
-                    }
-                    string imgPath = Path.Combine(WWWroot, "img");
-                    if (!Directory.Exists(imgPath))
-                    {
-                        Directory.CreateDirectory(imgPath);
-                    }
-                    string uniqueName = Guid.NewGuid().ToString() + "_" + staff.file.FileName;
-                    FilePath = Path.Combine(imgPath, uniqueName);
-                    using (var fileStream = new FileStream(FilePath, FileMode.Create))
-                    {
-                        await staff.file.CopyToAsync(fileStream);
-                    }
-                    string subDirectory = "img";
-                    string relativeFilePath = Path.Combine("/", subDirectory, uniqueName).Replace('\\', '/');
-                    FilePath = relativeFilePath;
-                }
-
-
+                string relativeFilePath = await imgService.SaveImgIntoProject(staff.file);
                 Staff newstaff = new Staff()
                 {
-                    Ten = staff.Ten,
-                    Cccd = staff.Cccd,
+                    StaffName = staff.Ten,
+                    IdNumber = staff.Cccd,
                     RoleId = staff.RoleId,
-                    Luong = staff.Luong,
-                    NgaySinh = ngaySinh,
-                    DiaChi = staff.DiaChi,
-                    CuaHangId = user.CuaHangId
+                    Salary = staff.Luong,
+                    DoB = ngaySinh,
+                    StaffAddr = staff.DiaChi,
+                    StoreId = user.StoreId
                 };
-                var respone = await sqLServices.createStaff(newstaff, FilePath);
+                var respone = await sqLServices.createStaff(newstaff, relativeFilePath);
                 if (respone == null)
                 {
                     throw new Exception("Can't create Staff in Database");

@@ -22,7 +22,7 @@ namespace QuanLySinhVien.Controller.Public
         [HttpGet("Product/{pageNum}/{pageSize}")]
         public async Task<IActionResult> GetProduct([FromRoute] int pageNum, [FromRoute] int pageSize)
         {
-            var res = new PageRespone<Sanpham>();
+            var res = new PageRespone<Product>();
             if (pageNum < 1)
             {
                 throw new ArgumentOutOfRangeException("PageNum param is Out Of Range");
@@ -31,7 +31,7 @@ namespace QuanLySinhVien.Controller.Public
             {
                 throw new ArgumentOutOfRangeException("Max page size is 100");
             }
-            var items = await myDbContext.Sanphams.OrderBy(x => x.TenSp )
+            var items = await myDbContext.Products.OrderBy(x => x.ProductName )
                                 .Skip((pageNum - 1) * pageSize)
                                 .Take(pageSize).ToListAsync();
 
@@ -41,15 +41,15 @@ namespace QuanLySinhVien.Controller.Public
             }
             foreach (var item in items)
             {
-                Item<Sanpham> itemNew = new Item<Sanpham>()
+                Item<Product> itemNew = new Item<Product>()
                 {
                     Value = item,
-                    PathChiTiet = $"/ChiTiet/{item.MaSp}"
+                    PathChiTiet = $"/ChiTiet/{item.ProductId}"
                 };
 
                 res.Items.Add(itemNew);
             }
-            int totalCount = await myDbContext.Sanphams.CountAsync();
+            int totalCount = await myDbContext.Products.CountAsync();
             res.TotalCount = totalCount;
             res.TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
             res.PageIndex = pageNum;
@@ -69,25 +69,25 @@ namespace QuanLySinhVien.Controller.Public
             {
                 throw new ArgumentOutOfRangeException("Max page size is 100");
             }
-            var items = await myDbContext.Sanphams.Where(p => p.MaDm == CateId ).OrderBy(x => x.TenSp)
+            var items = await myDbContext.Products.Where(p => p.SubcategoryId == CateId ).OrderBy(x => x.ProductName)
                                 .Skip((pageNum - 1) * pageSize)
                                 .Take(pageSize).ToListAsync();
             if (items.Count == 0 || !items.Any() || items == null)
             {
                 throw new KeyNotFoundException("Can't find any Product");
             }
-            var res = new PageRespone<Sanpham>();
+            var res = new PageRespone<Product>();
             foreach (var item in items)
             {
-                Item<Sanpham> itemNew = new Item<Sanpham>()
+                Item<Product> itemNew = new Item<Product>()
                 {
                     Value = item,
-                    PathChiTiet = $"/public/Product/{item.MaSp}"
+                    PathChiTiet = $"/public/Product/{item.ProductId}"
                 };
 
                 res.Items.Append(itemNew);
             }
-            int totalCount = await myDbContext.Sanphams.Where(p => p.MaDm == CateId ).CountAsync();
+            int totalCount = await myDbContext.Products.Where(p => p.SubcategoryId == CateId ).CountAsync();
             res.TotalCount = totalCount;
             res.TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
             res.PageIndex = pageNum;
@@ -98,7 +98,7 @@ namespace QuanLySinhVien.Controller.Public
         [HttpGet("ProductDetail/{masp}")]
         public async Task<IActionResult> GetChiTietProduct([FromRoute] string masp)
         {
-            var respone = await myDbContext.Sanphams.FindAsync(masp);
+            var respone = await myDbContext.Products.FindAsync(masp);
             if (respone == null)
             {
                 throw new KeyNotFoundException("Product not exists");
@@ -111,7 +111,7 @@ namespace QuanLySinhVien.Controller.Public
         {
             try
             {
-                var danhmucCha = await myDbContext.LoaiDanhMucs.ToListAsync();
+                var danhmucCha = await myDbContext.Categories.Include(cate => cate.SubCategories).ToListAsync();
                 if (danhmucCha == null || danhmucCha.Count == 0)
                 {
                     return NoContent();
@@ -119,20 +119,20 @@ namespace QuanLySinhVien.Controller.Public
                 List<DanhMucRespone> danhMucRespones = new List<DanhMucRespone>();
                 foreach (var cha in danhmucCha)
                 {
-                    var danhmucCon = await myDbContext.Danhmucs.Where(d => d.MaLoaiDm == cha.MaLoaiDm).ToListAsync();
+                    
                     List<DMRes> res = new List<DMRes>();
-                    foreach (var con in danhmucCon)
+                    foreach (var con in cha.SubCategories)
                     {
                         res.Add(new DMRes()
                         {
-                            tenDM = con.TenDm,
-                            MaDm = con.MaDm
+                            tenDM = con.SubCategoryName,
+                            MaDm = con.SubCategoryId
                         });
                     }
                     danhMucRespones.Add(new DanhMucRespone()
                     {
-                        MaLoaiDm = cha.MaLoaiDm,
-                        ten = cha.TenLoaiDm,
+                        MaLoaiDm = cha.CategoryId,
+                        ten = cha.CategoryName,
                         danhMucCon = res
                     });
                 }
@@ -151,7 +151,7 @@ namespace QuanLySinhVien.Controller.Public
         {
             try
             {
-                var respone = await myDbContext.Nguyenlieus.ToListAsync();
+                var respone = await myDbContext.Goods.ToListAsync();
                 return Ok(respone);
             }
             catch (System.Exception)

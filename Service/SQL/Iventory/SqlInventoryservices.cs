@@ -12,19 +12,19 @@ namespace QuanLySinhVien.Service.SQL.Iventory
         public SQLInventoryServices(MyDbContext context, ILoggerFactory logger)
         : base(context, logger) { }
 
-        public async Task<Kho?> softDeleteKho(string maKho)
+        public async Task<Inventory?> softDeleteKho(string maKho)
         {
             var transaction = await context.Database.BeginTransactionAsync(); 
 
             try
             {
-                var kho = await context.Khos.FindAsync(maKho);
+                var kho = await context.Inventories.FindAsync(maKho);
 
                 if (kho == null)
                 {
                     throw new KeyNotFoundException("Inventory does not exists");
                 }
-                kho.TrangThai = "Ngưng hoạt động";
+                kho.Status = "Ngưng hoạt động";
 
                 context.Entry(kho).State = EntityState.Modified;
 
@@ -41,7 +41,7 @@ namespace QuanLySinhVien.Service.SQL.Iventory
             }
         }
 
-        public async Task<Kho?> taoKho(string maCH, string DiaChi)
+        public async Task<Inventory?> taoKho(string maCH, string DiaChi)
         {
             DbConnection dbConnection = context.Database.GetDbConnection();
 
@@ -60,7 +60,7 @@ namespace QuanLySinhVien.Service.SQL.Iventory
 
                 try
                 {
-                    command.CommandText = "dbo.TaoKhoMoi";
+                    command.CommandText = "management.usp_CreateNewInventory";
                     command.CommandType = CommandType.StoredProcedure;
                     string maKho = base.GenerateId(10, "KH");
 
@@ -72,15 +72,14 @@ namespace QuanLySinhVien.Service.SQL.Iventory
 
                     if (returnValueParam.Value != DBNull.Value)
                     {
-                        return await context.Khos.FindAsync(maKho);
+                        return await context.Inventories.FindAsync(maKho);
                     }
                     throw new Exception("Can't create Inventory");
                 }
                 catch (System.Exception ex)
                 {
                     logger.LogError(ex.Message);
-
-                    return null;
+                    throw;
                 }
                 finally
                 {

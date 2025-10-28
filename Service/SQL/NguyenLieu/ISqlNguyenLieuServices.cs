@@ -4,7 +4,7 @@ namespace QuanLySinhVien.Service.SQL.NguyenLieu
 {
     public interface ISqlNguyenLieuServices
     {
-        Task<Nguyenlieu?> taoNguyenLieu(string tenNL, string DVT);
+        Task<Good?> taoNguyenLieu(string tenNL, string DVT);
 
         
     }

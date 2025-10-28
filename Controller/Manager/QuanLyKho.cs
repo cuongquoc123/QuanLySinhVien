@@ -42,7 +42,7 @@ namespace QuanLySinhVien.Controller.Manager
             {
                 throw new UnauthorizedAccessException("Token not valid");
             }
-            var Manager = await context.Sysusers.Include(u => u.User).FirstAsync(u => u.UserId == ManagerId);
+            var Manager = await context.Sysusers.FindAsync(int.Parse(ManagerId));
 
             if (Manager == null)
             {
@@ -50,25 +50,25 @@ namespace QuanLySinhVien.Controller.Manager
             }
 
 
-            var items = await context.Khos.Where(p => p.CuaHangId == Manager.User.CuaHangId).OrderBy(p => p.MaKho)
+            var items = await context.Inventories.Where(p => p.StoreId == Manager.StoreId).OrderBy(p => p.InventoryId)
                                 .Skip((pageNum - 1) * pageSize)
                                 .Take(pageSize).ToListAsync();
             if (items.Count == 0 || !items.Any() || items == null)
             {
                 throw new KeyNotFoundException("Can't find any Product");
             }
-            var res = new PageRespone<Kho>();
+            var res = new PageRespone<Inventory>();
             foreach (var item in items)
             {
-                Item<Kho> itemNew = new Item<Kho>()
+                Item<Inventory> itemNew = new Item<Inventory>()
                 {
                     Value = item,
-                    PathChiTiet = $"/manager/Kho/Detail/{item.MaKho}"
+                    PathChiTiet = $"/manager/Kho/Detail/{item.InventoryId}"
                 };
 
                 res.Items.Add(itemNew);
             }
-            int totalCount = await context.Khos.Where(p => p.CuaHangId == Manager.User.CuaHangId)
+            int totalCount = await context.Inventories.Where(p => p.StoreId == Manager.StoreId)
                                 .CountAsync();
             res.TotalCount = totalCount;
             res.TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
@@ -85,28 +85,37 @@ namespace QuanLySinhVien.Controller.Manager
             {
                 throw new ArgumentNullException("Missing Param MaKho");
             }
-            var respone = await context.TonKhos.Include(tk => tk.MaNguyenLieuNavigation).Where(TK => TK.MaKho == MaKho).ToListAsync();
-            var Khos = await context.Khos.FindAsync(MaKho);
+            var TonKho = await context.Stocks.Include(Stk => Stk.Inventory)
+                        .Include(Stk => Stk.Good).Where(stk => stk.InventoryId == MaKho).ToListAsync();
             List<TonKhoRespone> tonKhoRespones = new List<TonKhoRespone>();
-            foreach (var item in respone)
+            string Khoid = string.Empty;
+                string DiaChi = string.Empty;
+                string TrangThai = string.Empty;
+            foreach (var item in TonKho)
             {
                 tonKhoRespones.Add(new TonKhoRespone()
                 {
-                    maNL = item.MaNguyenLieuNavigation.MaNguyenLieu,
-                    tenNL = item.MaNguyenLieuNavigation.TenNguyenLieu,
-                    DVT = item.MaNguyenLieuNavigation.Dvt,
-                    SoLuong = item.SoLuongTon
+                    maNL = item.Good.GoodId,
+                    tenNL = item.Good.GoodName,
+                    DVT = item.Good.UnitName,
+                    SoLuong = item.InStock,
+                    TrangThai = item.Status
                 });
+                Khoid = item.InventoryId;
+                DiaChi = item.Inventory.Addr;
+                TrangThai = item.Inventory.Status;
             }
             return Ok(new
             {
-                Kho = Khos,
+                KhoId = Khoid,
+                DiaChi = DiaChi,
+                TrangThai = TrangThai,
                 TonKho = tonKhoRespones
             });
         }
 
         [HttpPost("NhapKho/{MaKho}")]
-        public async Task<IActionResult> TaoPhieuNhapNL([FromRoute] string MaKho, [FromBody] List<Product> dsNL)
+        public async Task<IActionResult> TaoPhieuNhapNL([FromRoute] string MaKho, [FromBody] List<ProductItem> dsNL)
         {
             if (string.IsNullOrEmpty(MaKho))
             {
@@ -119,23 +128,23 @@ namespace QuanLySinhVien.Controller.Manager
                 {
                     throw new Exception("Can't create PhieuNhat");
                 }
-                var CTPH = await context.ChiTietPhieuNhaps.Include(ct => ct.MaNguyenLieuNavigation).Where(ph => ph.MaPhieu == respone.MaPhieu).ToListAsync();
+
                 List<TonKhoRespone> tonKhoRespones = new List<TonKhoRespone>();
-                foreach (var item in CTPH)
+                foreach (var item in respone.Grndetails)
                 {
                     tonKhoRespones.Add(new TonKhoRespone()
                     {
-                        maNL = item.MaNguyenLieuNavigation.MaNguyenLieu,
-                        tenNL = item.MaNguyenLieuNavigation.TenNguyenLieu,
-                        DVT = item.MaNguyenLieuNavigation.Dvt,
-                        SoLuong = item.SoLuong,
+                        maNL = item.Good.GoodId,
+                        tenNL = item.Good.GoodName,
+                        DVT = item.Good.UnitName,
+                        SoLuong = item.ReStock,
                     });
                 }
                 return Ok(new
                 {
-                    MaPhieu = respone.MaPhieu,
-                    MaKho = respone.MaKho,
-                    NgayNhap = respone.NgayNhap,
+                    MaPhieu = respone.GrnId,
+                    MaKho = respone.InventoryId,
+                    NgayNhap = respone.AdmissionDate,
                     ChiTietPhieu = tonKhoRespones
                 });
             }
@@ -160,19 +169,19 @@ namespace QuanLySinhVien.Controller.Manager
                 throw new UnauthorizedAccessException("Token Not valid");
             }
 
-            var Manager = await context.Staff.FindAsync(ManagerId);
+            var Manager = await context.Sysusers.FindAsync(int.Parse(ManagerId));
 
             if (Manager == null)
             {
                 throw new CustomError(403, "Forbiden", "This user Does not exists in my DB");
             }
-            if (string.IsNullOrEmpty(Manager.CuaHangId))
+            if (string.IsNullOrEmpty(Manager.StoreId))
             {
                 throw new CustomError(403, "Forbiden", "This user don't have permission to create Kho");
             }
             try
             {
-                var respone = await sQLInventoryService.taoKho(Manager.CuaHangId, DiaChi);
+                var respone = await sQLInventoryService.taoKho(Manager.StoreId, DiaChi);
 
                 if (respone == null)
                 {

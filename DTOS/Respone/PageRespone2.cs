@@ -16,7 +16,7 @@ namespace QuanLySinhVien.DTOS.Respone
         public string? TrangTHai { get; set; }
         public DateTime? NgayNhan { get; set; }
         public DateTime? NgayHoangThanh { get; set; }
-        public string? UserId { get; set; }
+        public string? User { get; set; }
         public List<CTDHRespone> CTDH { get; set; } = new List<CTDHRespone>();  
         public string? PathChiTiet { get; set; }
 

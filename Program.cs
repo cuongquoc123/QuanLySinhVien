@@ -21,6 +21,7 @@ using QuanLySinhVien.Service.SQL.StaffF;
 using Serilog;
 using QuanLySinhVien.Service.SQL.PhieuNhapKho;
 using Microsoft.AspNetCore.HttpOverrides;
+using QuanLySinhVien.Service.ImgServices;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -135,6 +136,8 @@ builder.Services.AddScoped<ISqlNguyenLieuServices, SqlNguyenLieuServices>();
 builder.Services.AddScoped<ISQLInventoryService,SQLInventoryServices>();
 
 builder.Services.AddScoped<ISqlPhieuNhapKho, SqlPhieuNhapKhoServices>();
+
+builder.Services.AddScoped<IImgService, ImgService>();
 
 var app = builder.Build();
 

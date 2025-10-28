@@ -12,17 +12,17 @@ namespace QuanLySinhVien.Service.SQL.Order
         public OrderService (MyDbContext context, ILoggerFactory logger)
         : base (context, logger) {}
 
-        public async Task<Donhang?> updateDonStatus(string madon, string status)
+        public async Task<Models.Order?> updateDonStatus(string madon, string status)
         {
             var transaction = await context.Database.BeginTransactionAsync();
             try
             {
-                Donhang? UpdateDon = await context.Donhangs.FindAsync(madon);
+                Models.Order? UpdateDon = await context.Orders.FindAsync(madon);
                 if (UpdateDon == null)
                 {
                     throw new KeyNotFoundException("Don Hang not exists");
                 }
-                UpdateDon.TrangThai = status;
+                UpdateDon.Status = status;
                 context.Entry(UpdateDon).State = EntityState.Modified;
                 await context.SaveChangesAsync();
                 await transaction.CommitAsync();
@@ -35,7 +35,7 @@ namespace QuanLySinhVien.Service.SQL.Order
             }
         }
 
-        public async Task<Donhang?> taoDon( string MaNV, List<Product> dssp, string makhach)
+        public async Task<Models.Order?> taoDon( int MaNV, List<ProductItem> dssp, string makhach)
         {
             DbConnection dbConnection = context.Database.GetDbConnection();
             using (DbCommand command = dbConnection.CreateCommand())
@@ -55,12 +55,12 @@ namespace QuanLySinhVien.Service.SQL.Order
                 try
                 {
                     string madon = GenerateId(10, "DH");
-                    command.CommandText = "TaoDonHang";
+                    command.CommandText = "dbo.usp_CreateOrder";
                     command.CommandType = CommandType.StoredProcedure;
 
                     command.Parameters.Add(new SqlParameter("@CustomerId", SqlDbType.Char, 10) { Value = makhach });
-                    command.Parameters.Add(new SqlParameter("@StaffId", SqlDbType.Char, 10) { Value = MaNV });
-                    command.Parameters.Add(new SqlParameter("@MaDon", SqlDbType.Char, 10) { Value = madon });
+                    command.Parameters.Add(new SqlParameter("@StaffId", SqlDbType.Int) { Value = MaNV });
+                    command.Parameters.Add(new SqlParameter("@OrderId", SqlDbType.Char, 10) { Value = madon });
 
                     DataTable? danhSachSanPham = TaoBangThamSoSanPham(dssp);
                     if (danhSachSanPham == null)
@@ -69,9 +69,9 @@ namespace QuanLySinhVien.Service.SQL.Order
                     }
 
                     SqlParameter tvpParam = new SqlParameter();
-                    tvpParam.ParameterName = "@DanhSachSP";
+                    tvpParam.ParameterName = "@ListProduct";
                     tvpParam.SqlDbType = SqlDbType.Structured;
-                    tvpParam.TypeName = "dbo.ChiTietType";
+                    tvpParam.TypeName = "dbo.DetailType";
                     tvpParam.Value = danhSachSanPham;
 
 
@@ -81,15 +81,7 @@ namespace QuanLySinhVien.Service.SQL.Order
 
                     if (returnValueParam.Value == null )
                     {
-                        var donhang = await context.Donhangs.FirstOrDefaultAsync(dh => dh.MaDon == madon);
-                        if (donhang == null)
-                        {
-                            System.Console.WriteLine("Don hang bị null");
-                        }
-                        else
-                        {
-                            System.Console.WriteLine(donhang.MaDon);
-                        }
+                        var donhang = await context.Orders.Include(ord => ord.OrderDetails).ThenInclude(detail => detail.Product).FirstOrDefaultAsync(dh => dh.OrderId == madon);
                         
                         return donhang;
                     }
@@ -98,7 +90,7 @@ namespace QuanLySinhVien.Service.SQL.Order
                 catch (System.Exception ex)
                 {
                     logger.LogError(ex.Message);
-                    return null;
+                    throw;
                 }
                 finally
                 {

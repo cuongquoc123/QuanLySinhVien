@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace QuanLySinhVien.Models;
 
-[Table("sysrole")]
+[Table("sysrole", Schema = "management")]
 public partial class Sysrole
 {
     [Key]
@@ -19,4 +19,7 @@ public partial class Sysrole
 
     [InverseProperty("Role")]
     public virtual ICollection<Staff> Staff { get; set; } = new List<Staff>();
+
+    [InverseProperty("Role")]
+    public virtual ICollection<Sysuser> Sysusers { get; set; } = new List<Sysuser>();
 }

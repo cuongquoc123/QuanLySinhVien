@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace QuanLySinhVien.Models;
 
-[Table("staff")]
+[Table("staff", Schema = "management")]
 public partial class Staff
 {
     [Key]
@@ -14,50 +14,46 @@ public partial class Staff
     [Unicode(false)]
     public string StaffId { get; set; } = null!;
 
-    [Column("CCCD")]
     [StringLength(11)]
     [Unicode(false)]
-    public string Cccd { get; set; } = null!;
+    public string IdNumber { get; set; } = null!;
 
     [StringLength(50)]
-    public string Ten { get; set; } = null!;
+    public string StaffName { get; set; } = null!;
 
     [StringLength(50)]
-    public string DiaChi { get; set; } = null!;
+    public string StaffAddr { get; set; } = null!;
 
-    public DateOnly? NgaySinh { get; set; }
-
-    [Column(TypeName = "money")]
-    public decimal? Luong { get; set; }
+    public DateOnly? DoB { get; set; }
 
     [Column(TypeName = "money")]
-    public decimal? Thuong { get; set; }
+    public decimal Salary { get; set; }
+
+    [Column(TypeName = "money")]
+    public decimal Bonus { get; set; }
 
     [StringLength(500)]
     public string Avatar { get; set; } = null!;
 
     [StringLength(100)]
-    public string? StatuSf { get; set; }
+    public string? Status { get; set; }
 
     [StringLength(10)]
     [Unicode(false)]
-    public string? CuaHangId { get; set; }
+    public string? StoreId { get; set; }
 
     [StringLength(10)]
     [Unicode(false)]
     public string RoleId { get; set; } = null!;
 
-    [ForeignKey("CuaHangId")]
-    [InverseProperty("Staff")]
-    public virtual Cuahang? CuaHang { get; set; }
-
-    [InverseProperty("User")]
-    public virtual ICollection<Donhang> Donhangs { get; set; } = new List<Donhang>();
-
     [ForeignKey("RoleId")]
     [InverseProperty("Staff")]
-    public virtual Sysrole? Role { get; set; }
+    public virtual Sysrole Role { get; set; } = null!;
 
-    [InverseProperty("User")]
-    public virtual Sysuser? Sysuser { get; set; }
+    [ForeignKey("StoreId")]
+    [InverseProperty("Staff")]
+    public virtual Store? Store { get; set; }
+
+    [InverseProperty("Staff")]
+    public virtual ICollection<Sysuser> Sysusers { get; set; } = new List<Sysuser>();
 }

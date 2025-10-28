@@ -15,29 +15,27 @@ namespace QuanLySinhVien.Controller.Admin
     public class QuanLyCH : ControllerBase
     {
         private readonly ISqlStoreServices sqLServices;
-        private readonly IWebHostEnvironment webHostEnvironment;
         private readonly MyDbContext myDbContext;
-        public QuanLyCH(ISqlStoreServices sqLServices, IWebHostEnvironment webHostEnvironment, MyDbContext myDbContext)
+        public QuanLyCH(ISqlStoreServices sqLServices, MyDbContext myDbContext)
         {
             this.sqLServices = sqLServices;
-            this.webHostEnvironment = webHostEnvironment;
             this.myDbContext = myDbContext;
         }
 
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var DSCH = await myDbContext.Cuahangs.ToListAsync();
+            var DSCH = await myDbContext.Stores.ToListAsync();
             if (DSCH.Count == 0 || !DSCH.Any() || DSCH == null)
             {
                 throw new KeyNotFoundException("Do not have any store");
             }
-            List<Item<Cuahang>> respone = new List<Item<Cuahang>>();
+            List<Item<Store>> respone = new List<Item<Store>>();
             foreach (var CH in DSCH)
             {
-                Item<Cuahang> item = new Item<Cuahang>();
+                Item<Store> item = new Item<Store>();
                 item.Value = CH;
-                item.PathChiTiet = $"/admin/Store/{CH.CuaHangId}";
+                item.PathChiTiet = $"/admin/Store/{CH.StoreId}";
                 respone.Add(item);
             }
             return Ok(respone);
@@ -50,7 +48,7 @@ namespace QuanLySinhVien.Controller.Admin
                 throw new ArgumentNullException("Missing Param StoreId");
             }
 
-            var respone = await myDbContext.Cuahangs.FindAsync(StoreId);
+            var respone = await myDbContext.Stores.FindAsync(StoreId);
             if (respone == null)
             {
                 throw new KeyNotFoundException("Store not Exists");
@@ -70,11 +68,11 @@ namespace QuanLySinhVien.Controller.Admin
             {
                 throw new ArgumentOutOfRangeException("Length of atribute is out off range");
             }
-            Cuahang newStore = new Cuahang()
+            Store newStore = new Store()
             {
-                TenCh = request.TenCh,
-                DiaChi = request.DiaChi,
-                Sdt = request.SDT
+                StoreName = request.TenCh,
+                StoreAddr = request.DiaChi,
+                PhoneNum = request.SDT
             };
             try
             {

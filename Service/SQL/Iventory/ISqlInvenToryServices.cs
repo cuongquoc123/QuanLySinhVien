@@ -4,7 +4,7 @@ namespace QuanLySinhVien.Service.SQL.Iventory
 {
     public interface ISQLInventoryService
     {
-        Task<Kho?> taoKho(string maCH, string DiaChi);
-        Task<Kho?> softDeleteKho(string maKho);
+        Task<Inventory?> taoKho(string maCH, string DiaChi);
+        Task<Inventory?> softDeleteKho(string maKho);
     }
 }

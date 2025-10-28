@@ -15,237 +15,224 @@ public partial class MyDbContext : DbContext
     {
     }
 
-    public virtual DbSet<ChiTietDonHang> ChiTietDonHangs { get; set; }
+    public virtual DbSet<Category> Categories { get; set; }
 
-    public virtual DbSet<ChiTietPhieuNhap> ChiTietPhieuNhaps { get; set; }
+    public virtual DbSet<Good> Goods { get; set; }
 
-    public virtual DbSet<Cuahang> Cuahangs { get; set; }
+    public virtual DbSet<Grn> Grns { get; set; }
 
-    public virtual DbSet<Customer> Customers { get; set; }
+    public virtual DbSet<Grndetail> Grndetails { get; set; }
 
-    public virtual DbSet<CustomerDetail> CustomerDetails { get; set; }
+    public virtual DbSet<Inventory> Inventories { get; set; }
 
-    public virtual DbSet<Danhmuc> Danhmucs { get; set; }
+    public virtual DbSet<Order> Orders { get; set; }
 
-    public virtual DbSet<Donhang> Donhangs { get; set; }
+    public virtual DbSet<OrderDetail> OrderDetails { get; set; }
 
-    public virtual DbSet<Kho> Khos { get; set; }
-
-    public virtual DbSet<LoaiDanhMuc> LoaiDanhMucs { get; set; }
-
-    public virtual DbSet<Nguyenlieu> Nguyenlieus { get; set; }
-
-    public virtual DbSet<PhieuNhapNl> PhieuNhapNls { get; set; }
-
-    public virtual DbSet<Sanpham> Sanphams { get; set; }
+    public virtual DbSet<Product> Products { get; set; }
 
     public virtual DbSet<Staff> Staff { get; set; }
+
+    public virtual DbSet<Stock> Stocks { get; set; }
+
+    public virtual DbSet<Store> Stores { get; set; }
+
+    public virtual DbSet<SubCategory> SubCategories { get; set; }
 
     public virtual DbSet<Sysrole> Sysroles { get; set; }
 
     public virtual DbSet<Sysuser> Sysusers { get; set; }
 
-    public virtual DbSet<TonKho> TonKhos { get; set; }
-
-
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<ChiTietDonHang>(entity =>
+        modelBuilder.Entity<Category>(entity =>
         {
-            entity.HasKey(e => new { e.MaDon, e.MaSp }).HasName("PK__chi_tiet__EFFBA5E919AFBD06");
+            entity.HasKey(e => e.CategoryId).HasName("PK__category__19093A0B73BE255A");
 
-            entity.ToTable("chi_tiet_don_hang", tb => tb.HasTrigger("NganThemMoiSPChoDonXuLy"));
-
-            entity.Property(e => e.MaDon).IsFixedLength();
-            entity.Property(e => e.MaSp).IsFixedLength();
-
-            entity.HasOne(d => d.MaDonNavigation).WithMany(p => p.ChiTietDonHangs)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_CTDH_DH");
-
-            entity.HasOne(d => d.MaSpNavigation).WithMany(p => p.ChiTietDonHangs)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_CTDH_SP");
+            entity.Property(e => e.CategoryId).IsFixedLength();
         });
 
-        modelBuilder.Entity<ChiTietPhieuNhap>(entity =>
+        modelBuilder.Entity<Good>(entity =>
         {
-            entity.HasKey(e => new { e.MaNguyenLieu, e.MaPhieu }).HasName("PK__chi_tiet__D53798AB788278D9");
+            entity.HasKey(e => e.GoodId).HasName("PK__goods__043AE53D8B3BA8E8");
 
-            entity.ToTable("chi_tiet_phieu_nhap", tb => tb.HasTrigger("UpdateSoLuongTonKho"));
-
-            entity.Property(e => e.MaNguyenLieu).IsFixedLength();
-            entity.Property(e => e.MaPhieu).IsFixedLength();
-
-            entity.HasOne(d => d.MaNguyenLieuNavigation).WithMany(p => p.ChiTietPhieuNhaps)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_CTYC_NL");
-
-            entity.HasOne(d => d.MaPhieuNavigation).WithMany(p => p.ChiTietPhieuNhaps)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_CTYC_PHIEU");
+            entity.Property(e => e.GoodId).IsFixedLength();
         });
 
-        modelBuilder.Entity<Cuahang>(entity =>
+        modelBuilder.Entity<Grn>(entity =>
         {
-            entity.HasKey(e => e.CuaHangId).HasName("PK__cuahang__1BECA8F87D6CE444");
+            entity.HasKey(e => e.GrnId).HasName("PK__GRN__ACCC6B89F6170161");
 
-            entity.Property(e => e.CuaHangId).IsFixedLength();
-            entity.Property(e => e.Sdt).IsFixedLength();
+            entity.Property(e => e.GrnId).IsFixedLength();
+            entity.Property(e => e.InventoryId).IsFixedLength();
+
+            entity.HasOne(d => d.Inventory).WithMany(p => p.Grns).HasConstraintName("FK_CH_PNL");
         });
 
-        modelBuilder.Entity<Customer>(entity =>
+        modelBuilder.Entity<Grndetail>(entity =>
         {
-            entity.HasKey(e => e.CustomerId).HasName("PK__Customer__A4AE64D8C73A1751");
+            entity.HasKey(e => new { e.GoodId, e.GrnId }).HasName("PK__GRNDetai__8EF62385284A8FE1");
 
+            entity.ToTable("GRNDetail", "management", tb => tb.HasTrigger("trg_update_Stock"));
+
+            entity.Property(e => e.GoodId).IsFixedLength();
+            entity.Property(e => e.GrnId).IsFixedLength();
+
+            entity.HasOne(d => d.Good).WithMany(p => p.Grndetails)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_GRN_Goods");
+
+            entity.HasOne(d => d.Grn).WithMany(p => p.Grndetails)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Detail_GRN");
+        });
+
+        modelBuilder.Entity<Inventory>(entity =>
+        {
+            entity.HasKey(e => e.InventoryId).HasName("PK__inventor__F5FDE6B3420C330E");
+
+            entity.ToTable("inventory", "management", tb => tb.HasTrigger("trg_cancer_delete_inventory"));
+
+            entity.Property(e => e.InventoryId).IsFixedLength();
+            entity.Property(e => e.StoreId).IsFixedLength();
+
+            entity.HasOne(d => d.Store).WithMany(p => p.Inventories)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Inventory_Store");
+        });
+
+        modelBuilder.Entity<Order>(entity =>
+        {
+            entity.HasKey(e => e.OrderId).HasName("PK__orders__C3905BCFE133ACE8");
+
+            entity.ToTable("orders", tb =>
+                {
+                    tb.HasTrigger("cancer_delete_Order");
+                    tb.HasTrigger("trg_prevent_order_update");
+                    tb.HasTrigger("trg_update_CompleteTime_Order");
+                });
+
+            entity.Property(e => e.OrderId).IsFixedLength();
             entity.Property(e => e.CustomerId).IsFixedLength();
+
+            entity.HasOne(d => d.SysUser).WithMany(p => p.Orders).HasConstraintName("FK_SysUser_Order");
         });
 
-        modelBuilder.Entity<CustomerDetail>(entity =>
+        modelBuilder.Entity<OrderDetail>(entity =>
         {
-            entity.HasKey(e => e.CustomerId).HasName("PK__Customer__A4AE64D8C2A9E604");
+            entity.HasKey(e => new { e.OrderId, e.ProductId }).HasName("PK__order_de__08D097A35BCD0062");
 
-            entity.Property(e => e.CustomerId).IsFixedLength();
-            entity.Property(e => e.Avatar).HasDefaultValue("https://bla.edu.vn/wp-content/uploads/2025/09/avatar-fb.jpg");
-            entity.Property(e => e.Cccd).IsFixedLength();
-            entity.Property(e => e.Sdt).IsFixedLength();
+            entity.ToTable("order_detail", tb => tb.HasTrigger("trg_lock_action_order_detail"));
 
-            entity.HasOne(d => d.Customer).WithOne(p => p.CustomerDetail)
+            entity.Property(e => e.OrderId).IsFixedLength();
+            entity.Property(e => e.ProductId).IsFixedLength();
+
+            entity.HasOne(d => d.Order).WithMany(p => p.OrderDetails)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Detail_Customer");
-        });
+                .HasConstraintName("FK_OrderDetail_Order");
 
-        modelBuilder.Entity<Danhmuc>(entity =>
-        {
-            entity.HasKey(e => e.MaDm).HasName("PK__danhmuc__7A3EF408265D834A");
-
-            entity.Property(e => e.MaDm).IsFixedLength();
-            entity.Property(e => e.MaLoaiDm).IsFixedLength();
-
-            entity.HasOne(d => d.MaLoaiDmNavigation).WithMany(p => p.Danhmucs)
+            entity.HasOne(d => d.Product).WithMany(p => p.OrderDetails)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_DM_LDM");
+                .HasConstraintName("FK_OrderDetail_Product");
         });
 
-        modelBuilder.Entity<Donhang>(entity =>
+        modelBuilder.Entity<Product>(entity =>
         {
-            entity.HasKey(e => e.MaDon).HasName("PK__donhang__3D89F5686D0D1857");
+            entity.HasKey(e => e.ProductId).HasName("PK__products__B40CC6CD73E287B0");
 
-            entity.ToTable("donhang", tb => tb.HasTrigger("CapNhatGioHoanThanh"));
+            entity.ToTable("products", tb => tb.HasTrigger("trg_cancer_delete_products"));
 
-            entity.Property(e => e.MaDon).IsFixedLength();
-            entity.Property(e => e.CustomerId).IsFixedLength();
-            entity.Property(e => e.UserId).IsFixedLength();
+            entity.Property(e => e.ProductId).IsFixedLength();
+            entity.Property(e => e.SubcategoryId).IsFixedLength();
 
-            entity.HasOne(d => d.Customer).WithMany(p => p.Donhangs).HasConstraintName("FK_Cus_DH");
-
-            entity.HasOne(d => d.User).WithMany(p => p.Donhangs).HasConstraintName("FK_NV_DH");
-        });
-
-        modelBuilder.Entity<Kho>(entity =>
-        {
-            entity.HasKey(e => e.MaKho).HasName("PK__kho__3BDA9350A59708E5");
-
-            entity.Property(e => e.MaKho).IsFixedLength();
-            entity.Property(e => e.CuaHangId).IsFixedLength();
-
-            entity.HasOne(d => d.CuaHang).WithMany(p => p.Khos)
+            entity.HasOne(d => d.Subcategory).WithMany(p => p.Products)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Kho_CH");
-        });
-
-        modelBuilder.Entity<LoaiDanhMuc>(entity =>
-        {
-            entity.HasKey(e => e.MaLoaiDm).HasName("PK__LoaiDanh__1227485E29918971");
-
-            entity.Property(e => e.MaLoaiDm).IsFixedLength();
-        });
-
-        modelBuilder.Entity<Nguyenlieu>(entity =>
-        {
-            entity.HasKey(e => e.MaNguyenLieu).HasName("PK__nguyenli__C7519355A4041B51");
-
-            entity.Property(e => e.MaNguyenLieu).IsFixedLength();
-        });
-
-        modelBuilder.Entity<PhieuNhapNl>(entity =>
-        {
-            entity.HasKey(e => e.MaPhieu).HasName("PK__phieu_nh__2660BFE0F818D77E");
-
-            entity.ToTable("phieu_nhapNL", tb => tb.HasTrigger("TuDienCotNgayNhap"));
-
-            entity.Property(e => e.MaPhieu).IsFixedLength();
-            entity.Property(e => e.MaKho).IsFixedLength();
-
-            entity.HasOne(d => d.MaKhoNavigation).WithMany(p => p.PhieuNhapNls).HasConstraintName("FK_CH_PNL");
-        });
-
-        modelBuilder.Entity<Sanpham>(entity =>
-        {
-            entity.HasKey(e => e.MaSp).HasName("PK__sanpham__2725081C0E1B2D87");
-
-            entity.Property(e => e.MaSp).IsFixedLength();
-            entity.Property(e => e.MaDm).IsFixedLength();
-
-            entity.HasOne(d => d.MaDmNavigation).WithMany(p => p.Sanphams)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_SP_DM");
+                .HasConstraintName("FK_Product_SubCategory");
         });
 
         modelBuilder.Entity<Staff>(entity =>
         {
-            entity.HasKey(e => e.StaffId).HasName("PK__staff__96D4AB179906C6BF");
+            entity.HasKey(e => e.StaffId).HasName("PK__staff__96D4AB174122ABC2");
 
-            entity.ToTable("staff", tb =>
-                {
-                    tb.HasTrigger("KiemTraTuoiStaff");
-                    tb.HasTrigger("NganChanXoaStaff");
-                    tb.HasTrigger("trg_AfterInsertStaff");
-                    tb.HasTrigger("trg_AfterUpdateStaffRole");
-                });
+            entity.ToTable("staff", "management", tb => tb.HasTrigger("CheckStaffAge"));
 
             entity.Property(e => e.StaffId).IsFixedLength();
-            entity.Property(e => e.Avatar).HasDefaultValue("https://bla.edu.vn/wp-content/uploads/2025/09/avatar-fb.jpg");
-            entity.Property(e => e.Cccd).IsFixedLength();
-            entity.Property(e => e.CuaHangId).IsFixedLength();
+            entity.Property(e => e.IdNumber).IsFixedLength();
             entity.Property(e => e.RoleId).IsFixedLength();
+            entity.Property(e => e.StoreId).IsFixedLength();
 
-            entity.HasOne(d => d.CuaHang).WithMany(p => p.Staff).HasConstraintName("FK_CH_STAFF");
+            entity.HasOne(d => d.Role).WithMany(p => p.Staff)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_USER_ROLE");
 
-            entity.HasOne(d => d.Role).WithMany(p => p.Staff).HasConstraintName("FK_USER_ROLE");
+            entity.HasOne(d => d.Store).WithMany(p => p.Staff).HasConstraintName("FK_Store_Staff");
+        });
+
+        modelBuilder.Entity<Stock>(entity =>
+        {
+            entity.Property(e => e.GoodId).IsFixedLength();
+            entity.Property(e => e.InventoryId).IsFixedLength();
+
+            entity.HasOne(d => d.Good).WithMany()
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Stock_Goods");
+
+            entity.HasOne(d => d.Inventory).WithMany()
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Inventory_Stock");
+        });
+
+        modelBuilder.Entity<Store>(entity =>
+        {
+            entity.HasKey(e => e.StoreId).HasName("PK__store__3B82F0E1F0F4934C");
+
+            entity.ToTable("store", tb =>
+                {
+                    tb.HasTrigger("TrgCreateNewStore");
+                    tb.HasTrigger("trg_cancer_delete_store");
+                });
+
+            entity.Property(e => e.StoreId).IsFixedLength();
+            entity.Property(e => e.PhoneNum).IsFixedLength();
+        });
+
+        modelBuilder.Entity<SubCategory>(entity =>
+        {
+            entity.HasKey(e => e.SubCategoryId).HasName("PK__sub_cate__26BE5B19650684DB");
+
+            entity.Property(e => e.SubCategoryId).IsFixedLength();
+            entity.Property(e => e.CategoryId).IsFixedLength();
+
+            entity.HasOne(d => d.Category).WithMany(p => p.SubCategories)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Sub_Category");
         });
 
         modelBuilder.Entity<Sysrole>(entity =>
         {
-            entity.HasKey(e => e.RoleId).HasName("PK__sysrole__8AFACE1A0D352965");
+            entity.HasKey(e => e.RoleId).HasName("PK__sysrole__8AFACE1A7BAFFD69");
 
             entity.Property(e => e.RoleId).IsFixedLength();
         });
 
         modelBuilder.Entity<Sysuser>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__sysuser__1788CC4CD266A461");
+            entity.HasKey(e => e.UserId).HasName("PK__sysuser__1788CC4C908CAB42");
 
-            entity.Property(e => e.UserId).IsFixedLength();
+            entity.Property(e => e.RoleId).IsFixedLength();
+            entity.Property(e => e.StaffId).IsFixedLength();
+            entity.Property(e => e.StoreId).IsFixedLength();
 
-            entity.HasOne(d => d.User).WithOne(p => p.Sysuser)
+            entity.HasOne(d => d.Role).WithMany(p => p.Sysusers)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_USER_STAFF");
-        });
+                .HasConstraintName("FK_User_RoleS");
 
-        modelBuilder.Entity<TonKho>(entity =>
-        {
-            entity.Property(e => e.MaKho).IsFixedLength();
-            entity.Property(e => e.MaNguyenLieu).IsFixedLength();
+            entity.HasOne(d => d.Staff).WithMany(p => p.Sysusers).HasConstraintName("FK_User_Staff");
 
-            entity.HasOne(d => d.MaKhoNavigation).WithMany()
+            entity.HasOne(d => d.Store).WithMany(p => p.Sysusers)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Kho_TonKho");
-
-            entity.HasOne(d => d.MaNguyenLieuNavigation).WithMany()
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Kho_NguyenLieu");
+                .HasConstraintName("FK_Store_SysUser");
         });
 
         OnModelCreatingPartial(modelBuilder);

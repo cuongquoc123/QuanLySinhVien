@@ -15,6 +15,30 @@ namespace QuanLySinhVien.Service.SQL.StaffF
         {
             this.passWordService = passWordService;
         }
+
+        public async Task<string> AssignUserToStaff(string StaffId, string UserName)
+        {
+            try
+            {
+                await context.Database.ExecuteSqlInterpolatedAsync($"""
+                    Exec management.uspAssignUserToStaff 
+                    @UserName = {UserName},
+                    @TargetStaffId = {StaffId}
+                """);
+
+                return "SuccesFully Assign User To Staff";
+            }
+            catch (SqlException)
+            {
+                throw;
+            }
+            catch (System.Exception)
+            {
+
+                throw;
+            }
+        }
+
         public async Task<Staff?> createStaff(Staff newStaff, string imgPath)
         {
             var Transaction = await context.Database.BeginTransactionAsync();
@@ -23,15 +47,14 @@ namespace QuanLySinhVien.Service.SQL.StaffF
                 
                 Staff moi = new Staff();
                 moi.Avatar = imgPath;
-                moi.Ten = newStaff.Ten;
+                moi.StaffName = newStaff.StaffName;
                 moi.RoleId = newStaff.RoleId;
-                moi.CuaHangId = newStaff.CuaHangId;
-                moi.StatuSf = "Hoạt động";
+                moi.StoreId = newStaff.StaffId;
                 moi.StaffId = GenerateId(10, "ST");
-                moi.DiaChi = newStaff.DiaChi;
-                moi.Luong = newStaff.Luong;
-                moi.Cccd = newStaff.Cccd;
-                moi.NgaySinh = newStaff.NgaySinh;
+                moi.StaffAddr = newStaff.StaffAddr;
+                moi.Salary = newStaff.Salary;
+                moi.IdNumber = newStaff.IdNumber;
+                moi.DoB = newStaff.DoB;
                 await context.Staff.AddAsync(moi);
                 await context.SaveChangesAsync();
                 await Transaction.CommitAsync();
@@ -43,54 +66,7 @@ namespace QuanLySinhVien.Service.SQL.StaffF
                 return null;
             }
         }
-        public async Task<Sysuser?> createAccount(string staffId, string username, string password,string RoleId)
-        {
-            DbConnection dbConnection = context.Database.GetDbConnection();
 
-            var returnValueParam = new SqlParameter()
-            {
-                ParameterName = "@ReturnValue",
-                SqlDbType = SqlDbType.Int,
-                Direction = ParameterDirection.ReturnValue
-            };
-            using (DbCommand command = dbConnection.CreateCommand())
-            {
-                if (dbConnection.State != ConnectionState.Open)
-                    {
-                        await dbConnection.OpenAsync();
-                    }
-                try
-                {
-                    
-                    command.CommandText = "dbo.TaoTaiKhoanStaff";
-                    command.CommandType = CommandType.StoredProcedure;
-
-                    command.Parameters.Add(new SqlParameter("@StaffId", SqlDbType.Char, 10) { Value = staffId });
-                    command.Parameters.Add(new SqlParameter("@UserName", SqlDbType.NVarChar, 100) { Value = username });
-                    command.Parameters.Add(new SqlParameter("@PassWord", SqlDbType.NVarChar, 100) { Value = passWordService.HashPassWord(password) });
-                    command.Parameters.Add(new SqlParameter("@RoleId", SqlDbType.Char, 10) { Value = RoleId });
-                    await command.ExecuteNonQueryAsync();
-
-                    if (returnValueParam.Value != DBNull.Value)
-                    {
-                        return await context.Sysusers.FindAsync(staffId);
-                    }
-
-                    throw new Exception("UserName already in db or staff not found");
-                }
-                catch (System.Exception ex)
-                {
-                    logger.LogError(ex.Message);
-                    return null;
-                }
-                finally
-                {
-                        await dbConnection.CloseAsync();
-                }
-
-
-            }
-        }
 
 
         public async Task<int> SoftDeleteUser(string Id)
@@ -101,7 +77,7 @@ namespace QuanLySinhVien.Service.SQL.StaffF
                 var user = await context.Staff.FindAsync(Id);
                 if (user != null)
                 {
-                    user.StatuSf = "Nghỉ việc";
+                    user.Status = "Nghỉ việc";
                     context.Entry(user).State = EntityState.Modified;
                     await context.SaveChangesAsync();
                     await Transaction.CommitAsync();

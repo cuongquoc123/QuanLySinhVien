@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using QuanLySinhVien.DTOS.Request;
 using QuanLySinhVien.Models;
+using QuanLySinhVien.Service.ImgServices;
 using QuanLySinhVien.Service.SQL;
 using QuanLySinhVien.Service.SQL.ProductS;
 
@@ -10,14 +11,12 @@ namespace QuanLySinhVien.Controller.Admin
     [Route("admin/Product")]
     public class QuanLyProduct : ControllerBase
     {
-        private readonly MyDbContext context;
         private readonly ISqlProductServiecs sqLServices;
-        private readonly IWebHostEnvironment webHostEnvironment;
-        public QuanLyProduct(MyDbContext context,ISqlProductServiecs sqLServices, IWebHostEnvironment webHostEnvironment)
+        private readonly IImgService imgService;
+        public QuanLyProduct(ISqlProductServiecs sqLServices,  IImgService imgService)
         {
-            this.context = context;
             this.sqLServices = sqLServices;
-            this.webHostEnvironment = webHostEnvironment;
+            this.imgService = imgService;  
         }
 
         [HttpPost("")]
@@ -29,36 +28,17 @@ namespace QuanLySinhVien.Controller.Admin
             }
             if (sanphams.file == null || sanphams.file.Length == 0)
             {
-                throw new ArgumentException("Missing File");
+                throw new ArgumentException("Missing File Product IMG");
             }
             try
             {
-                string wwwrootPath = webHostEnvironment.WebRootPath;
-                if (string.IsNullOrEmpty(wwwrootPath))
+                string relativeFilePath = await imgService.SaveImgIntoProject(sanphams.file);
+                Product sp = new Product()
                 {
-                    throw new Exception("Can't take web root path");
-                }
-                string subDirectory = "img";
-                string imgPath = Path.Combine(wwwrootPath, "img");
-                if (!Directory.Exists(imgPath))
-                {
-                    Directory.CreateDirectory(imgPath);
-                }
-                
-                string uniqueNameFile = Guid.NewGuid().ToString() + "_" + sanphams.file.FileName;
-                string FilePath = Path.Combine(imgPath, uniqueNameFile);
-
-                using (var fileStream = new FileStream(FilePath, FileMode.Create))
-                {
-                    await sanphams.file.CopyToAsync(fileStream);
-                }
-                string relativeFilePath = Path.Combine("/", subDirectory, uniqueNameFile).Replace('\\', '/');
-                Sanpham sp = new Sanpham()
-                {
-                    TenSp = sanphams.productname,
-                    DonGia = sanphams.donGia,
-                    MaDm = sanphams.DMID,
-                    Mota = sanphams.mota
+                    ProductName = sanphams.productname,
+                    Price = sanphams.donGia,
+                    SubcategoryId = sanphams.DMID,
+                    Decription = sanphams.mota
                 };
                 var respone = await sqLServices.CreateProDucts(sp, relativeFilePath);
 
