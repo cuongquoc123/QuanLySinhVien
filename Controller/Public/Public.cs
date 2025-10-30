@@ -160,6 +160,56 @@ namespace QuanLySinhVien.Controller.Public
             }
         }
 
+        [HttpGet("Store")]
+        public async Task<IActionResult> GetStore()
+        {
+            var stores = await myDbContext.Stores.ToListAsync();
+            if (stores.Count == 0 || stores == null)
+            {
+                return NoContent();
+            }
+            List<storeRespone> ls = new List<storeRespone>();
+            foreach (var s in stores)
+            {
+                ls.Add(new storeRespone()
+                {
+                    StoreId = s.StoreId,
+                    StoreName = s.StoreName
+                });
+            }
+
+            return Ok(ls);
+        }
+
+        [HttpGet("Roles")]
+        public async Task<IActionResult> AllRole()
+        {
+            try
+            {
+                var sysroles = await myDbContext.Sysroles.ToListAsync();
+
+                if (sysroles == null)
+                {
+                    return NoContent();
+                }
+                List<SysRoleRespone> respone = new List<SysRoleRespone>();
+                foreach (var role in sysroles)
+                {
+                    respone.Add(new SysRoleRespone()
+                    {
+                        roleId = role.RoleId,
+                        roleName = role.RoleName
+                    });
+                }
+                return Ok(respone);
+            }
+            catch (System.Exception)
+            {
+                throw;
+            }
+            
+            
+        }
     }
 
 

@@ -15,16 +15,15 @@ namespace QuanLySinhVien.Controller.Cashier
     [Authorize(Roles = "Admin,Manager,Cashier")]
     public class ThuNgan : ControllerBase
     {
-
+        private readonly MyDbContext context;
         private readonly IOrderService sqLServices;
-        public ThuNgan( IOrderService sqLServices)
+        public ThuNgan( IOrderService sqLServices, MyDbContext context )
         {
             this.sqLServices = sqLServices;
-
+            this.context = context;
         }
 
         [HttpPost("")]
-
         public async Task<IActionResult> taoDonHang([FromBody] HoaDonRequest request)
         {
             if (request == null )
@@ -74,7 +73,70 @@ namespace QuanLySinhVien.Controller.Cashier
                 throw;
             }
         }
+        [HttpGet("Unproccess")]
+        public async Task<IActionResult> GetOrderUnproccess()
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    throw new UnauthorizedAccessException("Token not valid");
+                }
 
+                var user = await context.Sysusers.FindAsync(int.Parse(userId));
+
+                if (user == null)
+                {
+                    throw new UnauthorizedAccessException("This is not my Token");
+                }
+
+                var respone = new PageRespone2();
+                var Items = await context.Orders.Include(ord => ord.SysUser).Include(ord => ord.OrderDetails)
+                                .ThenInclude(detail => detail.Product)
+                                .Where(d => d.SysUser != null && d.Status == "Tiếp nhận"
+                                && d.SysUser.StoreId == user.StoreId).ToListAsync();
+                if (Items == null || Items.Count == 0 || !Items.Any())
+                {
+                    return NoContent();
+                }
+
+                foreach (var item in Items)
+                {
+                    Item2 itemNew = new Item2()
+                    {
+                        maDon = item.OrderId,
+                        TrangTHai = item.Status,
+                        NgayNhan = item.RecivingDate,
+                        NgayHoangThanh = item.CompleteDate,
+                        User = item.SysUser?.UserName,
+                        PathChiTiet = $"/manager/DH/chitiet/{item.OrderId}"
+                    };
+                    
+                    foreach (var item2 in item.OrderDetails)
+                    {
+                        CTDHRespone CTDHS = new CTDHRespone()
+                        {
+                            masp = item2.ProductId,
+                            tenSP = item2.Product.ProductName,
+                            SoLuong = item2.Quantity,
+                            Gia = item2.Product.Price,
+                            ThanhTiem = item2.Quantity * item2.Product.Price
+                        };
+                        itemNew.CTDH.Add(CTDHS);
+                    }
+                    
+                    
+                    respone.Items.Add(itemNew);
+                }
+                return Ok(respone);
+            }
+            catch (System.Exception)
+            {
+                
+                throw;
+            }
+        }
         [HttpPut("{Madon}/{Status}")]
         public async Task<IActionResult> UpdateDonStatus([FromRoute] string Madon, [FromRoute] string Status)
         {

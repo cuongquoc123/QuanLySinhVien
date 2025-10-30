@@ -35,7 +35,7 @@ namespace QuanLySinhVien.MidWare.JWT
             var user = context.Sysusers.Include(u => u.Staff).First(x => x.UserName == username);
             if (user is not null)
             {
-                
+
                 if (string.IsNullOrEmpty(user.Password))
                 {
                     throw new CustomError(422, "Unprocessable Entity", "Your KeyWord not true");
@@ -70,6 +70,10 @@ namespace QuanLySinhVien.MidWare.JWT
         public IActionResult Login(LoginRequest request)
         {
             logger.LogInformation($"API Login is being called:");
+            if (request.UserName != "admin")
+            {
+                request.UserName = $"{request.StoreId}_{request.UserName}";
+            }
             if (!ValidateUser(request.UserName, request.Password, out var user, out string roles, out int UserId))
             {
                 throw new UnauthorizedAccessException("User Infor not true");

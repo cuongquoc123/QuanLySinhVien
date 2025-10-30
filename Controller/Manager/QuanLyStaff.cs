@@ -13,7 +13,7 @@ namespace QuanLySinhVien.Controller.Manager
 {
     [ApiController]
     [Route("/manager/Staff")]
-    [Authorize(Roles = "admin,manager")]
+    [Authorize(Roles = "Admin,Manager")]
     public class QuanLyStaff : ControllerBase
     {
         private readonly MyDbContext context;
@@ -74,11 +74,12 @@ namespace QuanLySinhVien.Controller.Manager
                         cccd = s.IdNumber,
                         ten = s.StaffName,
                         ngaySinh = s.DoB.Value,
-                        luong = s.Salary,
-                        thuong = s.Bonus,
+                        diaChi = s.StaffAddr,
                         avatar = s.Avatar,
                         statuSf = s.Status,
-                        cuaHangId = s.StoreId
+                        Email = s.Email,
+                        PhoneNum = s.PhoneNum,
+                        Gendar = s.Gender
                     },
                     PathChiTiet = $"/manager/Staff/{s.StaffId}"
                 };
@@ -93,41 +94,8 @@ namespace QuanLySinhVien.Controller.Manager
 
             return Ok(respone);
         }
-        [HttpGet("Detail/{StaffId}")]
-        public async Task<IActionResult> StaffDetailm([FromRoute] string StaffId)
-        {
-            if (string.IsNullOrEmpty(StaffId))
-            {
-                throw new ArgumentNullException("Missing Param StaffId");
-            }
-
-            var managerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (managerId == null)
-            {
-                throw new KeyNotFoundException("Missing Token");
-            }
-            var manager = await context.Sysusers.FindAsync(int.Parse(StaffId));
-            if (manager == null)
-            {
-                throw new UnauthorizedAccessException("Fake Token");
-            }
-            if (manager.StaffId == null)
-            {
-                throw new UnauthorizedAccessException("user exists in store ");
-            }
-
-            Staff? respone = await context.Staff.FirstAsync(s => s.StaffId == StaffId && s.StoreId == manager.StoreId);
-
-            if (respone == null)
-            {
-                throw new KeyNotFoundException("Your Store do not have this staff or you don't have permision this staff");
-            }
-            
-            return Ok(respone);
-        }
-
         [HttpPost]
-        [Authorize(Roles = "manager,admin")]
+        [Authorize(Roles = "Manager,Admin")]
         public async Task<IActionResult> CreateStaffm([FromForm] CreateStaffRequest staff)
         {
             if (string.IsNullOrEmpty(staff.Cccd) ||

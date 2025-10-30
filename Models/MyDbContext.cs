@@ -43,31 +43,54 @@ public partial class MyDbContext : DbContext
 
     public virtual DbSet<Sysuser> Sysusers { get; set; }
 
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Category>(entity =>
         {
             entity.HasKey(e => e.CategoryId).HasName("PK__category__19093A0B73BE255A");
 
-            entity.Property(e => e.CategoryId).IsFixedLength();
+            entity.ToTable("category");
+
+            entity.Property(e => e.CategoryId)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .IsFixedLength();
+            entity.Property(e => e.CategoryName).HasMaxLength(10);
         });
 
         modelBuilder.Entity<Good>(entity =>
         {
             entity.HasKey(e => e.GoodId).HasName("PK__goods__043AE53D8B3BA8E8");
 
-            entity.Property(e => e.GoodId).IsFixedLength();
+            entity.ToTable("goods", "management");
+
+            entity.Property(e => e.GoodId)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .IsFixedLength();
+            entity.Property(e => e.GoodName).HasMaxLength(100);
+            entity.Property(e => e.UnitName).HasMaxLength(20);
         });
 
         modelBuilder.Entity<Grn>(entity =>
         {
             entity.HasKey(e => e.GrnId).HasName("PK__GRN__ACCC6B89F6170161");
 
-            entity.Property(e => e.GrnId).IsFixedLength();
-            entity.Property(e => e.InventoryId).IsFixedLength();
+            entity.ToTable("GRN", "management");
 
-            entity.HasOne(d => d.Inventory).WithMany(p => p.Grns).HasConstraintName("FK_CH_PNL");
+            entity.Property(e => e.GrnId)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .IsFixedLength()
+                .HasColumnName("GRN_ID");
+            entity.Property(e => e.InventoryId)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .IsFixedLength();
+
+            entity.HasOne(d => d.Inventory).WithMany(p => p.Grns)
+                .HasForeignKey(d => d.InventoryId)
+                .HasConstraintName("FK_CH_PNL");
         });
 
         modelBuilder.Entity<Grndetail>(entity =>
@@ -76,14 +99,23 @@ public partial class MyDbContext : DbContext
 
             entity.ToTable("GRNDetail", "management", tb => tb.HasTrigger("trg_update_Stock"));
 
-            entity.Property(e => e.GoodId).IsFixedLength();
-            entity.Property(e => e.GrnId).IsFixedLength();
+            entity.Property(e => e.GoodId)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .IsFixedLength();
+            entity.Property(e => e.GrnId)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .IsFixedLength()
+                .HasColumnName("GRN_ID");
 
             entity.HasOne(d => d.Good).WithMany(p => p.Grndetails)
+                .HasForeignKey(d => d.GoodId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_GRN_Goods");
 
             entity.HasOne(d => d.Grn).WithMany(p => p.Grndetails)
+                .HasForeignKey(d => d.GrnId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Detail_GRN");
         });
@@ -94,10 +126,20 @@ public partial class MyDbContext : DbContext
 
             entity.ToTable("inventory", "management", tb => tb.HasTrigger("trg_cancer_delete_inventory"));
 
-            entity.Property(e => e.InventoryId).IsFixedLength();
-            entity.Property(e => e.StoreId).IsFixedLength();
+            entity.Property(e => e.InventoryId)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .IsFixedLength();
+            entity.Property(e => e.Addr).HasMaxLength(100);
+            entity.Property(e => e.Status).HasMaxLength(100);
+            entity.Property(e => e.StoreId)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .IsFixedLength()
+                .HasColumnName("StoreID");
 
             entity.HasOne(d => d.Store).WithMany(p => p.Inventories)
+                .HasForeignKey(d => d.StoreId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Inventory_Store");
         });
@@ -113,10 +155,19 @@ public partial class MyDbContext : DbContext
                     tb.HasTrigger("trg_update_CompleteTime_Order");
                 });
 
-            entity.Property(e => e.OrderId).IsFixedLength();
-            entity.Property(e => e.CustomerId).IsFixedLength();
+            entity.Property(e => e.OrderId)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .IsFixedLength();
+            entity.Property(e => e.CustomerId)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .IsFixedLength();
+            entity.Property(e => e.Status).HasMaxLength(50);
 
-            entity.HasOne(d => d.SysUser).WithMany(p => p.Orders).HasConstraintName("FK_SysUser_Order");
+            entity.HasOne(d => d.SysUser).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.SysUserId)
+                .HasConstraintName("FK_SysUser_Order");
         });
 
         modelBuilder.Entity<OrderDetail>(entity =>
@@ -125,14 +176,22 @@ public partial class MyDbContext : DbContext
 
             entity.ToTable("order_detail", tb => tb.HasTrigger("trg_lock_action_order_detail"));
 
-            entity.Property(e => e.OrderId).IsFixedLength();
-            entity.Property(e => e.ProductId).IsFixedLength();
+            entity.Property(e => e.OrderId)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .IsFixedLength();
+            entity.Property(e => e.ProductId)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .IsFixedLength();
 
             entity.HasOne(d => d.Order).WithMany(p => p.OrderDetails)
+                .HasForeignKey(d => d.OrderId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_OrderDetail_Order");
 
             entity.HasOne(d => d.Product).WithMany(p => p.OrderDetails)
+                .HasForeignKey(d => d.ProductId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_OrderDetail_Product");
         });
@@ -143,10 +202,24 @@ public partial class MyDbContext : DbContext
 
             entity.ToTable("products", tb => tb.HasTrigger("trg_cancer_delete_products"));
 
-            entity.Property(e => e.ProductId).IsFixedLength();
-            entity.Property(e => e.SubcategoryId).IsFixedLength();
+            entity.Property(e => e.ProductId)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .IsFixedLength();
+            entity.Property(e => e.Decription).HasColumnType("text");
+            entity.Property(e => e.Img)
+                .HasMaxLength(500)
+                .HasColumnName("IMG");
+            entity.Property(e => e.Price).HasColumnType("money");
+            entity.Property(e => e.ProductName).HasMaxLength(100);
+            entity.Property(e => e.Status).HasMaxLength(100);
+            entity.Property(e => e.SubcategoryId)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .IsFixedLength();
 
             entity.HasOne(d => d.Subcategory).WithMany(p => p.Products)
+                .HasForeignKey(d => d.SubcategoryId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Product_SubCategory");
         });
@@ -157,28 +230,68 @@ public partial class MyDbContext : DbContext
 
             entity.ToTable("staff", "management", tb => tb.HasTrigger("CheckStaffAge"));
 
-            entity.Property(e => e.StaffId).IsFixedLength();
-            entity.Property(e => e.IdNumber).IsFixedLength();
-            entity.Property(e => e.RoleId).IsFixedLength();
-            entity.Property(e => e.StoreId).IsFixedLength();
+            entity.Property(e => e.StaffId)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .IsFixedLength();
+            entity.Property(e => e.Avatar).HasMaxLength(500);
+            entity.Property(e => e.Bonus).HasColumnType("money");
+            entity.Property(e => e.Email).HasMaxLength(50);
+            entity.Property(e => e.Gender).HasMaxLength(5);
+            entity.Property(e => e.IdNumber)
+                .HasMaxLength(11)
+                .IsUnicode(false)
+                .IsFixedLength();
+            entity.Property(e => e.PhoneNum)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .IsFixedLength();
+            entity.Property(e => e.RoleId)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .IsFixedLength();
+            entity.Property(e => e.Salary).HasColumnType("money");
+            entity.Property(e => e.StaffAddr).HasMaxLength(50);
+            entity.Property(e => e.StaffName).HasMaxLength(50);
+            entity.Property(e => e.Status).HasMaxLength(100);
+            entity.Property(e => e.StoreId)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .IsFixedLength();
 
             entity.HasOne(d => d.Role).WithMany(p => p.Staff)
+                .HasForeignKey(d => d.RoleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_USER_ROLE");
 
-            entity.HasOne(d => d.Store).WithMany(p => p.Staff).HasConstraintName("FK_Store_Staff");
+            entity.HasOne(d => d.Store).WithMany(p => p.Staff)
+                .HasForeignKey(d => d.StoreId)
+                .HasConstraintName("FK_Store_Staff");
         });
 
         modelBuilder.Entity<Stock>(entity =>
         {
-            entity.Property(e => e.GoodId).IsFixedLength();
-            entity.Property(e => e.InventoryId).IsFixedLength();
+            entity
+                .HasNoKey()
+                .ToTable("Stock", "management");
+
+            entity.Property(e => e.GoodId)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .IsFixedLength();
+            entity.Property(e => e.InventoryId)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .IsFixedLength();
+            entity.Property(e => e.Status).HasMaxLength(100);
 
             entity.HasOne(d => d.Good).WithMany()
+                .HasForeignKey(d => d.GoodId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Stock_Goods");
 
             entity.HasOne(d => d.Inventory).WithMany()
+                .HasForeignKey(d => d.InventoryId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Inventory_Stock");
         });
@@ -193,18 +306,43 @@ public partial class MyDbContext : DbContext
                     tb.HasTrigger("trg_cancer_delete_store");
                 });
 
-            entity.Property(e => e.StoreId).IsFixedLength();
-            entity.Property(e => e.PhoneNum).IsFixedLength();
+            entity.Property(e => e.StoreId)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .IsFixedLength()
+                .HasColumnName("StoreID");
+            entity.Property(e => e.Email)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.PhoneNum)
+                .HasMaxLength(11)
+                .IsUnicode(false)
+                .IsFixedLength();
+            entity.Property(e => e.StoreAddr).HasMaxLength(100);
+            entity.Property(e => e.StoreName).HasMaxLength(100);
+            entity.Property(e => e.StoreStatus)
+                .HasMaxLength(100)
+                .HasColumnName("Store_Status");
         });
 
         modelBuilder.Entity<SubCategory>(entity =>
         {
             entity.HasKey(e => e.SubCategoryId).HasName("PK__sub_cate__26BE5B19650684DB");
 
-            entity.Property(e => e.SubCategoryId).IsFixedLength();
-            entity.Property(e => e.CategoryId).IsFixedLength();
+            entity.ToTable("sub_category");
+
+            entity.Property(e => e.SubCategoryId)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .IsFixedLength();
+            entity.Property(e => e.CategoryId)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .IsFixedLength();
+            entity.Property(e => e.SubCategoryName).HasMaxLength(50);
 
             entity.HasOne(d => d.Category).WithMany(p => p.SubCategories)
+                .HasForeignKey(d => d.CategoryId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Sub_Category");
         });
@@ -213,24 +351,49 @@ public partial class MyDbContext : DbContext
         {
             entity.HasKey(e => e.RoleId).HasName("PK__sysrole__8AFACE1A7BAFFD69");
 
-            entity.Property(e => e.RoleId).IsFixedLength();
+            entity.ToTable("sysrole", "management");
+
+            entity.Property(e => e.RoleId)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .IsFixedLength();
+            entity.Property(e => e.RoleName).HasMaxLength(50);
         });
 
         modelBuilder.Entity<Sysuser>(entity =>
         {
             entity.HasKey(e => e.UserId).HasName("PK__sysuser__1788CC4C908CAB42");
 
-            entity.Property(e => e.RoleId).IsFixedLength();
-            entity.Property(e => e.StaffId).IsFixedLength();
-            entity.Property(e => e.StoreId).IsFixedLength();
+            entity.ToTable("sysuser", "management");
+
+            entity.HasIndex(e => e.UserName, "UQ__sysuser__C9F2845615550E20").IsUnique();
+
+            entity.Property(e => e.Password).HasMaxLength(100);
+            entity.Property(e => e.RoleId)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .IsFixedLength();
+            entity.Property(e => e.StaffId)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .IsFixedLength();
+            entity.Property(e => e.StoreId)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .IsFixedLength();
+            entity.Property(e => e.UserName).HasMaxLength(100);
 
             entity.HasOne(d => d.Role).WithMany(p => p.Sysusers)
+                .HasForeignKey(d => d.RoleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_User_RoleS");
 
-            entity.HasOne(d => d.Staff).WithMany(p => p.Sysusers).HasConstraintName("FK_User_Staff");
+            entity.HasOne(d => d.Staff).WithMany(p => p.Sysusers)
+                .HasForeignKey(d => d.StaffId)
+                .HasConstraintName("FK_User_Staff");
 
             entity.HasOne(d => d.Store).WithMany(p => p.Sysusers)
+                .HasForeignKey(d => d.StoreId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Store_SysUser");
         });
