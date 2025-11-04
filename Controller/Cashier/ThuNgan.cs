@@ -140,7 +140,8 @@ namespace QuanLySinhVien.Controller.Cashier
         [HttpPut("Unproccess")]
         public async Task<IActionResult> UpdateDonStatus([FromQuery] string id, [FromQuery] string status)
         {
-
+            System.Console.WriteLine(id);
+            System.Console.WriteLine(status);
             if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(status))
             {
                 throw new ArgumentException("Missing Parram Madon or Status");

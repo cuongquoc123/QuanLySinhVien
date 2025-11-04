@@ -19,12 +19,11 @@ namespace QuanLySinhVien.Service.SQL.Order
             {
                 Models.Order? UpdateDon = await context.Orders.FindAsync(madon);
                 if (UpdateDon == null)
-                {
+                { 
                     throw new KeyNotFoundException("Don Hang not exists");
                 }
                 UpdateDon.Status = status;
                 await context.SaveChangesAsync();
-                await transaction.CommitAsync();
                 return UpdateDon;
             }
             catch (System.Exception)
