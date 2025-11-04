@@ -23,7 +23,6 @@ namespace QuanLySinhVien.Service.SQL.Order
                     throw new KeyNotFoundException("Don Hang not exists");
                 }
                 UpdateDon.Status = status;
-                context.Entry(UpdateDon).State = EntityState.Modified;
                 await context.SaveChangesAsync();
                 await transaction.CommitAsync();
                 return UpdateDon;
