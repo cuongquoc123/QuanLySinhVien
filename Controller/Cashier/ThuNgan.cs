@@ -137,21 +137,24 @@ namespace QuanLySinhVien.Controller.Cashier
                 throw;
             }
         }
-        [HttpPut("{Madon}/{Status}")]
-        public async Task<IActionResult> UpdateDonStatus([FromRoute] string Madon, [FromRoute] string Status)
+        [HttpPut("Unproccess")]
+        public async Task<IActionResult> UpdateDonStatus([FromQuery] string id, [FromQuery] string status)
         {
-            if (string.IsNullOrEmpty(Madon) || string.IsNullOrEmpty(Status))
+            if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(status))
             {
                 throw new ArgumentException("Missing Parram Madon or Status");
             }
             try
             {
-                var respone = await sqLServices.updateDonStatus(Madon, Status);
+                var respone = await sqLServices.updateDonStatus(id, status);
                 if (respone == null)
                 {
                     throw new Exception("Can't update status in database");
                 }
-                return Ok(respone);
+                return Ok(new
+                {
+                    message = "Update status succes fully"
+                });
             }
             catch (System.Exception)
             {
