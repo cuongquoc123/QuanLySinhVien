@@ -140,15 +140,14 @@ namespace QuanLySinhVien.Controller.Manager
             }
             return Ok(new
             {
-                MaDon = DonHang.OrderId,
-                User = DonHang.SysUser?.UserName,
-                NgayNhan = DonHang.RecivingDate,
-                NgayHoangThanh = DonHang.CompleteDate,
+                OrderId = DonHang.OrderId,
+                OrderDate = DonHang.RecivingDate,
+                CompleteDate = DonHang.CompleteDate ?? null,
                 customer = DonHang.CustomerId,
-                TrangThai = DonHang.Status,
-                ThanhTien = TongCong * (decimal)1.1,
-                TaxVat = "10%",
-                chi_tiet = CTDHS
+                Status = DonHang.Status,
+                Total = TongCong * (decimal)1.1,
+                VatTax = "10%",
+                Detail = CTDHS
             });
         }
 

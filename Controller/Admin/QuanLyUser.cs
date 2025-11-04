@@ -22,7 +22,7 @@ namespace QuanLySinhVien.Controller.Admin
                 string message = await sqlStaffServices.AssignUserToStaff(StaffId, UserName);
                 return Ok(new
                 {
-                    Message = message
+                    message = message
                 });
             }
             catch (System.Exception)

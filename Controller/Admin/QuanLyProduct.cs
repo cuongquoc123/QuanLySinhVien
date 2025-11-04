@@ -79,7 +79,7 @@ namespace QuanLySinhVien.Controller.Admin
                 {
                     return Ok(new
                     {
-                        message = "Successfully Soft Delete ProductId"
+                        message = "Successfully Soft Delete Product"
                     });
                 }
             }

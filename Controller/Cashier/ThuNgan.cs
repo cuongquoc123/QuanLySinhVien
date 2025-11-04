@@ -140,12 +140,17 @@ namespace QuanLySinhVien.Controller.Cashier
         [HttpPut("Unproccess")]
         public async Task<IActionResult> UpdateDonStatus([FromQuery] string id, [FromQuery] string status)
         {
+
             if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(status))
             {
                 throw new ArgumentException("Missing Parram Madon or Status");
             }
             try
             {
+                if (status == "Hủy")
+                {
+                    status = "Đã hủy";
+                }
                 var respone = await sqLServices.updateDonStatus(id, status);
                 if (respone == null)
                 {
