@@ -24,6 +24,7 @@ namespace QuanLySinhVien.Service.SQL.Order
                 }
                 UpdateDon.Status = status;
                 await context.SaveChangesAsync();
+                await transaction.CommitAsync();
                 return UpdateDon;
             }
             catch (System.Exception)
