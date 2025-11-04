@@ -1,3 +1,4 @@
+using QuanLySinhVien.DTOS.Request;
 using QuanLySinhVien.Models;
 
 namespace QuanLySinhVien.Service.SQL.StaffF
@@ -7,5 +8,6 @@ namespace QuanLySinhVien.Service.SQL.StaffF
         Task<Staff?> createStaff(Staff newStaff, string imgPath);
         Task<int> SoftDeleteUser(string Id);
         Task<String> AssignUserToStaff(string StaffId, string UserName);
+        Task<int> UpdateStaffInfo(UpdateStaffRequest StaffNewInfo);
     }
 }

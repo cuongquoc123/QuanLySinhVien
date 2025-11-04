@@ -9,7 +9,7 @@ namespace QuanLySinhVien.MidWare.Filter
 
         private readonly RequestDelegate _next;
 
-        private const int LIMIT = 100;
+        private const int LIMIT = 10000;
 
         public GlabalLogger(RequestDelegate next, ILogger<GlabalLogger> logger)
         {

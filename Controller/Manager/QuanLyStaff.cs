@@ -25,9 +25,6 @@ namespace QuanLySinhVien.Controller.Manager
             this.sqLServices = sqLServices;
             this.imgService = imgService;
         }
-
-
-
         [HttpGet("{pageNum}/{pageSize}")]
         public async Task<IActionResult> GetStaffm([FromRoute] int pageNum, [FromRoute] int pageSize)
         {
@@ -50,7 +47,7 @@ namespace QuanLySinhVien.Controller.Manager
             {
                 throw new UnauthorizedAccessException("Fake Token");
             }
-            var lsStaff = await context.Staff.Where(s => s.StoreId == manager.StoreId)
+            var lsStaff = await context.Staff.Include(s => s.Role).Where(s => s.StoreId == manager.StoreId)
                                 .Skip((pageNum - 1) * pageSize)
                                 .Take(pageSize).ToListAsync();
             if (lsStaff == null || lsStaff.Count == 0 || !lsStaff.Any())
@@ -79,7 +76,9 @@ namespace QuanLySinhVien.Controller.Manager
                         statuSf = s.Status,
                         Email = s.Email,
                         PhoneNum = s.PhoneNum,
-                        Gendar = s.Gender
+                        Gendar = s.Gender,
+                        RoleId = s.RoleId,
+                        RoleName = s.Role.RoleName
                     },
                     PathChiTiet = $"/manager/Staff/{s.StaffId}"
                 };
@@ -94,11 +93,10 @@ namespace QuanLySinhVien.Controller.Manager
 
             return Ok(respone);
         }
-        [HttpPost]
-        [Authorize(Roles = "Manager,Admin")]
+        [HttpPost("Create")]
         public async Task<IActionResult> CreateStaffm([FromForm] CreateStaffRequest staff)
         {
-            if (string.IsNullOrEmpty(staff.Cccd) ||
+            if (string.IsNullOrEmpty(staff.cccd) ||
                 string.IsNullOrEmpty(staff.Ten) || string.IsNullOrEmpty(staff.DiaChi) ||
                 string.IsNullOrEmpty(staff.RoleId))
             {
@@ -119,37 +117,49 @@ namespace QuanLySinhVien.Controller.Manager
             {
                 throw new KeyNotFoundException("Missing Token");
             }
-            var user = await context.Staff.FindAsync(int.Parse(userId));
+            var user = await context.Sysusers.FindAsync(int.Parse(userId));
             if (user == null)
             {
                 throw new UnauthorizedAccessException("Token Not Valid");
             }
-            if (user.RoleId == "R000000001" && !string.IsNullOrEmpty(staff.cuaHangId))
-            {
-                user.StoreId = staff.cuaHangId;
-            }
-            if (user == null)
-            {
-                throw new UnauthorizedAccessException("Fake Token");
-            }
             try
             {
+                System.Console.WriteLine(user.StoreId);
                 string relativeFilePath = await imgService.SaveImgIntoProject(staff.file);
                 Staff newstaff = new Staff()
                 {
                     StaffName = staff.Ten,
-                    IdNumber = staff.Cccd,
                     RoleId = staff.RoleId,
                     Salary = staff.Luong,
+                    IdNumber = staff.cccd,
                     DoB = ngaySinh,
                     StaffAddr = staff.DiaChi,
-                    StoreId = user.StoreId
+                    StoreId = user.StoreId,
+                    Gender = staff.Gendar,
+                    PhoneNum = staff.PhoneNum,
+                    Email = staff.Email
                 };
-                var respone = await sqLServices.createStaff(newstaff, relativeFilePath);
-                if (respone == null)
+                System.Console.WriteLine("bắt đầu lưu");
+                var staff1 = await sqLServices.createStaff(newstaff, relativeFilePath);
+                System.Console.WriteLine("Lưu thành công");
+                if (staff1 == null)
                 {
                     throw new Exception("Can't create Staff in Database");
                 }
+                var respone = new StaffRespone()
+                {
+                    ten = staff1.StaffName,
+                    staffId = staff1.StaffId,
+                    cccd = staff1.Status,
+                    diaChi = staff1.StaffAddr,
+                    ngaySinh = staff1.DoB,
+                    Gendar = staff1.Gender,
+                    Email = staff1.Email,
+                    avatar = staff1.Avatar,
+                    statuSf = staff1.Status,
+                    PhoneNum = staff1.PhoneNum
+                };
+
                 return Ok(respone);
             }
             catch (System.Exception)
@@ -159,5 +169,49 @@ namespace QuanLySinhVien.Controller.Manager
 
 
         }
+
+        [HttpPut("")]
+        public async Task<IActionResult> UpdateStaff([FromBody] UpdateStaffRequest req)
+        {
+            try
+            {
+                int result = await sqLServices.UpdateStaffInfo(req);
+                if (result == 404)
+                {
+                    throw new KeyNotFoundException("Staff not found");
+                }
+                return Ok(new
+                {
+                    message = "Update Succesfull"
+                });
+            }
+            catch (System.Exception)
+            {
+                throw;
+            }
+
+
+        }
+        [HttpPut("LayOff/{staffId}")]
+        public async Task<IActionResult> LayOffStaff([FromRoute] string staffId)
+        {
+            try
+            {
+                int result = await sqLServices.SoftDeleteUser(staffId);
+                if (result == 404)
+                {
+                    throw new KeyNotFoundException("Staff not exists");
+                }
+                return Ok(new
+                {
+                    message = "Lay Off Succesfully"
+                });
+            }
+            catch (System.Exception)
+            {
+                throw;
+            }
+        }
+       
     }
 }
