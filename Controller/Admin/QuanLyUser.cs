@@ -30,5 +30,24 @@ namespace QuanLySinhVien.Controller.Admin
                 throw;
             }
         }
+
+        [HttpGet("StoreAccount")]
+        public async Task<IActionResult> StoreAccount ([FromQuery]string StoreId)
+        {
+            try
+            {
+                var respone = await sqlStaffServices.GetStoreAccountsAsync(StoreId);
+
+                if (respone != null)
+                {
+                    return Ok(respone);
+                }
+                throw new Exception("Can't get account from database");
+            }
+            catch (System.Exception)
+            {
+                throw;
+            }
+        }
     }
 }

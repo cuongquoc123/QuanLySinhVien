@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using QuanLySinhVien.DTOS.SqlDTO;
 
 namespace QuanLySinhVien.Models;
 
@@ -42,9 +43,10 @@ public partial class MyDbContext : DbContext
     public virtual DbSet<Sysrole> Sysroles { get; set; }
 
     public virtual DbSet<Sysuser> Sysusers { get; set; }
-
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<StoreAccountResult>().HasNoKey();
         modelBuilder.Entity<Category>(entity =>
         {
             entity.HasKey(e => e.CategoryId).HasName("PK__category__19093A0B73BE255A");

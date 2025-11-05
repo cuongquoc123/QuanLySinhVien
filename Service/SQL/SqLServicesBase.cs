@@ -46,8 +46,6 @@ namespace QuanLySinhVien.Service.SQL
             this.logger = logger.CreateLogger("SqLServiceBase");
 
         }
-
-
         
         protected DataTable? TaoBangThamSoSanPham(List<ProductItem> dsP)
         {

@@ -1,4 +1,5 @@
 using QuanLySinhVien.DTOS.Request;
+using QuanLySinhVien.DTOS.SqlDTO;
 using QuanLySinhVien.Models;
 
 namespace QuanLySinhVien.Service.SQL.StaffF
@@ -9,5 +10,6 @@ namespace QuanLySinhVien.Service.SQL.StaffF
         Task<int> SoftDeleteUser(string Id);
         Task<String> AssignUserToStaff(string StaffId, string UserName);
         Task<int> UpdateStaffInfo(UpdateStaffRequest StaffNewInfo);
+        Task<List<StoreAccount>> GetStoreAccountsAsync(string StoreId);
     }
 }

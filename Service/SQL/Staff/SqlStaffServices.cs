@@ -1,10 +1,13 @@
 using System.Data;
 using System.Data.Common;
+using System.Text.Json;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using QuanLySinhVien.DTOS.Request;
+using QuanLySinhVien.DTOS.SqlDTO;
 using QuanLySinhVien.Models;
 using QuanLySinhVien.Service.HashPassword;
+using Sprache;
 
 namespace QuanLySinhVien.Service.SQL.StaffF
 {
@@ -72,6 +75,28 @@ namespace QuanLySinhVien.Service.SQL.StaffF
                 return null;
             }
         }
+
+        public async Task<List<StoreAccount>> GetStoreAccountsAsync(string StoreId)
+        {
+            var ResultDTO = await context.Set<StoreAccountResult>()
+                                    .FromSqlInterpolated($"Select * from management.fn_GetStoreAccounts({StoreId})")
+                                    .ToListAsync();
+
+            System.Console.WriteLine(ResultDTO.Count);
+            var FinalViewModels = ResultDTO.Select(dto => new StoreAccount()
+            {
+                Username = dto.Username,
+                RoleId = dto.RoleId,
+                StaffId = dto.StaffId,
+                StaffName = dto.StaffName,
+                eligibleStaff = string.IsNullOrEmpty(dto.EligibleStaff) ?
+                                new List<EligibleStaff>() : JsonSerializer.Deserialize<List<EligibleStaff>>(dto.EligibleStaff)
+                                ?? new List<EligibleStaff>()
+            }).ToList();
+
+            return FinalViewModels;
+        }
+
         public async Task<int> SoftDeleteUser(string Id)
         {
             var Transaction = await context.Database.BeginTransactionAsync();
