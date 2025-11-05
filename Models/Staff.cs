@@ -15,6 +15,12 @@ public partial class Staff
 
     public DateOnly? DoB { get; set; }
 
+    public string? Email { get; set; }
+
+    public string? PhoneNum { get; set; }
+
+    public string? Gender { get; set; }
+
     public decimal Salary { get; set; }
 
     public decimal Bonus { get; set; }
@@ -26,12 +32,6 @@ public partial class Staff
     public string? StoreId { get; set; }
 
     public string RoleId { get; set; } = null!;
-
-    public string? Email { get; set; }
-
-    public string? PhoneNum { get; set; }
-
-    public string? Gender { get; set; }
 
     public virtual Sysrole Role { get; set; } = null!;
 

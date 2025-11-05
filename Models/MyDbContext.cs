@@ -7,7 +7,7 @@ namespace QuanLySinhVien.Models;
 
 public partial class MyDbContext : DbContext
 {
-    public MyDbContext()
+     public MyDbContext()
     {
     }
 
@@ -43,13 +43,15 @@ public partial class MyDbContext : DbContext
     public virtual DbSet<Sysrole> Sysroles { get; set; }
 
     public virtual DbSet<Sysuser> Sysusers { get; set; }
-    
+
+
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<StoreAccountResult>().HasNoKey();
         modelBuilder.Entity<Category>(entity =>
         {
-            entity.HasKey(e => e.CategoryId).HasName("PK__category__19093A0B73BE255A");
+            entity.HasKey(e => e.CategoryId).HasName("PK__category__19093A0B960AEDF6");
 
             entity.ToTable("category");
 
@@ -62,7 +64,7 @@ public partial class MyDbContext : DbContext
 
         modelBuilder.Entity<Good>(entity =>
         {
-            entity.HasKey(e => e.GoodId).HasName("PK__goods__043AE53D8B3BA8E8");
+            entity.HasKey(e => e.GoodId).HasName("PK__goods__043AE53D6B2E63D3");
 
             entity.ToTable("goods", "management");
 
@@ -76,7 +78,7 @@ public partial class MyDbContext : DbContext
 
         modelBuilder.Entity<Grn>(entity =>
         {
-            entity.HasKey(e => e.GrnId).HasName("PK__GRN__ACCC6B89F6170161");
+            entity.HasKey(e => e.GrnId).HasName("PK__GRN__ACCC6B89E8A333A2");
 
             entity.ToTable("GRN", "management");
 
@@ -85,10 +87,6 @@ public partial class MyDbContext : DbContext
                 .IsUnicode(false)
                 .IsFixedLength()
                 .HasColumnName("GRN_ID");
-            entity.Property(e => e.InventoryId)
-                .HasMaxLength(10)
-                .IsUnicode(false)
-                .IsFixedLength();
 
             entity.HasOne(d => d.Inventory).WithMany(p => p.Grns)
                 .HasForeignKey(d => d.InventoryId)
@@ -97,7 +95,7 @@ public partial class MyDbContext : DbContext
 
         modelBuilder.Entity<Grndetail>(entity =>
         {
-            entity.HasKey(e => new { e.GoodId, e.GrnId }).HasName("PK__GRNDetai__8EF62385284A8FE1");
+            entity.HasKey(e => new { e.GoodId, e.GrnId }).HasName("PK__GRNDetai__8EF623858B88305F");
 
             entity.ToTable("GRNDetail", "management", tb => tb.HasTrigger("trg_update_Stock"));
 
@@ -124,14 +122,10 @@ public partial class MyDbContext : DbContext
 
         modelBuilder.Entity<Inventory>(entity =>
         {
-            entity.HasKey(e => e.InventoryId).HasName("PK__inventor__F5FDE6B3420C330E");
+            entity.HasKey(e => e.InventoryId).HasName("PK__inventor__F5FDE6B3138AF931");
 
             entity.ToTable("inventory", "management", tb => tb.HasTrigger("trg_cancer_delete_inventory"));
 
-            entity.Property(e => e.InventoryId)
-                .HasMaxLength(10)
-                .IsUnicode(false)
-                .IsFixedLength();
             entity.Property(e => e.Addr).HasMaxLength(100);
             entity.Property(e => e.Status).HasMaxLength(100);
             entity.Property(e => e.StoreId)
@@ -148,7 +142,7 @@ public partial class MyDbContext : DbContext
 
         modelBuilder.Entity<Order>(entity =>
         {
-            entity.HasKey(e => e.OrderId).HasName("PK__orders__C3905BCFE133ACE8");
+            entity.HasKey(e => e.OrderId).HasName("PK__orders__C3905BCF7952D386");
 
             entity.ToTable("orders", tb =>
                 {
@@ -174,7 +168,7 @@ public partial class MyDbContext : DbContext
 
         modelBuilder.Entity<OrderDetail>(entity =>
         {
-            entity.HasKey(e => new { e.OrderId, e.ProductId }).HasName("PK__order_de__08D097A35BCD0062");
+            entity.HasKey(e => new { e.OrderId, e.ProductId }).HasName("PK__order_de__08D097A31DDAA38D");
 
             entity.ToTable("order_detail", tb => tb.HasTrigger("trg_lock_action_order_detail"));
 
@@ -200,7 +194,7 @@ public partial class MyDbContext : DbContext
 
         modelBuilder.Entity<Product>(entity =>
         {
-            entity.HasKey(e => e.ProductId).HasName("PK__products__B40CC6CD73E287B0");
+            entity.HasKey(e => e.ProductId).HasName("PK__products__B40CC6CD7A65F24C");
 
             entity.ToTable("products", tb => tb.HasTrigger("trg_cancer_delete_products"));
 
@@ -228,7 +222,7 @@ public partial class MyDbContext : DbContext
 
         modelBuilder.Entity<Staff>(entity =>
         {
-            entity.HasKey(e => e.StaffId).HasName("PK__staff__96D4AB174122ABC2");
+            entity.HasKey(e => e.StaffId).HasName("PK__staff__96D4AB17F91B12B9");
 
             entity.ToTable("staff", "management", tb => tb.HasTrigger("CheckStaffAge"));
 
@@ -238,16 +232,13 @@ public partial class MyDbContext : DbContext
                 .IsFixedLength();
             entity.Property(e => e.Avatar).HasMaxLength(500);
             entity.Property(e => e.Bonus).HasColumnType("money");
-            entity.Property(e => e.Email).HasMaxLength(50);
-            entity.Property(e => e.Gender).HasMaxLength(5);
+            entity.Property(e => e.Email).HasMaxLength(100);
+            entity.Property(e => e.Gender).HasMaxLength(3);
             entity.Property(e => e.IdNumber)
                 .HasMaxLength(11)
                 .IsUnicode(false)
                 .IsFixedLength();
-            entity.Property(e => e.PhoneNum)
-                .HasMaxLength(10)
-                .IsUnicode(false)
-                .IsFixedLength();
+            entity.Property(e => e.PhoneNum).HasMaxLength(10);
             entity.Property(e => e.RoleId)
                 .HasMaxLength(10)
                 .IsUnicode(false)
@@ -281,10 +272,6 @@ public partial class MyDbContext : DbContext
                 .HasMaxLength(10)
                 .IsUnicode(false)
                 .IsFixedLength();
-            entity.Property(e => e.InventoryId)
-                .HasMaxLength(10)
-                .IsUnicode(false)
-                .IsFixedLength();
             entity.Property(e => e.Status).HasMaxLength(100);
 
             entity.HasOne(d => d.Good).WithMany()
@@ -294,13 +281,12 @@ public partial class MyDbContext : DbContext
 
             entity.HasOne(d => d.Inventory).WithMany()
                 .HasForeignKey(d => d.InventoryId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Inventory_Stock");
         });
 
         modelBuilder.Entity<Store>(entity =>
         {
-            entity.HasKey(e => e.StoreId).HasName("PK__store__3B82F0E1F0F4934C");
+            entity.HasKey(e => e.StoreId).HasName("PK__store__3B82F0E14DB35C97");
 
             entity.ToTable("store", tb =>
                 {
@@ -329,7 +315,7 @@ public partial class MyDbContext : DbContext
 
         modelBuilder.Entity<SubCategory>(entity =>
         {
-            entity.HasKey(e => e.SubCategoryId).HasName("PK__sub_cate__26BE5B19650684DB");
+            entity.HasKey(e => e.SubCategoryId).HasName("PK__sub_cate__26BE5B19F4F6AB48");
 
             entity.ToTable("sub_category");
 
@@ -351,7 +337,7 @@ public partial class MyDbContext : DbContext
 
         modelBuilder.Entity<Sysrole>(entity =>
         {
-            entity.HasKey(e => e.RoleId).HasName("PK__sysrole__8AFACE1A7BAFFD69");
+            entity.HasKey(e => e.RoleId).HasName("PK__sysrole__8AFACE1A795670F7");
 
             entity.ToTable("sysrole", "management");
 
@@ -364,11 +350,11 @@ public partial class MyDbContext : DbContext
 
         modelBuilder.Entity<Sysuser>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__sysuser__1788CC4C908CAB42");
+            entity.HasKey(e => e.UserId).HasName("PK__sysuser__1788CC4C8DBEDAAF");
 
             entity.ToTable("sysuser", "management");
 
-            entity.HasIndex(e => e.UserName, "UQ__sysuser__C9F2845615550E20").IsUnique();
+            entity.HasIndex(e => e.UserName, "UQ__sysuser__C9F28456DE75E251").IsUnique();
 
             entity.Property(e => e.Password).HasMaxLength(100);
             entity.Property(e => e.RoleId)

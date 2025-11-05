@@ -2,10 +2,10 @@ namespace QuanLySinhVien.DTOS.Respone
 {
     public class TonKhoRespone
     {
-        public string? maNL { get; set; }
-        public string? tenNL { get; set; }
-        public string? DVT { get; set; }
-        public int SoLuong { get; set; }
-        public string? TrangThai { get; set; }
+        public string? GoodId { get; set; }
+        public string? GoodName { get; set; }
+        public string? UnitName { get; set; }
+        public int InStock { get; set; }
+        public string? Status { get; set; }
     }
 }

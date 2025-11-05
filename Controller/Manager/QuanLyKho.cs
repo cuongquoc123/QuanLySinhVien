@@ -12,8 +12,8 @@ using QuanLySinhVien.Service.SQL.PhieuNhapKho;
 namespace QuanLySinhVien.Controller.Manager
 {
     [ApiController]
-    [Route("manager/Kho")]
-    [Authorize(Roles = "admin,manager")]
+    [Route("manager/kho")]
+    [Authorize(Roles = "Admin,Manager")]
     public class QuanLyKho : ControllerBase
     {
         private readonly ISQLInventoryService sQLInventoryService;
@@ -26,91 +26,41 @@ namespace QuanLySinhVien.Controller.Manager
             this.sQLInventoryService = sQLInventoryService;
         }
 
-        [HttpGet("{pageNum}/{pageSize}")]
-        public async Task<IActionResult> GetALlKho([FromRoute] int pageNum, [FromRoute] int pageSize)
+
+        [HttpGet("Detail")]
+        public async Task<IActionResult> GetDetailKho()
         {
-            if (pageNum < 1)
-            {
-                throw new ArgumentOutOfRangeException("PageNum param is Out Of Range");
-            }
-            if (pageSize > 100 || pageSize < 0)
-            {
-                throw new ArgumentOutOfRangeException("Max page size is 100");
-            }
-            var ManagerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrWhiteSpace(ManagerId))
+            var managerid = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (managerid == null)
             {
                 throw new UnauthorizedAccessException("Token not valid");
             }
-            var Manager = await context.Sysusers.FindAsync(int.Parse(ManagerId));
+            var manager = context.Sysusers.Find(int.Parse(managerid));
 
-            if (Manager == null)
+            if (manager == null)
             {
-                throw new CustomError(403, "Forbiden", "You do not exists in my DB");
-            }
-
-
-            var items = await context.Inventories.Where(p => p.StoreId == Manager.StoreId).OrderBy(p => p.InventoryId)
-                                .Skip((pageNum - 1) * pageSize)
-                                .Take(pageSize).ToListAsync();
-            if (items.Count == 0 || !items.Any() || items == null)
-            {
-                throw new KeyNotFoundException("Can't find any Product");
-            }
-            var res = new PageRespone<Inventory>();
-            foreach (var item in items)
-            {
-                Item<Inventory> itemNew = new Item<Inventory>()
-                {
-                    Value = item,
-                    PathChiTiet = $"/manager/Kho/Detail/{item.InventoryId}"
-                };
-
-                res.Items.Add(itemNew);
-            }
-            int totalCount = await context.Inventories.Where(p => p.StoreId == Manager.StoreId)
-                                .CountAsync();
-            res.TotalCount = totalCount;
-            res.TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
-            res.PageIndex = pageNum;
-            res.PageSize = pageSize;
-
-            return Ok(res);
-        }
-
-        [HttpGet("Detail/{MaKho}")]
-        public async Task<IActionResult> GetDetailKho([FromRoute] string MaKho)
-        {
-            if (string.IsNullOrEmpty(MaKho))
-            {
-                throw new ArgumentNullException("Missing Param MaKho");
+                throw new UnauthorizedAccessException("Fake token");
             }
             var TonKho = await context.Stocks.Include(Stk => Stk.Inventory)
-                        .Include(Stk => Stk.Good).Where(stk => stk.InventoryId == MaKho).ToListAsync();
+                        .Include(Stk => Stk.Good).Where(stk =>stk.Inventory != null && stk.Inventory.StoreId == manager.StoreId ).ToListAsync();
             List<TonKhoRespone> tonKhoRespones = new List<TonKhoRespone>();
-            string Khoid = string.Empty;
-                string DiaChi = string.Empty;
-                string TrangThai = string.Empty;
+            int? Khoid = 0;
             foreach (var item in TonKho)
             {
                 tonKhoRespones.Add(new TonKhoRespone()
                 {
-                    maNL = item.Good.GoodId,
-                    tenNL = item.Good.GoodName,
-                    DVT = item.Good.UnitName,
-                    SoLuong = item.InStock,
-                    TrangThai = item.Status
+                    GoodId = item.GoodId,
+                    GoodName = item.Good.GoodName,
+                    UnitName = item.Good.UnitName,
+                    InStock = item.InStock,
+                    Status = item.Status
                 });
                 Khoid = item.InventoryId;
-                DiaChi = item.Inventory.Addr;
-                TrangThai = item.Inventory.Status;
             }
             return Ok(new
             {
-                KhoId = Khoid,
-                DiaChi = DiaChi,
-                TrangThai = TrangThai,
-                TonKho = tonKhoRespones
+                InventoryId = Khoid,
+                Stock = tonKhoRespones
             });
         }
 
@@ -134,18 +84,18 @@ namespace QuanLySinhVien.Controller.Manager
                 {
                     tonKhoRespones.Add(new TonKhoRespone()
                     {
-                        maNL = item.Good.GoodId,
-                        tenNL = item.Good.GoodName,
-                        DVT = item.Good.UnitName,
-                        SoLuong = item.ReStock,
+                        GoodId = item.Good.GoodId,
+                        GoodName = item.Good.GoodName,
+                        UnitName = item.Good.UnitName,
+                        InStock = item.ReStock,
                     });
                 }
                 return Ok(new
                 {
-                    MaPhieu = respone.GrnId,
-                    MaKho = respone.InventoryId,
-                    NgayNhap = respone.AdmissionDate,
-                    ChiTietPhieu = tonKhoRespones
+                    GRNId = respone.GrnId,
+                    InventoryId = respone.InventoryId,
+                    AdmissionDate = respone.AdmissionDate,
+                    Detail = tonKhoRespones
                 });
             }
             catch (System.Exception)

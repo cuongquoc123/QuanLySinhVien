@@ -9,7 +9,7 @@ public partial class Grn
 
     public DateTime AdmissionDate { get; set; }
 
-    public string? InventoryId { get; set; }
+    public int? InventoryId { get; set; }
 
     public virtual ICollection<Grndetail> Grndetails { get; set; } = new List<Grndetail>();
 

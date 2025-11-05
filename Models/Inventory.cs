@@ -5,7 +5,7 @@ namespace QuanLySinhVien.Models;
 
 public partial class Inventory
 {
-    public string InventoryId { get; set; } = null!;
+    public int InventoryId { get; set; }
 
     public string Status { get; set; } = null!;
 

@@ -5,7 +5,7 @@ namespace QuanLySinhVien.Models;
 
 public partial class Stock
 {
-    public string InventoryId { get; set; } = null!;
+    public int? InventoryId { get; set; }
 
     public string GoodId { get; set; } = null!;
 
@@ -15,5 +15,5 @@ public partial class Stock
 
     public virtual Good Good { get; set; } = null!;
 
-    public virtual Inventory Inventory { get; set; } = null!;
+    public virtual Inventory? Inventory { get; set; }
 }

@@ -5,7 +5,7 @@ using QuanLySinhVien.Service.SQL.NguyenLieu;
 namespace QuanLySinhVien.Controller.Admin
 {
     [ApiController]
-    [Route("admin/NL")]
+    [Route("admin/good")]
     public class QuanLyNguyenLieu : ControllerBase
     {
         private readonly ISqlNguyenLieuServices sqlNguyenLieuServices;
@@ -18,15 +18,15 @@ namespace QuanLySinhVien.Controller.Admin
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateNL([FromQuery] string TenNL, [FromQuery] string DVT)
+        public async Task<IActionResult> CreateNL([FromQuery] string goods_name, [FromQuery] string unit_name)
         {
-            if (string.IsNullOrWhiteSpace(TenNL) || string.IsNullOrWhiteSpace(DVT))
+            if (string.IsNullOrWhiteSpace(goods_name) || string.IsNullOrWhiteSpace(unit_name))
             {
                 throw new ArgumentException("Missing Query 'TenNL' or 'DVT' ");
             }
             try
             {
-                var respone = await sqlNguyenLieuServices.taoNguyenLieu(tenNL: TenNL, DVT: DVT);
+                var respone = await sqlNguyenLieuServices.taoNguyenLieu(tenNL: goods_name, DVT: unit_name);
 
                 if (respone == null)
                 {
