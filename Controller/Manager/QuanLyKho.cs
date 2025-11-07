@@ -42,7 +42,7 @@ namespace QuanLySinhVien.Controller.Manager
                 throw new UnauthorizedAccessException("Fake token");
             }
             var TonKho = await context.Stocks.Include(Stk => Stk.Inventory)
-                        .Include(Stk => Stk.Good).Where(stk =>stk.Inventory != null && stk.Inventory.StoreId == manager.StoreId ).ToListAsync();
+                        .Include(Stk => Stk.Good).Where(stk => stk.Inventory != null && stk.Inventory.StoreId == manager.StoreId).ToListAsync();
             List<TonKhoRespone> tonKhoRespones = new List<TonKhoRespone>();
             int? Khoid = 0;
             foreach (var item in TonKho)
@@ -105,67 +105,93 @@ namespace QuanLySinhVien.Controller.Manager
 
         }
 
-        [HttpPost()]
-        public async Task<IActionResult> TaoKho([FromQuery] string DiaChi)
+        // [HttpPost()]
+        // public async Task<IActionResult> TaoKho([FromQuery] string DiaChi)
+        // {
+        //     if (string.IsNullOrWhiteSpace(DiaChi))
+        //     {
+        //         throw new ArgumentException("Missing Param 'DiaChi' on query");
+        //     }
+        //     var ManagerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        //     if (string.IsNullOrEmpty(ManagerId))
+        //     {
+        //         throw new UnauthorizedAccessException("Token Not valid");
+        //     }
+
+        //     var Manager = await context.Sysusers.FindAsync(int.Parse(ManagerId));
+
+        //     if (Manager == null)
+        //     {
+        //         throw new CustomError(403, "Forbiden", "This user Does not exists in my DB");
+        //     }
+        //     if (string.IsNullOrEmpty(Manager.StoreId))
+        //     {
+        //         throw new CustomError(403, "Forbiden", "This user don't have permission to create Kho");
+        //     }
+        //     try
+        //     {
+        //         var respone = await sQLInventoryService.taoKho(Manager.StoreId, DiaChi);
+
+        //         if (respone == null)
+        //         {
+        //             throw new Exception("Can't create Kho");
+        //         }
+
+        //         return Ok(respone);
+        //     }
+        //     catch (System.Exception)
+        //     {
+
+        //         throw;
+        //     }
+
+        // }
+
+        // [HttpPut("{Makho}")]
+        // public async Task<IActionResult> SoftDeleteKho([FromRoute] string Makho)
+        // {
+        //     if (string.IsNullOrEmpty(Makho))
+        //     {
+        //         throw new ArgumentException("missing param 'Makho' on route");
+        //     }
+        //     try
+        //     {
+        //         var respone = await sQLInventoryService.softDeleteKho(Makho);
+        //         if (respone == null)
+        //         {
+        //             throw new Exception("Can't delete Inventory");
+        //         }
+        //         return Ok(new
+        //         {
+        //             message = "Delete SuccesFull"
+        //         });
+        //     }
+        //     catch (System.Exception)
+        //     {
+        //         throw;
+        //     }
+        // }
+
+        [HttpPut("/Stock/{InventoryId}")]
+        public async Task<IActionResult> UpdateStock([FromRoute] int InventoryId, [FromBody] List<UpdateStockRequest> requests)
         {
-            if (string.IsNullOrWhiteSpace(DiaChi))
-            {
-                throw new ArgumentException("Missing Param 'DiaChi' on query");
-            }
-            var ManagerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (string.IsNullOrEmpty(ManagerId))
-            {
-                throw new UnauthorizedAccessException("Token Not valid");
-            }
-
-            var Manager = await context.Sysusers.FindAsync(int.Parse(ManagerId));
-
-            if (Manager == null)
-            {
-                throw new CustomError(403, "Forbiden", "This user Does not exists in my DB");
-            }
-            if (string.IsNullOrEmpty(Manager.StoreId))
-            {
-                throw new CustomError(403, "Forbiden", "This user don't have permission to create Kho");
-            }
             try
             {
-                var respone = await sQLInventoryService.taoKho(Manager.StoreId, DiaChi);
-
-                if (respone == null)
+                int result = await sQLInventoryService.DecreaseInstock(InventoryId, requests);
+                if (result == 200)
                 {
-                    throw new Exception("Can't create Kho");
+                    return Ok(new
+                    {
+                        message = "Update stock successfully"
+                    });
                 }
-
-                return Ok(respone);
+                throw new Exception("Can't update Stock in Database");
             }
-            catch (System.Exception)
+            catch (KeyNotFoundException)
             {
 
                 throw;
-            }
-
-        }
-
-        [HttpPut("{Makho}")]
-        public async Task<IActionResult> SoftDeleteKho([FromRoute] string Makho)
-        {
-            if (string.IsNullOrEmpty(Makho))
-            {
-                throw new ArgumentException("missing param 'Makho' on route");
-            }
-            try
-            {
-                var respone = await sQLInventoryService.softDeleteKho(Makho);
-                if (respone == null)
-                {
-                    throw new Exception("Can't delete Inventory");
-                }
-                return Ok(new
-                {
-                    message = "Delete SuccesFull"
-                });
             }
             catch (System.Exception)
             {

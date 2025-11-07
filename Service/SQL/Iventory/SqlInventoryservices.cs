@@ -3,6 +3,7 @@ using System.Data.Common;
 using System.Transactions;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using QuanLySinhVien.DTOS.Request;
 using QuanLySinhVien.Models;
 
 namespace QuanLySinhVien.Service.SQL.Iventory
@@ -11,6 +12,31 @@ namespace QuanLySinhVien.Service.SQL.Iventory
     {
         public SQLInventoryServices(MyDbContext context, ILoggerFactory logger)
         : base(context, logger) { }
+
+        public async Task<int> DecreaseInstock(int InventoryId, List<UpdateStockRequest> NewStock)
+        {
+            var Inventory = await context.Stocks.Where(x => x.InventoryId == InventoryId).ToListAsync();
+            foreach (var stock in NewStock)
+            {
+                var Good = Inventory.First(i => i.GoodId == stock.GoodId);
+
+                if (Good == null)
+                {
+                    throw new KeyNotFoundException($"Good: {stock.GoodId} not found in your Inventory ");
+                }
+                if (Good.InStock > stock.NewStock)
+                {
+                    throw new ArgumentException($"New Stock of good: {Good.GoodId} must be shorter than Instock");
+                }
+                if (stock.NewStock < 0)
+                {
+                    stock.NewStock = 0;
+                }
+                Good.InStock = stock.NewStock;
+            }
+            await context.SaveChangesAsync();
+            return 200;
+        }
 
         public async Task<Inventory?> softDeleteKho(string maKho)
         {
