@@ -4,6 +4,7 @@ using System.Text.Json;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using QuanLySinhVien.DTOS.Request;
+using QuanLySinhVien.DTOS.Respone;
 using QuanLySinhVien.DTOS.SqlDTO;
 using QuanLySinhVien.Models;
 using QuanLySinhVien.Service.HashPassword;
@@ -76,14 +77,13 @@ namespace QuanLySinhVien.Service.SQL.StaffF
             }
         }
 
-        public async Task<List<StoreAccount>> GetStoreAccountsAsync(string StoreId)
+        private List<StoreAccount> convertStoreAccountResutlToStoreAccount(List<StoreAccountResult> LsAcountResult)
         {
-            var ResultDTO = await context.Set<StoreAccountResult>()
-                                    .FromSqlInterpolated($"Select * from management.fn_GetStoreAccounts({StoreId})")
-                                    .ToListAsync();
-
-            System.Console.WriteLine(ResultDTO.Count);
-            var FinalViewModels = ResultDTO.Select(dto => new StoreAccount()
+            if (LsAcountResult == null)
+            {
+                return new List<StoreAccount>();
+            }
+            var FinalViewModels = LsAcountResult.Select(dto => new StoreAccount()
             {
                 Username = dto.Username,
                 RoleId = dto.RoleId,
@@ -93,6 +93,37 @@ namespace QuanLySinhVien.Service.SQL.StaffF
                                 new List<EligibleStaff>() : JsonSerializer.Deserialize<List<EligibleStaff>>(dto.EligibleStaff)
                                 ?? new List<EligibleStaff>()
             }).ToList();
+            return FinalViewModels;
+        }
+        public async Task<PageRespone3<StoreAccount>> GetPageAccountAsync(int PageNum, int PageSize)
+        {
+            var LsAcountResult = await context.Set<StoreAccountResult>()
+                                    .FromSqlInterpolated($"Select * from management.fn_GetStoreAccounts_Paged({PageNum}, {PageSize})")
+                                    .ToListAsync();
+
+            var FinalViewModels = this.convertStoreAccountResutlToStoreAccount(LsAcountResult);
+
+            var totalcountSql = $"SELECT management.fn_GetStoreAccounts_Count()";
+            var totalcount = (await context.Database.SqlQueryRaw<int>(totalcountSql).ToListAsync()).First();
+
+            var totalPage = (PageSize == 0) ? 0 : (int)Math.Ceiling((double)totalcount / PageSize);
+
+            return new PageRespone3<StoreAccount> ()
+            {
+                Items = FinalViewModels,
+                PageIndex = PageNum,
+                PageSize = PageSize,
+                TotalPages = totalPage,
+                TotalCount = totalcount
+            };
+        }
+
+        public async Task<List<StoreAccount>> GetStoreAccountsAsync(string StoreId,string RoleId)
+        {
+            var ResultDTO = await context.Set<StoreAccountResult>()
+                                    .FromSqlInterpolated($"Select * from management.fn_GetStoreAccounts({StoreId},{RoleId})")
+                                    .ToListAsync();
+            var FinalViewModels = this.convertStoreAccountResutlToStoreAccount(ResultDTO);
 
             return FinalViewModels;
         }

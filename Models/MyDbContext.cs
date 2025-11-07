@@ -48,7 +48,11 @@ public partial class MyDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<StoreAccountResult>().HasNoKey();
+        modelBuilder.Entity<StoreAccountResult>(entity =>
+        {
+            entity.HasNoKey();
+            entity.ToView(null);
+        });
         modelBuilder.Entity<Category>(entity =>
         {
             entity.HasKey(e => e.CategoryId).HasName("PK__category__19093A0B960AEDF6");

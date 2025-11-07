@@ -32,17 +32,45 @@ namespace QuanLySinhVien.Controller.Admin
         }
 
         [HttpGet("StoreAccount")]
-        public async Task<IActionResult> StoreAccount ([FromQuery]string StoreId)
+        public async Task<IActionResult> StoreAccount([FromQuery] string StoreId, [FromQuery] string RoleId)
         {
             try
             {
-                var respone = await sqlStaffServices.GetStoreAccountsAsync(StoreId);
+                
+                var respone = await sqlStaffServices.GetStoreAccountsAsync(StoreId, RoleId);
 
                 if (respone != null)
                 {
                     return Ok(respone);
                 }
                 throw new Exception("Can't get account from database");
+            }
+            catch (System.Exception)
+            {
+                throw;
+            }
+        }
+
+        [HttpGet("StoreAccountPage")]
+        public async Task<IActionResult> StoreAccountPage([FromQuery]int PageNum,[FromQuery] int PageSize)
+        {
+            try
+            {
+                if (PageSize > 100 || PageSize <= 0)
+                {
+                    throw new ArgumentOutOfRangeException("PageSize must shorter than 100 or higher than 0");
+                }
+                if (PageSize <= 0 )
+                {
+                    throw new ArgumentOutOfRangeException("PageSize mus higher than 0");
+                }
+                var respone = await sqlStaffServices.GetPageAccountAsync(PageNum, PageSize);
+
+                if (respone != null)
+                {
+                    return Ok(respone);
+                }
+                throw new Exception("Can't get data from database");
             }
             catch (System.Exception)
             {
