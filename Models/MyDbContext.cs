@@ -7,7 +7,7 @@ namespace QuanLySinhVien.Models;
 
 public partial class MyDbContext : DbContext
 {
-     public MyDbContext()
+    public MyDbContext()
     {
     }
 
@@ -17,6 +17,10 @@ public partial class MyDbContext : DbContext
     }
 
     public virtual DbSet<Category> Categories { get; set; }
+
+    public virtual DbSet<Gon> Gons { get; set; }
+
+    public virtual DbSet<Gondetail> Gondetails { get; set; }
 
     public virtual DbSet<Good> Goods { get; set; }
 
@@ -44,14 +48,11 @@ public partial class MyDbContext : DbContext
 
     public virtual DbSet<Sysuser> Sysusers { get; set; }
 
-
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<StoreAccountResult>(entity =>
         {
             entity.HasNoKey();
-            entity.ToView(null);
         });
         modelBuilder.Entity<Category>(entity =>
         {
@@ -64,6 +65,51 @@ public partial class MyDbContext : DbContext
                 .IsUnicode(false)
                 .IsFixedLength();
             entity.Property(e => e.CategoryName).HasMaxLength(10);
+        });
+
+        modelBuilder.Entity<Gon>(entity =>
+        {
+            entity.HasKey(e => e.Gonid).HasName("PK__GON__E5CFF0CB0D42B055");
+
+            entity.ToTable("GON", "management");
+
+            entity.Property(e => e.Gonid)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .IsFixedLength()
+                .HasColumnName("GONId");
+
+            entity.HasOne(d => d.Inventory).WithMany(p => p.Gons)
+                .HasForeignKey(d => d.InventoryId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Inventory_GON");
+        });
+
+        modelBuilder.Entity<Gondetail>(entity =>
+        {
+            entity.HasKey(e => new { e.Gonid, e.GoodId });
+
+            entity.ToTable("GONDetail", "management");
+
+            entity.Property(e => e.Gonid)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .IsFixedLength()
+                .HasColumnName("GONId");
+            entity.Property(e => e.GoodId)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .IsFixedLength();
+
+            entity.HasOne(d => d.Gon).WithMany(p => p.Gondetails)
+                .HasForeignKey(d => d.Gonid)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Detail_Gon");
+
+            entity.HasOne(d => d.Good).WithMany(p => p.Gondetails)
+                .HasForeignKey(d => d.GoodId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_GonDetail_Good");
         });
 
         modelBuilder.Entity<Good>(entity =>

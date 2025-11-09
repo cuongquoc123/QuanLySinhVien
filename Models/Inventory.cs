@@ -13,6 +13,8 @@ public partial class Inventory
 
     public string StoreId { get; set; } = null!;
 
+    public virtual ICollection<Gon> Gons { get; set; } = new List<Gon>();
+
     public virtual ICollection<Grn> Grns { get; set; } = new List<Grn>();
 
     public virtual Store Store { get; set; } = null!;

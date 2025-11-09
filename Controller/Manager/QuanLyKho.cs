@@ -65,12 +65,8 @@ namespace QuanLySinhVien.Controller.Manager
         }
 
         [HttpPost("NhapKho/{MaKho}")]
-        public async Task<IActionResult> TaoPhieuNhapNL([FromRoute] string MaKho, [FromBody] List<ProductItem> dsNL)
+        public async Task<IActionResult> TaoPhieuNhapNL([FromRoute] int MaKho, [FromBody] List<ProductItem> dsNL)
         {
-            if (string.IsNullOrEmpty(MaKho))
-            {
-                throw new ArgumentException("Missing param 'MaKho' on route");
-            }
             try
             {
                 var respone = await sqlPhieuNhapKho.TaoPhieuNhat(Makho: MaKho, dsNL: dsNL);
@@ -173,7 +169,7 @@ namespace QuanLySinhVien.Controller.Manager
         //     }
         // }
 
-        [HttpPut("/Stock/{InventoryId}")]
+        [HttpPut("Stock/{InventoryId}")]
         public async Task<IActionResult> UpdateStock([FromRoute] int InventoryId, [FromBody] List<UpdateStockRequest> requests)
         {
             try
@@ -192,6 +188,41 @@ namespace QuanLySinhVien.Controller.Manager
             {
 
                 throw;
+            }
+            catch (System.Exception)
+            {
+                throw;
+            }
+        }
+
+        [HttpPost("OrderGood/{InventoryId}")]
+        public async Task<IActionResult> CreateOrderGood([FromRoute] int InventoryId, [FromBody] List<ProductItem> ListGooods)
+        {
+            try
+            {
+                var respone = await sqlPhieuNhapKho.CreateOrderGoods(ListGooods, InventoryId);
+                if (respone != null)
+                {
+                    List<TonKhoRespone> tonKhoRespones = new List<TonKhoRespone>();
+                    foreach (var item in respone.Gondetails)
+                    {
+                        tonKhoRespones.Add(new TonKhoRespone()
+                        {
+                            GoodId = item.Good.GoodId,
+                            GoodName = item.Good.GoodName,
+                            UnitName = item.Good.UnitName,
+                            InStock = item.Quantity,
+                        });
+                    }
+                    return Ok(new
+                    {
+                        GonId = respone.Gonid,
+                        InventoryId = respone.InventoryId,
+                        OrderDate = respone.OrderDate,
+                        Detail = tonKhoRespones
+                    });
+                }
+                throw new Exception("Can't create order");
             }
             catch (System.Exception)
             {
