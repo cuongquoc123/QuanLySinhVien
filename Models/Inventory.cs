@@ -13,9 +13,9 @@ public partial class Inventory
 
     public string StoreId { get; set; } = null!;
 
-    public virtual ICollection<Gon> Gons { get; set; } = new List<Gon>();
+    public virtual ICollection<Inventoryrecord> Inventoryrecords { get; set; } = new List<Inventoryrecord>();
 
-    public virtual ICollection<Grn> Grns { get; set; } = new List<Grn>();
+    public virtual ICollection<Stock> Stocks { get; set; } = new List<Stock>();
 
     public virtual Store Store { get; set; } = null!;
 }

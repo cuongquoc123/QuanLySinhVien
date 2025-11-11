@@ -11,7 +11,7 @@ public partial class Good
 
     public string UnitName { get; set; } = null!;
 
-    public virtual ICollection<Gondetail> Gondetails { get; set; } = new List<Gondetail>();
+    public virtual ICollection<RecorDetail> RecorDetails { get; set; } = new List<RecorDetail>();
 
-    public virtual ICollection<Grndetail> Grndetails { get; set; } = new List<Grndetail>();
+    public virtual ICollection<Stock> Stocks { get; set; } = new List<Stock>();
 }

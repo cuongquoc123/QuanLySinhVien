@@ -12,7 +12,6 @@ using QuanLySinhVien.Service.GGService;
 using QuanLySinhVien.Service.HashPassword;
 
 using QuanLySinhVien.Service.SQL;
-using QuanLySinhVien.Service.SQL.Iventory;
 using QuanLySinhVien.Service.SQL.NguyenLieu;
 using QuanLySinhVien.Service.SQL.Order;
 using QuanLySinhVien.Service.SQL.ProductS;
@@ -133,7 +132,6 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 
 builder.Services.AddScoped<ISqlNguyenLieuServices, SqlNguyenLieuServices>();
 
-builder.Services.AddScoped<ISQLInventoryService,SQLInventoryServices>();
 
 builder.Services.AddScoped<ISqlPhieuNhapKho, SqlPhieuNhapKhoServices>();
 

@@ -6,7 +6,6 @@ using QuanLySinhVien.DTOS.Request;
 using QuanLySinhVien.DTOS.Respone;
 using QuanLySinhVien.MidWare.Filter;
 using QuanLySinhVien.Models;
-using QuanLySinhVien.Service.SQL.Iventory;
 using QuanLySinhVien.Service.SQL.PhieuNhapKho;
 
 namespace QuanLySinhVien.Controller.Manager
@@ -16,14 +15,14 @@ namespace QuanLySinhVien.Controller.Manager
     [Authorize(Roles = "Admin,Manager")]
     public class QuanLyKho : ControllerBase
     {
-        private readonly ISQLInventoryService sQLInventoryService;
+
         private readonly ISqlPhieuNhapKho sqlPhieuNhapKho;
         private readonly MyDbContext context;
-        public QuanLyKho(ISqlPhieuNhapKho sqlPhieuNhapKho, MyDbContext context, ISQLInventoryService sQLInventoryService)
+        public QuanLyKho(ISqlPhieuNhapKho sqlPhieuNhapKho, MyDbContext context)
         {
             this.context = context;
             this.sqlPhieuNhapKho = sqlPhieuNhapKho;
-            this.sQLInventoryService = sQLInventoryService;
+
         }
 
 
@@ -64,122 +63,31 @@ namespace QuanLySinhVien.Controller.Manager
             });
         }
 
-        [HttpPost("NhapKho/{MaKho}")]
-        public async Task<IActionResult> TaoPhieuNhapNL([FromRoute] int MaKho, [FromBody] List<ProductItem> dsNL)
+        [HttpPost("Stock/{InventoryId}/{TypeId}")]
+        public async Task<IActionResult> UpdateStock([FromRoute] int InventoryId, [FromBody] List<ProductItem> requests, [FromRoute] int TypeId)
         {
             try
             {
-                var respone = await sqlPhieuNhapKho.TaoPhieuNhat(Makho: MaKho, dsNL: dsNL);
-                if (respone == null)
+                var res = await sqlPhieuNhapKho.CreateInventoryRecords(requests, InventoryId, TypeId);
+                if (res != null)
                 {
-                    throw new Exception("Can't create PhieuNhat");
-                }
-
-                List<TonKhoRespone> tonKhoRespones = new List<TonKhoRespone>();
-                foreach (var item in respone.Grndetails)
-                {
-                    tonKhoRespones.Add(new TonKhoRespone()
+                    List<TonKhoRespone> tonKhoRespones = new List<TonKhoRespone>();
+                    foreach (var item in res.RecorDetails)
                     {
-                        GoodId = item.Good.GoodId,
-                        GoodName = item.Good.GoodName,
-                        UnitName = item.Good.UnitName,
-                        InStock = item.ReStock,
-                    });
-                }
-                return Ok(new
-                {
-                    GRNId = respone.GrnId,
-                    InventoryId = respone.InventoryId,
-                    AdmissionDate = respone.AdmissionDate,
-                    Detail = tonKhoRespones
-                });
-            }
-            catch (System.Exception)
-            {
-                throw;
-            }
-
-        }
-
-        // [HttpPost()]
-        // public async Task<IActionResult> TaoKho([FromQuery] string DiaChi)
-        // {
-        //     if (string.IsNullOrWhiteSpace(DiaChi))
-        //     {
-        //         throw new ArgumentException("Missing Param 'DiaChi' on query");
-        //     }
-        //     var ManagerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        //     if (string.IsNullOrEmpty(ManagerId))
-        //     {
-        //         throw new UnauthorizedAccessException("Token Not valid");
-        //     }
-
-        //     var Manager = await context.Sysusers.FindAsync(int.Parse(ManagerId));
-
-        //     if (Manager == null)
-        //     {
-        //         throw new CustomError(403, "Forbiden", "This user Does not exists in my DB");
-        //     }
-        //     if (string.IsNullOrEmpty(Manager.StoreId))
-        //     {
-        //         throw new CustomError(403, "Forbiden", "This user don't have permission to create Kho");
-        //     }
-        //     try
-        //     {
-        //         var respone = await sQLInventoryService.taoKho(Manager.StoreId, DiaChi);
-
-        //         if (respone == null)
-        //         {
-        //             throw new Exception("Can't create Kho");
-        //         }
-
-        //         return Ok(respone);
-        //     }
-        //     catch (System.Exception)
-        //     {
-
-        //         throw;
-        //     }
-
-        // }
-
-        // [HttpPut("{Makho}")]
-        // public async Task<IActionResult> SoftDeleteKho([FromRoute] string Makho)
-        // {
-        //     if (string.IsNullOrEmpty(Makho))
-        //     {
-        //         throw new ArgumentException("missing param 'Makho' on route");
-        //     }
-        //     try
-        //     {
-        //         var respone = await sQLInventoryService.softDeleteKho(Makho);
-        //         if (respone == null)
-        //         {
-        //             throw new Exception("Can't delete Inventory");
-        //         }
-        //         return Ok(new
-        //         {
-        //             message = "Delete SuccesFull"
-        //         });
-        //     }
-        //     catch (System.Exception)
-        //     {
-        //         throw;
-        //     }
-        // }
-
-        [HttpPut("Stock/{InventoryId}")]
-        public async Task<IActionResult> UpdateStock([FromRoute] int InventoryId, [FromBody] List<UpdateStockRequest> requests)
-        {
-            try
-            {
-                int result = await sQLInventoryService.DecreaseInstock(InventoryId, requests);
-                if (result == 200)
-                {
+                        tonKhoRespones.Add(new TonKhoRespone()
+                        {
+                            GoodId = item.Good.GoodId,
+                            GoodName = item.Good.GoodName,
+                            UnitName = item.Good.UnitName,
+                            InStock = item.Quantity,
+                        });
+                    }
                     return Ok(new
                     {
-                        message = "Update stock successfully"
+                        RecordId = res.RecordsId,
+                        InventoryId = res.InventoryId,
+                        AdmissionDate = res.AdmissionDate,
+                        Detail = tonKhoRespones
                     });
                 }
                 throw new Exception("Can't update Stock in Database");
@@ -195,16 +103,59 @@ namespace QuanLySinhVien.Controller.Manager
             }
         }
 
-        [HttpPost("OrderGood/{InventoryId}")]
-        public async Task<IActionResult> CreateOrderGood([FromRoute] int InventoryId, [FromBody] List<ProductItem> ListGooods)
+        [HttpGet("Record")]
+        public async Task<IActionResult> GetRecord([FromQuery] int PageNum, [FromQuery] int PageSize)
         {
             try
             {
-                var respone = await sqlPhieuNhapKho.CreateOrderGoods(ListGooods, InventoryId);
-                if (respone != null)
+                var InventoryRecords = await context.Inventoryrecords.Include(r => r.Type)
+                                            .Skip((PageNum - 1) * PageSize).Take(PageSize)
+                                            .OrderBy(x => x.AdmissionDate).ToListAsync();
+
+                List<Item<RecordsInventoryRespone>> ResponeItems = new List<Item<RecordsInventoryRespone>>();
+
+                foreach (var item in InventoryRecords)
+                {
+                    var Record = new RecordsInventoryRespone()
+                    {
+                        RecordId = item.RecordsId,
+                        AdmissionDate = item.AdmissionDate,
+                        TypeId = item.TypeId,
+                        TypeName = item.Type.TypeName
+                    };
+                    ResponeItems.Add(new Item<RecordsInventoryRespone>()
+                    {
+                        Value = Record,
+                        PathChiTiet = $"Record/{item.RecordsId}"
+                    });
+                }
+
+                var Res = new PageRespone<RecordsInventoryRespone>();
+                Res.Items = ResponeItems;
+
+                Res.TotalCount = await context.Inventoryrecords.CountAsync();
+                Res.TotalPages = (int)Math.Ceiling(Res.TotalCount / (double)PageSize);
+                Res.PageIndex = PageNum;
+                Res.PageSize = PageSize;
+                return Ok(Res);
+            }
+            catch (System.Exception)
+            {
+                throw;
+            }
+        }
+
+        [HttpGet("Record/{RecordId}")]
+        public async Task<IActionResult> RecordDetail([FromRoute] string RecordId)
+        {
+            try
+            {
+                var res = await context.Inventoryrecords.Include(x => x.RecorDetails).
+                                ThenInclude(x => x.Good).FirstOrDefaultAsync(x => x.RecordsId == RecordId);
+                if (res != null)
                 {
                     List<TonKhoRespone> tonKhoRespones = new List<TonKhoRespone>();
-                    foreach (var item in respone.Gondetails)
+                    foreach (var item in res.RecorDetails)
                     {
                         tonKhoRespones.Add(new TonKhoRespone()
                         {
@@ -216,16 +167,101 @@ namespace QuanLySinhVien.Controller.Manager
                     }
                     return Ok(new
                     {
-                        GonId = respone.Gonid,
-                        InventoryId = respone.InventoryId,
-                        OrderDate = respone.OrderDate,
+                        RecordId = res.RecordsId,
+                        InventoryId = res.InventoryId,
+                        AdmissionDate = res.AdmissionDate,
                         Detail = tonKhoRespones
                     });
                 }
-                throw new Exception("Can't create order");
+                throw new Exception("Can't update Stock in Database");
             }
             catch (System.Exception)
             {
+                throw;
+            }
+        }
+
+        [HttpGet("Record/Search")]
+        public async Task<IActionResult> GetRecords([FromQuery] DateTime DateStart, [FromQuery] DateTime DateEnd, [FromQuery] int TypeId)
+        {
+            DateStart = DateStart.AddDays(-1);
+            DateEnd = DateEnd.AddDays(1);
+
+            try
+            {
+                List<Inventoryrecord> Res;
+                if (TypeId == 0)
+                {
+                    Res = await context.Inventoryrecords.Include(x => x.Type).OrderBy(x => x.AdmissionDate)
+                                        .Where(x => x.AdmissionDate > DateStart && x.AdmissionDate < DateEnd)
+                                        .ToListAsync();
+                }
+                else
+                {
+                    Res = await context.Inventoryrecords.Include(x => x.Type).OrderBy(x => x.AdmissionDate)
+                                        .Where(x => x.TypeId == TypeId && x.AdmissionDate > DateStart && x.AdmissionDate < DateEnd)
+                                        .ToListAsync();
+                }
+
+                if (Res == null)
+                {
+                    return NoContent();
+                }
+                List<Item<RecordsInventoryRespone>> ResponeItems = new List<Item<RecordsInventoryRespone>>();
+
+                foreach (var item in Res)
+                {
+                    var Record = new RecordsInventoryRespone()
+                    {
+                        RecordId = item.RecordsId,
+                        AdmissionDate = item.AdmissionDate,
+                        TypeId = item.TypeId,
+                        TypeName = item.Type.TypeName
+                    };
+                    ResponeItems.Add(new Item<RecordsInventoryRespone>()
+                    {
+                        Value = Record,
+                        PathChiTiet = $"Record/{item.RecordsId}"
+                    });
+                }
+
+                return Ok(ResponeItems);
+            }
+            catch (System.Exception)
+            {
+                throw;
+            }
+        }
+
+        [HttpGet("TypeRecord")]
+        public async Task<IActionResult> GetAllTypeRecord()
+        {
+            try
+            {
+                var types = await context.Recordtypes.OrderBy(x => x.TypeId).ToListAsync();
+                if (types != null)
+                {
+                    var res = new List<object>();
+                    res.Add(new
+                    {
+                        TypeId = 0,
+                        TypeName = "All type"
+                    });
+                    foreach (var type in types)
+                    {
+                        res.Add(new
+                        {
+                            TypeId = type.TypeId,
+                            TypeName = type.TypeName
+                        });
+                    }
+                    return Ok(res);
+                }
+                throw new Exception("Can't get records type in db ");
+            }
+            catch (System.Exception)
+            {
+
                 throw;
             }
         }

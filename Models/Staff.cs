@@ -13,17 +13,17 @@ public partial class Staff
 
     public string StaffAddr { get; set; } = null!;
 
-    public DateOnly? DoB { get; set; }
+    public string? PhoneNum { get; set; }
 
     public string? Email { get; set; }
 
-    public string? PhoneNum { get; set; }
-
-    public string? Gender { get; set; }
+    public DateOnly? DoB { get; set; }
 
     public decimal Salary { get; set; }
 
     public decimal Bonus { get; set; }
+
+    public string? Gender { get; set; }
 
     public string Avatar { get; set; } = null!;
 
